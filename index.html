@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ray Mess Co</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FFD600">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #FFD600; }
+    .hidden { display: none; }
+  </style>
+
+<link rel="manifest" href="manifest.json">
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
+
+</head>
+<body class="flex items-center justify-center h-screen">
+
+  <!-- Splash -->
+  <div id="splash" class="flex flex-col items-center justify-center h-full">
+    <img src="icons/icon-192.png" alt="Logo" class="w-32 h-32 animate-pulse">
+    <h1 class="text-3xl font-bold text-black mt-4">Ray Mess Co</h1>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden flex-col w-full p-4">
+    <h1 class="text-2xl font-bold flex items-center gap-2 text-black">
+      <img src="icons/icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
+    </h1>
+
+    <!-- Botón -->
+    <button onclick="openModal()"
+      class="bg-black text-yellow-400 px-4 py-2 rounded-lg mt-4">
+      ➕ Registrar servicio
+    </button>
+
+    <!-- Lista -->
+    <div id="service-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-xl w-96">
+      <h2 class="text-xl font-bold mb-4">Registrar servicio</h2>
+      <form id="service-form" class="flex flex-col gap-2">
+        <input name="cliente" placeholder="Cliente" class="p-2 border rounded" required>
+        <input name="telefono" placeholder="Teléfono" class="p-2 border rounded">
+        <input name="recoger" placeholder="Dirección de recogida" class="p-2 border rounded" required>
+        <input name="entregar" placeholder="Dirección de entrega" class="p-2 border rounded" required>
+        <select name="pago" class="p-2 border rounded">
+          <option value="false">No cobra</option>
+          <option value="true">Cobrar</option>
+        </select>
+        <input name="valor" placeholder="Valor en pesos colombianos" class="p-2 border rounded">
+        <button type="submit" class="bg-yellow-400 text-black py-2 rounded">Guardar</button>
+      </form>
+      <button onclick="closeModal()" class="mt-2 text-red-600">Cancelar</button>
+    </div>
+  </div>
+
+  <script>
+    // Splash
+    setTimeout(() => {
+      document.getElementById('splash').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+    }, 3000);
+
+    // Modal
+    function openModal(){ document.getElementById('modal').classList.remove('hidden'); }
+    function closeModal(){ document.getElementById('modal').classList.add('hidden'); }
+
+    // Servicios
+    let services = JSON.parse(localStorage.getItem("services") || "[]");
+
+    function saveServices(){ localStorage.setItem("services", JSON.stringify(services)); }
+
+    function renderServices(){
+      const list = document.getElementById("service-list");
+      list.innerHTML = "";
+      services.forEach((s, index) => {
+        const card = document.createElement("div");
+        card.className = "bg-yellow-400 text-black p-4 rounded-xl shadow flex flex-col";
+        card.innerHTML = `
+          <p><b>Cliente:</b> ${s.cliente}</p>
+          <p>📞 <b>Tel:</b> ${s.telefono || "-"}</p>
+          <p>📍 <b>Recoger:</b> <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.recoger)}" target="_blank" class="underline">${s.recoger}</a></p>
+          <p>📍 <b>Entregar:</b> <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.entregar)}" target="_blank" class="underline">${s.entregar}</a></p>
+          <p class="font-bold mt-2">Estado: ${s.estado === "entregado" ? "🟢 Entregado" : "⏳ Pendiente"}</p>
+          <p class="font-bold">Pago: ${s.pago === "true" ? `💰 ${s.valor} COP` : "No"}</p>
+          <div class="flex gap-2 mt-4">
+            <button onclick="toggleEstado(${index})" class="flex-1 bg-black text-yellow-400 px-3 py-1 rounded">Cambiar estado</button>
+            <button onclick="deleteService(${index})" class="flex-1 bg-red-600 text-white px-3 py-1 rounded">🗑️ Eliminar</button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function toggleEstado(i){
+      services[i].estado = services[i].estado === "entregado" ? "pendiente" : "entregado";
+      saveServices(); renderServices();
+    }
+
+    function deleteService(i){
+      if(confirm("¿Eliminar servicio?")){
+        services.splice(i,1); saveServices(); renderServices();
+      }
+    }
+
+    document.getElementById("service-form").addEventListener("submit", e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+      services.push({...data, estado:"pendiente"});
+      saveServices(); renderServices(); closeModal(); e.target.reset();
+    });
+
+    renderServices();
+
+    // Registrar Service Worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+</body>
+</html>
