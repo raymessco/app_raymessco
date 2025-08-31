@@ -1,3 +1,19 @@
+function previewImage(event) {
+  const file = event.target.files[0];
+  const preview = document.getElementById("preview");
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.classList.remove("hidden");
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = "";
+    preview.classList.add("hidden");
+  }
+}
 const CACHE_NAME = "ray-mess-co-v4";
 const STATIC_ASSETS = [
   "index.html",
@@ -49,3 +65,4 @@ self.addEventListener("fetch", event => {
     })
   );
 });
+
