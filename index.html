@@ -94,7 +94,14 @@
         <input name="volumen" placeholder="Volumen (cantidad/medidas)" class="p-2 bg-[#CF9524] text-black placeholder-black rounded">
         <input type="number" name="costo" placeholder="Costo del servicio" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" min="0">
         <input type="file" name="foto" accept="image/*" class="p-2 bg-[#CF9524] text-black rounded">
-        <textarea name="observaciones" placeholder="Observaciones" class="p-2 bg-[#CF9524] text-black placeholder-black rounded overflow-y-auto resize-y" style="max-height: 120px; min-height: 60px;"></textarea>
+        
+        <!-- CAMPO OBSERVACIONES CON SCROLL FIJO -->
+        <textarea 
+          name="observaciones" 
+          placeholder="Observaciones" 
+          class="p-2 bg-[#CF9524] text-black placeholder-black rounded overflow-y-scroll resize-y" 
+          style="height: 120px; min-height: 60px;"
+        ></textarea>
 
         <div class="flex gap-2 mt-2">
           <button type="submit" class="flex-1 bg-green-500 text-black font-bold py-2 rounded">Registrar</button>
