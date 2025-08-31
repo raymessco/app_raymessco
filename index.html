@@ -93,9 +93,18 @@
         <input name="telefono" placeholder="Número de teléfono" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" inputmode="tel" pattern="[0-9+()\\- ]*">
         <input name="volumen" placeholder="Volumen (cantidad/medidas)" class="p-2 bg-[#CF9524] text-black placeholder-black rounded">
         <input type="number" name="costo" placeholder="Costo del servicio" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" min="0">
-        <input type="file" name="foto" accept="image/*" class="p-2 bg-[#CF9524] text-black rounded">
-        
-        <!-- CAMPO OBSERVACIONES CON SCROLL FIJO -->
+
+        <!-- FOTO: Cámara o galería + vista previa -->
+        <input 
+          type="file" 
+          name="foto" 
+          accept="image/*" 
+          capture="environment" 
+          class="p-2 bg-[#CF9524] text-black rounded"
+          onchange="previewImage(event)">
+        <img id="preview" class="hidden mt-2 rounded-lg max-h-40 w-auto mx-auto border border-[#CF9524]">
+
+        <!-- CAMPO OBSERVACIONES -->
         <textarea 
           name="observaciones" 
           placeholder="Observaciones" 
@@ -154,6 +163,7 @@
       const modal = document.getElementById('modal');
       const form = document.getElementById('service-form');
       form.reset();
+      document.getElementById('preview').classList.add('hidden'); // Oculta vista previa al abrir modal
       if (index !== null) {
         const s = services[index];
         form.empresa.value = s.empresa || "";
@@ -267,6 +277,22 @@
       }
     }
 
+    function previewImage(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById("preview");
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = "";
+        preview.classList.add("hidden");
+      }
+    }
+
     document.getElementById("service-form").addEventListener("submit", async e => {
       e.preventDefault();
       const form = e.target;
@@ -283,6 +309,7 @@
           services.push({ ...data, estado: "pendiente" });
         }
         saveServices(); renderServices(); closeModal(); form.reset();
+        document.getElementById("preview").classList.add("hidden");
       }
       if (form.foto && form.foto.files.length > 0) {
         const reader = new FileReader();
