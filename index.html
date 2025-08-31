@@ -42,7 +42,8 @@
       <ul class="flex flex-col p-4 gap-4">
         <li><button onclick="showSection('services')" class="w-full text-left">📋 Ver servicios</button></li>
         <li><button onclick="openModal()" class="w-full text-left">➕ Registrar servicio</button></li>
-        <li><button onclick="showSection('costos')" class="w-full text-left">💰 Costos por empresa</button></li>
+        <li><button onclick="showSection('cobros')" class="w-full text-left">💵 Cobros productos</button></li>
+        <li><button onclick="showSection('costos')" class="w-full text-left">🚚 Costos mensajería</button></li>
       </ul>
     </div>
 
@@ -59,19 +60,30 @@
       <!-- LISTA DE SERVICIOS -->
       <div id="services-section" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
 
-      <!-- RESUMEN DE COSTOS -->
-      <div id="costos-section" class="hidden">
-        <h2 class="text-xl font-bold text-[#CF9524] mb-4">Costos por empresa</h2>
+      <!-- COBROS DE PRODUCTOS -->
+      <div id="cobros-section" class="hidden">
+        <h2 class="text-xl font-bold text-[#CF9524] mb-4">Cobros de productos</h2>
         <table class="w-full text-[#CF9524] border border-[#CF9524]">
           <thead class="bg-[#222]">
             <tr>
-              <th class="border border-[#CF9524] p-2">Empresa</th>
-              <th class="border border-[#CF9524] p-2">Servicios</th>
-              <th class="border border-[#CF9524] p-2">Total (COP)</th>
+              <th class="border border-[#CF9524] p-2">Dirección de entrega</th>
+              <th class="border border-[#CF9524] p-2">Valor a cobrar</th>
             </tr>
           </thead>
-          <tbody id="costos-body"></tbody>
+          <tbody id="cobros-body"></tbody>
+          <tfoot>
+            <tr>
+              <td class="border border-[#CF9524] p-2 font-bold">TOTAL</td>
+              <td id="cobros-total" class="border border-[#CF9524] p-2 font-bold"></td>
+            </tr>
+          </tfoot>
         </table>
+      </div>
+
+      <!-- COSTOS DE MENSAJERÍA -->
+      <div id="costos-section" class="hidden">
+        <h2 class="text-xl font-bold text-[#CF9524] mb-4">Costos de mensajería</h2>
+        <div id="costos-body"></div>
       </div>
     </div>
   </div>
@@ -90,34 +102,24 @@
         <input name="contacto" placeholder="Nombre de contacto receptor" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" required>
         <input name="recoger" placeholder="Dirección de recogida" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" required>
         <input name="entregar" placeholder="Dirección de entrega" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" required>
-        <input name="telefono" placeholder="Número de teléfono" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" inputmode="tel" pattern="[0-9+()\\- ]*">
+        <input name="telefono" placeholder="Número de teléfono" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" inputmode="tel">
         <input name="volumen" placeholder="Volumen (cantidad/medidas)" class="p-2 bg-[#CF9524] text-black placeholder-black rounded">
-        <input type="number" name="costo" placeholder="Costo del servicio" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" min="0">
+        <input type="number" name="costo" placeholder="Costo del servicio (mensajería)" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" min="0">
 
-        <!-- FOTO: Cámara o galería + vista previa + quitar -->
-        <input 
-          type="file" 
-          name="foto" 
-          accept="image/*" 
-          capture="environment" 
-          class="p-2 bg-[#CF9524] text-black rounded"
-          onchange="previewImage(event)">
+        <!-- COBRO CONTRA ENTREGA -->
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="cobrar-check" name="cobrarCheck" class="w-4 h-4 accent-[#CF9524]" onchange="toggleCobroField(this)">
+          <label for="cobrar-check" class="text-[#CF9524]">¿Cobrar producto?</label>
+        </div>
+        <input type="number" name="cobrarProducto" id="cobrar-field" placeholder="Valor a cobrar (producto)" class="hidden p-2 bg-[#CF9524] text-black placeholder-black rounded" min="0">
+
+        <!-- FOTO -->
+        <input type="file" name="foto" accept="image/*" capture="environment" class="p-2 bg-[#CF9524] text-black rounded" onchange="previewImage(event)">
         <img id="preview" class="hidden mt-2 rounded-lg max-h-40 w-auto mx-auto border border-[#CF9524]">
-        <button 
-          type="button" 
-          id="remove-photo" 
-          onclick="removeImage()" 
-          class="hidden mt-2 bg-red-600 text-white px-3 py-1 rounded mx-auto">
-          Quitar foto
-        </button>
+        <button type="button" id="remove-photo" onclick="removeImage()" class="hidden mt-2 bg-red-600 text-white px-3 py-1 rounded mx-auto">Quitar foto</button>
 
-        <!-- CAMPO OBSERVACIONES -->
-        <textarea 
-          name="observaciones" 
-          placeholder="Observaciones" 
-          class="p-2 bg-[#CF9524] text-black placeholder-black rounded overflow-y-scroll resize-y" 
-          style="height: 120px; min-height: 60px;"
-        ></textarea>
+        <!-- OBSERVACIONES -->
+        <textarea name="observaciones" placeholder="Observaciones" class="p-2 bg-[#CF9524] text-black placeholder-black rounded overflow-y-scroll resize-y" style="height: 120px; min-height: 60px;"></textarea>
 
         <div class="flex gap-2 mt-2">
           <button type="submit" class="flex-1 bg-green-500 text-black font-bold py-2 rounded">Registrar</button>
@@ -128,11 +130,10 @@
   </div>
 
   <script>
-    // Splash
     setTimeout(() => {
       document.getElementById('splash').classList.add('hidden');
       document.getElementById('dashboard').classList.remove('hidden');
-    }, 3000);
+    }, 2000);
 
     let services = JSON.parse(localStorage.getItem("services") || "[]");
     let editIndex = null;
@@ -140,14 +141,13 @@
 
     function saveServices() { localStorage.setItem("services", JSON.stringify(services)); }
 
-    function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('-translate-x-full');
-    }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
 
     function showSection(section) {
       document.getElementById("services-section").classList.add("hidden");
       document.getElementById("filters").classList.add("hidden");
       document.getElementById("costos-section").classList.add("hidden");
+      document.getElementById("cobros-section").classList.add("hidden");
 
       if (section === "services") {
         document.getElementById("filters").classList.remove("hidden");
@@ -155,11 +155,19 @@
       } else if (section === "costos") {
         document.getElementById("costos-section").classList.remove("hidden");
         renderCostos();
+      } else if (section === "cobros") {
+        document.getElementById("cobros-section").classList.remove("hidden");
+        renderCobros();
       }
       toggleSidebar();
     }
 
     function setFilter(filter) { currentFilter = filter; renderServices(); }
+
+    function toggleCobroField(checkbox) {
+      const field = document.getElementById("cobrar-field");
+      if (checkbox.checked) field.classList.remove("hidden"); else { field.classList.add("hidden"); field.value = ""; }
+    }
 
     function openModal(index = null) {
       editIndex = index;
@@ -168,6 +176,8 @@
       form.reset();
       document.getElementById('preview').classList.add('hidden');
       document.getElementById('remove-photo').classList.add('hidden');
+      document.getElementById('cobrar-field').classList.add('hidden');
+      document.getElementById('cobrar-check').checked = false;
 
       if (index !== null) {
         const s = services[index];
@@ -180,159 +190,117 @@
         form.volumen.value = s.volumen || "";
         form.costo.value = s.costo || "";
         form.observaciones.value = s.observaciones || "";
+        if (s.cobrarProducto && s.cobrarProducto > 0) {
+          document.getElementById('cobrar-check').checked = true;
+          document.getElementById('cobrar-field').classList.remove('hidden');
+          form.cobrarProducto.value = s.cobrarProducto;
+        }
       }
-
       modal.classList.remove('hidden');
       document.body.classList.add('modal-open');
     }
 
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-      document.body.classList.remove('modal-open');
-      editIndex = null;
-    }
+    function closeModal() { document.getElementById('modal').classList.add('hidden'); document.body.classList.remove('modal-open'); editIndex = null; }
 
     function previewImage(event) {
       const file = event.target.files[0];
       const preview = document.getElementById("preview");
       const removeBtn = document.getElementById("remove-photo");
-
       if (file) {
         const reader = new FileReader();
-        reader.onload = e => {
-          preview.src = e.target.result;
-          preview.classList.remove("hidden");
-          removeBtn.classList.remove("hidden");
-        };
+        reader.onload = e => { preview.src = e.target.result; preview.classList.remove("hidden"); removeBtn.classList.remove("hidden"); };
         reader.readAsDataURL(file);
-      } else {
-        preview.src = "";
-        preview.classList.add("hidden");
-        removeBtn.classList.add("hidden");
-      }
+      } else { preview.src = ""; preview.classList.add("hidden"); removeBtn.classList.add("hidden"); }
     }
 
     function removeImage() {
       const input = document.querySelector("input[name='foto']");
-      const preview = document.getElementById("preview");
-      const removeBtn = document.getElementById("remove-photo");
-
-      input.value = "";
-      preview.src = "";
-      preview.classList.add("hidden");
-      removeBtn.classList.add("hidden");
+      input.value = ""; document.getElementById("preview").classList.add("hidden");
+      document.getElementById("remove-photo").classList.add("hidden");
     }
 
     function renderServices() {
       const list = document.getElementById('services-section');
       list.innerHTML = "";
-      if (!services || services.length === 0) {
-        list.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-[#CF9524]">No hay servicios registrados.</div>`;
-        return;
-      }
-
+      if (!services || services.length === 0) { list.innerHTML = `<div class="text-center text-[#CF9524]">No hay servicios registrados.</div>`; return; }
       services.forEach((s, index) => {
         if (currentFilter !== "all" && s.estado !== currentFilter) return;
-
         const card = document.createElement('div');
         card.className = "bg-[#CF9524] text-black p-4 rounded-xl shadow flex flex-col";
         card.innerHTML = `
-          <div>
-            <p class="font-bold">${escapeHtml(s.empresa || "-")}</p>
-            <p class="text-sm">Cliente: ${escapeHtml(s.cliente || "-")}</p>
-            <p class="text-sm">Contacto receptor: ${escapeHtml(s.contacto || "-")}</p>
-            <p class="text-sm">📞 <a href="tel:${encodeURIComponent(s.telefono || '')}" class="underline">${escapeHtml(s.telefono || '-')}</a></p>
-            <p class="text-sm">📍 Recoger: <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.recoger || '')}" target="_blank" class="underline">${escapeHtml(s.recoger || "-")}</a></p>
-            <p class="text-sm">📍 Entregar: <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.entregar || '')}" target="_blank" class="underline">${escapeHtml(s.entregar || "-")}</a></p>
-            <p class="text-sm"><strong>Volumen:</strong> ${escapeHtml(s.volumen || "-")}</p>
-            <p class="text-sm"><strong>Costo:</strong> $ ${formatNumber(s.costo || 0)}</p>
-            <p class="text-sm"><strong>Observaciones:</strong> ${escapeHtml(s.observaciones || "-")}</p>
-            <p class="mt-2"><strong>Estado:</strong> 
-              <span class="${s.estado === 'entregado' ? 'text-green-700' : 'text-red-700'}">${s.estado || "pendiente"}</span>
-            </p>
-          </div>
-          ${ s.foto ? `<div class="mt-3"><img src="${s.foto}" alt="Foto del paquete" class="rounded-lg max-h-48 w-auto object-contain mx-auto"></div>` : "" }
-          <div class="flex gap-2 mt-4">
-            <button onclick="toggleEstado(${index})" class="flex-1 bg-black text-[#CF9524] px-3 py-2 rounded">Cambiar estado</button>
-            <button onclick="openModal(${index})" class="flex-1 bg-blue-600 text-white px-3 py-2 rounded">✏️ Editar</button>
-            <button onclick="deleteService(${index})" class="flex-1 bg-red-600 text-white px-3 py-2 rounded">🗑️ Eliminar</button>
+          <p class="font-bold">${escapeHtml(s.empresa || "-")}</p>
+          <p class="text-sm">Cliente: ${escapeHtml(s.cliente || "-")}</p>
+          <p class="text-sm">Contacto: ${escapeHtml(s.contacto || "-")}</p>
+          <p class="text-sm">📞 <a href="tel:${s.telefono || ''}" class="underline">${escapeHtml(s.telefono || "-")}</a></p>
+          <p class="text-sm">📍 Recoger: ${escapeHtml(s.recoger || "-")}</p>
+          <p class="text-sm">📍 Entregar: ${escapeHtml(s.entregar || "-")}</p>
+          <p class="text-sm"><strong>Costo servicio:</strong> $ ${formatNumber(s.costo || 0)}</p>
+          <p class="text-sm"><strong>Cobrar producto:</strong> ${s.cobrarProducto ? "$ " + formatNumber(s.cobrarProducto) : "No"}</p>
+          <p class="text-sm"><strong>Observaciones:</strong> ${escapeHtml(s.observaciones || "-")}</p>
+          ${ s.foto ? `<img src="${s.foto}" class="rounded-lg max-h-48 w-auto object-contain mx-auto mt-2">` : "" }
+          <p class="mt-2"><strong>Estado:</strong> <span class="${s.estado === 'entregado' ? 'text-green-700' : 'text-red-700'}">${s.estado || "pendiente"}</span></p>
+          <div class="flex gap-2 mt-3">
+            <button onclick="toggleEstado(${index})" class="flex-1 bg-black text-[#CF9524] px-2 py-1 rounded">Cambiar estado</button>
+            <button onclick="openModal(${index})" class="flex-1 bg-blue-600 text-white px-2 py-1 rounded">✏️ Editar</button>
+            <button onclick="deleteService(${index})" class="flex-1 bg-red-600 text-white px-2 py-1 rounded">🗑️ Eliminar</button>
           </div>
         `;
         list.appendChild(card);
       });
     }
 
-    function renderCostos() {
-      const tbody = document.getElementById("costos-body");
-      tbody.innerHTML = "";
-      const totals = {};
-
+    function renderCobros() {
+      const tbody = document.getElementById("cobros-body");
+      const totalEl = document.getElementById("cobros-total");
+      tbody.innerHTML = ""; let total = 0;
       services.forEach(s => {
-        const empresa = s.empresa || "Sin empresa";
-        const costo = parseFloat(s.costo) || 0;
-        if (!totals[empresa]) totals[empresa] = { cantidad: 0, total: 0 };
-        totals[empresa].cantidad += 1;
-        totals[empresa].total += costo;
+        const cobrar = parseFloat(s.cobrarProducto) || 0;
+        if (cobrar > 0) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td class="border border-[#CF9524] p-2">${escapeHtml(s.entregar || "-")}</td><td class="border border-[#CF9524] p-2">$ ${formatNumber(cobrar)}</td>`;
+          tbody.appendChild(tr); total += cobrar;
+        }
       });
+      totalEl.textContent = `$ ${formatNumber(total)}`;
+    }
 
-      for (let empresa in totals) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="border border-[#CF9524] p-2">${escapeHtml(empresa)}</td>
-          <td class="border border-[#CF9524] p-2 text-center">${totals[empresa].cantidad}</td>
-          <td class="border border-[#CF9524] p-2">$ ${formatNumber(totals[empresa].total)}</td>
+    function renderCostos() {
+      const container = document.getElementById("costos-body");
+      container.innerHTML = "";
+      const agrupado = {};
+      services.forEach(s => { const empresa = s.empresa || "Sin empresa"; if (!agrupado[empresa]) agrupado[empresa] = []; agrupado[empresa].push(s); });
+      for (let empresa in agrupado) {
+        let totalEmpresa = 0; let rows = "";
+        agrupado[empresa].forEach(s => { const costo = parseFloat(s.costo) || 0; totalEmpresa += costo;
+          rows += `<tr><td class="border border-[#CF9524] p-2">${escapeHtml(s.entregar || "-")}</td><td class="border border-[#CF9524] p-2">$ ${formatNumber(costo)}</td></tr>`; });
+        const block = document.createElement("div");
+        block.className = "mb-6 border border-[#CF9524] rounded-lg";
+        block.innerHTML = `
+          <h3 class="bg-[#222] text-[#CF9524] font-bold p-2">${escapeHtml(empresa)}</h3>
+          <table class="w-full text-[#CF9524] border-t border-[#CF9524]">
+            <thead><tr><th class="border border-[#CF9524] p-2">Dirección de entrega</th><th class="border border-[#CF9524] p-2">Costo servicio</th></tr></thead>
+            <tbody>${rows}</tbody>
+            <tfoot><tr><td class="border border-[#CF9524] p-2 font-bold">TOTAL</td><td class="border border-[#CF9524] p-2 font-bold">$ ${formatNumber(totalEmpresa)}</td></tr></tfoot>
+          </table>
         `;
-        tbody.appendChild(tr);
+        container.appendChild(block);
       }
     }
 
-    function escapeHtml(text) {
-      if (!text && text !== 0) return '';
-      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;")
-                         .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
-                         .replace(/'/g, "&#039;");
-    }
+    function toggleEstado(index) { services[index].estado = services[index].estado === "entregado" ? "pendiente" : "entregado"; saveServices(); renderServices(); }
 
-    function formatNumber(num) { return new Intl.NumberFormat("es-CO").format(num); }
+    function deleteService(index) { if (confirm("¿Eliminar este servicio?")) { services.splice(index, 1); saveServices(); renderServices(); } }
 
-    function toggleEstado(i) {
-      services[i].estado = services[i].estado === "entregado" ? "pendiente" : "entregado";
-      saveServices(); renderServices();
-    }
+    function escapeHtml(text) { return text ? text.replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m])) : ""; }
 
-    function deleteService(i) {
-      if (confirm("¿Eliminar servicio?")) {
-        services.splice(i, 1);
-        saveServices(); renderServices();
-      }
-    }
+    function formatNumber(num) { return Number(num).toLocaleString("es-CO"); }
 
-    document.getElementById("service-form").addEventListener("submit", async e => {
+    document.getElementById('service-form').addEventListener('submit', e => {
       e.preventDefault();
-      const form = e.target;
-      const data = Object.fromEntries(new FormData(form));
-
-      function saveData() {
-        if (!data.empresa || !data.cliente || !data.contacto || !data.recoger || !data.entregar) {
-          alert("Por favor completa todos los campos obligatorios.");
-          return;
-        }
-        if (editIndex !== null) {
-          services[editIndex] = { ...services[editIndex], ...data };
-          editIndex = null;
-        } else {
-          services.push({ ...data, estado: "pendiente" });
-        }
-        saveServices(); renderServices(); closeModal(); form.reset();
-        document.getElementById("preview").classList.add("hidden");
-        document.getElementById("remove-photo").classList.add("hidden");
-      }
-
-      if (form.foto && form.foto.files.length > 0) {
-        const reader = new FileReader();
-        reader.onloadend = () => { data.foto = reader.result; saveData(); };
-        reader.readAsDataURL(form.foto.files[0]);
-      } else { saveData(); }
+      const form = e.target; const data = Object.fromEntries(new FormData(form).entries());
+      if (editIndex !== null) { services[editIndex] = { ...services[editIndex], ...data }; }
+      else { data.estado = "pendiente"; if (form.foto.files[0]) { const reader = new FileReader(); reader.onload = ev => { data.foto = ev.target.result; services.push(data); saveServices(); renderServices(); closeModal(); }; reader.readAsDataURL(form.foto.files[0]); return; } services.push(data); }
+      saveServices(); renderServices(); closeModal();
     });
 
     renderServices();
