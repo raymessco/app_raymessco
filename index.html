@@ -94,7 +94,7 @@
         <input name="volumen" placeholder="Volumen (cantidad/medidas)" class="p-2 bg-[#CF9524] text-black placeholder-black rounded">
         <input type="number" name="costo" placeholder="Costo del servicio" class="p-2 bg-[#CF9524] text-black placeholder-black rounded" min="0">
 
-        <!-- FOTO: Cámara o galería + vista previa -->
+        <!-- FOTO: Cámara o galería + vista previa + quitar -->
         <input 
           type="file" 
           name="foto" 
@@ -103,6 +103,13 @@
           class="p-2 bg-[#CF9524] text-black rounded"
           onchange="previewImage(event)">
         <img id="preview" class="hidden mt-2 rounded-lg max-h-40 w-auto mx-auto border border-[#CF9524]">
+        <button 
+          type="button" 
+          id="remove-photo" 
+          onclick="removeImage()" 
+          class="hidden mt-2 bg-red-600 text-white px-3 py-1 rounded mx-auto">
+          Quitar foto
+        </button>
 
         <!-- CAMPO OBSERVACIONES -->
         <textarea 
@@ -134,8 +141,7 @@
     function saveServices() { localStorage.setItem("services", JSON.stringify(services)); }
 
     function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('-translate-x-full');
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
     }
 
     function showSection(section) {
@@ -153,17 +159,16 @@
       toggleSidebar();
     }
 
-    function setFilter(filter) {
-      currentFilter = filter;
-      renderServices();
-    }
+    function setFilter(filter) { currentFilter = filter; renderServices(); }
 
     function openModal(index = null) {
       editIndex = index;
       const modal = document.getElementById('modal');
       const form = document.getElementById('service-form');
       form.reset();
-      document.getElementById('preview').classList.add('hidden'); // Oculta vista previa al abrir modal
+      document.getElementById('preview').classList.add('hidden');
+      document.getElementById('remove-photo').classList.add('hidden');
+
       if (index !== null) {
         const s = services[index];
         form.empresa.value = s.empresa || "";
@@ -176,6 +181,7 @@
         form.costo.value = s.costo || "";
         form.observaciones.value = s.observaciones || "";
       }
+
       modal.classList.remove('hidden');
       document.body.classList.add('modal-open');
     }
@@ -186,6 +192,37 @@
       editIndex = null;
     }
 
+    function previewImage(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById("preview");
+      const removeBtn = document.getElementById("remove-photo");
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.classList.remove("hidden");
+          removeBtn.classList.remove("hidden");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = "";
+        preview.classList.add("hidden");
+        removeBtn.classList.add("hidden");
+      }
+    }
+
+    function removeImage() {
+      const input = document.querySelector("input[name='foto']");
+      const preview = document.getElementById("preview");
+      const removeBtn = document.getElementById("remove-photo");
+
+      input.value = "";
+      preview.src = "";
+      preview.classList.add("hidden");
+      removeBtn.classList.add("hidden");
+    }
+
     function renderServices() {
       const list = document.getElementById('services-section');
       list.innerHTML = "";
@@ -193,6 +230,7 @@
         list.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-[#CF9524]">No hay servicios registrados.</div>`;
         return;
       }
+
       services.forEach((s, index) => {
         if (currentFilter !== "all" && s.estado !== currentFilter) return;
 
@@ -210,9 +248,7 @@
             <p class="text-sm"><strong>Costo:</strong> $ ${formatNumber(s.costo || 0)}</p>
             <p class="text-sm"><strong>Observaciones:</strong> ${escapeHtml(s.observaciones || "-")}</p>
             <p class="mt-2"><strong>Estado:</strong> 
-              <span class="${s.estado === 'entregado' ? 'text-green-700' : 'text-red-700'}">
-                ${s.estado || "pendiente"}
-              </span>
+              <span class="${s.estado === 'entregado' ? 'text-green-700' : 'text-red-700'}">${s.estado || "pendiente"}</span>
             </p>
           </div>
           ${ s.foto ? `<div class="mt-3"><img src="${s.foto}" alt="Foto del paquete" class="rounded-lg max-h-48 w-auto object-contain mx-auto"></div>` : "" }
@@ -234,9 +270,7 @@
       services.forEach(s => {
         const empresa = s.empresa || "Sin empresa";
         const costo = parseFloat(s.costo) || 0;
-        if (!totals[empresa]) {
-          totals[empresa] = { cantidad: 0, total: 0 };
-        }
+        if (!totals[empresa]) totals[empresa] = { cantidad: 0, total: 0 };
         totals[empresa].cantidad += 1;
         totals[empresa].total += costo;
       });
@@ -254,16 +288,12 @@
 
     function escapeHtml(text) {
       if (!text && text !== 0) return '';
-      return String(text).replace(/&/g, "&amp;")
-                         .replace(/</g, "&lt;")
-                         .replace(/>/g, "&gt;")
-                         .replace(/"/g, "&quot;")
+      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+                         .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
                          .replace(/'/g, "&#039;");
     }
 
-    function formatNumber(num) {
-      return new Intl.NumberFormat("es-CO").format(num);
-    }
+    function formatNumber(num) { return new Intl.NumberFormat("es-CO").format(num); }
 
     function toggleEstado(i) {
       services[i].estado = services[i].estado === "entregado" ? "pendiente" : "entregado";
@@ -277,26 +307,11 @@
       }
     }
 
-    function previewImage(event) {
-      const file = event.target.files[0];
-      const preview = document.getElementById("preview");
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-          preview.src = e.target.result;
-          preview.classList.remove("hidden");
-        };
-        reader.readAsDataURL(file);
-      } else {
-        preview.src = "";
-        preview.classList.add("hidden");
-      }
-    }
-
     document.getElementById("service-form").addEventListener("submit", async e => {
       e.preventDefault();
       const form = e.target;
       const data = Object.fromEntries(new FormData(form));
+
       function saveData() {
         if (!data.empresa || !data.cliente || !data.contacto || !data.recoger || !data.entregar) {
           alert("Por favor completa todos los campos obligatorios.");
@@ -310,7 +325,9 @@
         }
         saveServices(); renderServices(); closeModal(); form.reset();
         document.getElementById("preview").classList.add("hidden");
+        document.getElementById("remove-photo").classList.add("hidden");
       }
+
       if (form.foto && form.foto.files.length > 0) {
         const reader = new FileReader();
         reader.onloadend = () => { data.foto = reader.result; saveData(); };
