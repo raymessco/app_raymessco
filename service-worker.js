@@ -1,20 +1,4 @@
-function previewImage(event) {
-  const file = event.target.files[0];
-  const preview = document.getElementById("preview");
-
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      preview.src = e.target.result;
-      preview.classList.remove("hidden");
-    };
-    reader.readAsDataURL(file);
-  } else {
-    preview.src = "";
-    preview.classList.add("hidden");
-  }
-}
-const CACHE_NAME = "ray-mess-co-v4";
+const CACHE_NAME = "ray-mess-co-v5";
 const STATIC_ASSETS = [
   "index.html",
   "manifest.json",
@@ -47,12 +31,14 @@ self.addEventListener("message", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
+
   if (event.request.mode === "navigate") {
     event.respondWith(
       caches.match("index.html").then(cached => cached || fetch(event.request))
     );
     return;
   }
+
   event.respondWith(
     caches.match(event.request).then(cached => {
       return cached || fetch(event.request).then(resp => {
@@ -65,4 +51,3 @@ self.addEventListener("fetch", event => {
     })
   );
 });
-
