@@ -2,7 +2,7 @@
   "name": "Ray Mess Co",
   "short_name": "RayMess",
   "description": "Sistema de gestión de servicios de mensajería",
-  "start_url": "/",
+  "start_url": "/app_raymessco/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#CF9524",
@@ -20,3 +20,4 @@
     }
   ]
 }
+
