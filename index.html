@@ -9,6 +9,7 @@
   
   <!-- Meta tags para iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
   <link rel="apple-touch-icon" href="https://raymessco.github.io/app_raymessco/icon-192.png">
@@ -16,7 +17,8 @@
   <!-- Manifest debe estar en la raíz o URL absoluta -->
   <link rel="manifest" href="https://raymessco.github.io/app_raymessco/manifest.json">
   
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Reemplazar CDN de Tailwind con versión local -->
+  <link rel="stylesheet" href="https://raymessco.github.io/app_raymessco/tailwind.css">
   <style>
     :root { --gold:#CF9524; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -128,7 +130,6 @@
     </div>
   </div>
 
-  <!-- Resto del código se mantiene igual hasta el final -->
   <!-- DASHBOARD -->
   <div id="app" class="hidden flex-1 flex flex-col w-full h-screen">
 
@@ -181,7 +182,7 @@
         <button onclick="setFilter('pendiente')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Pendientes</button>
         <button onclick="setFilter('en_ruta')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">En ruta</button>
         <button onclick="setFilter('entregado')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Entregados</button>
-        <button onclick="setFilter('cancelado')" class="px-3 py-2 border border([var(--gold)] rounded mobile-btn">Cancelados</button>
+        <button onclick="setFilter('cancelado')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Cancelados</button>
       </div>
 
       <!-- SERVICES LIST -->
@@ -204,7 +205,7 @@
             <thead class="bg-[#151515]">
               <tr>
                 <th class="border border-[var(--gold)] p-2">Dirección de entrega</th>
-                <th class="border border([var(--gold)] p-2">Valor</th>
+                <th class="border border-[var(--gold)] p-2">Valor</th>
               </tr>
             </thead>
             <tbody id="cobros-body"></tbody>
@@ -1103,7 +1104,7 @@
             <div class="text-xs text-gray-300 mb-2">${escapeHtml(u.email || '')} · UID: ${doc.id}</div>
             <div class="flex gap-2">
               <button class="bg-green-600 px-3 py-2 rounded text-black font-bold mobile-btn" onclick="approveMensajero('${doc.id}')">Aprobar</button>
-              <button class="bg-red-600 px-3 py-2 rounded text-white mobile-btn" onclick="rejectMensajero('${doc.id')">Rechazar</button>
+              <button class="bg-red-600 px-3 py-2 rounded text-white mobile-btn" onclick="rejectMensajero('${doc.id}')">Rechazar</button>
             </div>
           `;
           container.appendChild(row);
@@ -1133,7 +1134,15 @@
 
     async function rejectMensajero(uid) {
       if (!confirm('¿Rechazar solicitud?')) return;
-      try
+      try {
+        await db.collection('users').doc(uid).update({ role: 'cliente' });
+        alert('Solicitud rechazada: role cambiado a cliente.');
+        listPendingMensajeros();
+      } catch (e) {
+        console.error('Error rechazando:', e);
+        alert('Error al rechazar. Revisa la consola.');
+      }
+    }
     window.rejectMensajero = rejectMensajero;
 
     // ===== Cobros & Costos (admin) =====
