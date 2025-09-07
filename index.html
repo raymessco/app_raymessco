@@ -68,6 +68,29 @@
       height: 100%;
       z-index: 45;
     }
+
+    /* Loader para el botón de Google */
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 3px solid #CF9524;
+      width: 20px;
+      height: 20px;
+      -webkit-animation: spin 1s linear infinite;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+    }
+    
+    @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -79,17 +102,33 @@
         <img src="https://raymessco.github.io/app_raymessco/icon-192.png" class="w-20 h-20" alt="logo">
         <h1 class="text-2xl font-bold text-[var(--gold)]">Ray Mess Co</h1>
         <p class="text-center text-sm text-[#d1b070]">Accede con tu cuenta de Google</p>
-        <button id="btn-google" class="w-full mt-4 bg-[var(--gold)] text-black font-bold py-3 rounded-xl hover:opacity-90 transition mobile-btn">Continuar con Google</button>
+        
+        <!-- Mensaje de estado para autenticación -->
+        <div id="auth-status" class="hidden text-center text-sm my-2 p-2 rounded"></div>
+        
+        <button id="btn-google" class="w-full mt-4 bg-[var(--gold)] text-black font-bold py-3 rounded-xl hover:opacity-90 transition mobile-btn flex items-center justify-center">
+          <span id="btn-text">Continuar con Google</span>
+          <div id="btn-loader" class="loader hidden"></div>
+        </button>
+        
         <p class="text-xs text-gray-400 mt-2">Dominios autorizados: usa <span class="chip">http://localhost</span> o tu dominio</p>
         
         <!-- Instalar app button -->
         <button id="install-button" class="hidden w-full mt-3 bg-[#333] text-[var(--gold)] font-bold py-3 rounded-xl mobile-btn">
           📲 Instalar App
         </button>
+
+        <!-- Información de depuración -->
+        <div id="debug-info" class="hidden text-xs text-gray-500 mt-4 p-2 bg-gray-800 rounded">
+          <p>Información de depuración:</p>
+          <p id="debug-config"></p>
+          <p id="debug-auth"></p>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Resto del código se mantiene igual hasta el final -->
   <!-- DASHBOARD -->
   <div id="app" class="hidden flex-1 flex flex-col w-full h-screen">
 
@@ -142,7 +181,7 @@
         <button onclick="setFilter('pendiente')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Pendientes</button>
         <button onclick="setFilter('en_ruta')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">En ruta</button>
         <button onclick="setFilter('entregado')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Entregados</button>
-        <button onclick="setFilter('cancelado')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Cancelados</button>
+        <button onclick="setFilter('cancelado')" class="px-3 py-2 border border([var(--gold)] rounded mobile-btn">Cancelados</button>
       </div>
 
       <!-- SERVICES LIST -->
@@ -165,7 +204,7 @@
             <thead class="bg-[#151515]">
               <tr>
                 <th class="border border-[var(--gold)] p-2">Dirección de entrega</th>
-                <th class="border border-[var(--gold)] p-2">Valor</th>
+                <th class="border border([var(--gold)] p-2">Valor</th>
               </tr>
             </thead>
             <tbody id="cobros-body"></tbody>
@@ -258,6 +297,40 @@
     };
     /****************************************/
 
+    // Verificar configuración de Firebase
+    function checkFirebaseConfig() {
+      const configErrors = [];
+      if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "AIzaSyCkjLdn1NYI5eApE4N5ylkGJnlYsmO5hq4") {
+        configErrors.push("API Key no configurada correctamente");
+      }
+      if (!firebaseConfig.authDomain || firebaseConfig.authDomain.includes("firebaseapp.com")) {
+        configErrors.push("Auth Domain puede necesitar configuración adicional");
+      }
+      
+      const debugInfo = document.getElementById('debug-info');
+      const debugConfig = document.getElementById('debug-config');
+      
+      if (configErrors.length > 0) {
+        debugInfo.classList.remove('hidden');
+        debugConfig.textContent = `Problemas de configuración: ${configErrors.join(', ')}`;
+      }
+      
+      return configErrors.length === 0;
+    }
+
+    // Mostrar mensaje de estado
+    function showAuthStatus(message, isError = false) {
+      const statusEl = document.getElementById('auth-status');
+      statusEl.textContent = message;
+      statusEl.classList.remove('hidden', 'bg-green-800', 'bg-red-800');
+      statusEl.classList.add(isError ? 'bg-red-800' : 'bg-green-800');
+      
+      // Ocultar después de 5 segundos
+      setTimeout(() => {
+        statusEl.classList.add('hidden');
+      }, 5000);
+    }
+
     const app = firebase.initializeApp(firebaseConfig);
     const auth = app.auth();
     const db   = app.firestore();
@@ -341,6 +414,67 @@
     window.setFilter = setFilter;
     window.openModal = openModal;
     window.closeModal = closeModal;
+
+    // ===== Botón de Google =====
+    document.getElementById('btn-google').addEventListener('click', async () => {
+      const btnText = document.getElementById('btn-text');
+      const btnLoader = document.getElementById('btn-loader');
+      
+      try {
+        // Mostrar loader
+        btnText.textContent = 'Conectando...';
+        btnLoader.classList.remove('hidden');
+        
+        // Verificar configuración primero
+        if (!checkFirebaseConfig()) {
+          showAuthStatus("Error de configuración. Verifica la consola.", true);
+          return;
+        }
+        
+        showAuthStatus("Conectando con Google...", false);
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        // Agregar scope de email si es necesario
+        provider.addScope('email');
+        
+        // Forzar la selección de cuenta cada vez
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
+        const result = await auth.signInWithPopup(provider);
+        showAuthStatus("¡Autenticación exitosa!", false);
+        
+      } catch (error) {
+        console.error("Error en autenticación:", error);
+        
+        // Mensajes de error específicos
+        let errorMessage = "Error de autenticación";
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage = "El popup fue bloqueado. Permite popups para este sitio.";
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = "El popup de autenticación fue cerrado. Intenta nuevamente.";
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = "Error de red. Verifica tu conexión a Internet.";
+        } else if (error.code) {
+          errorMessage = `Error: ${error.code}`;
+        }
+        
+        showAuthStatus(errorMessage, true);
+      } finally {
+        // Restaurar estado del botón
+        btnText.textContent = 'Continuar con Google';
+        btnLoader.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      // cleanup listeners
+      if (_userProfileUnsub) { _userProfileUnsub(); _userProfileUnsub = null; }
+      if (window._unsub) { window._unsub(); window._unsub = null; }
+      if (window._unsub2) { window._unsub2(); window._unsub2 = null; }
+      auth.signOut();
+    });
 
     // ===== ensure user profile and role selection =====
     async function ensureUserProfile(user) {
@@ -1053,6 +1187,21 @@
 
     // Expose debug
     window._debug = { currentRole: () => currentRole, currentUser: () => currentUser, services: () => services };
+
+    // Verificar configuración al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+      checkFirebaseConfig();
+      
+      // Habilitar información de depuración con triple clic
+      let clickCount = 0;
+      document.body.addEventListener('click', function() {
+        clickCount++;
+        if (clickCount >= 3) {
+          document.getElementById('debug-info').classList.toggle('hidden');
+          clickCount = 0;
+        }
+      });
+    });
 
   </script>
 </body>
