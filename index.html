@@ -331,9 +331,18 @@
       }, 5000);
     }
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = app.auth();
-    const db   = app.firestore();
+    // Inicializar Firebase
+    let app, auth, db;
+    
+    try {
+      app = firebase.initializeApp(firebaseConfig);
+      auth = app.auth();
+      db = app.firestore();
+      console.log("Firebase inicializado correctamente");
+    } catch (error) {
+      console.error("Error inicializando Firebase:", error);
+      showAuthStatus("Error inicializando la aplicación. Recarga la página.", true);
+    }
 
     // estado global
     let currentUser = null;
@@ -1124,15 +1133,7 @@
 
     async function rejectMensajero(uid) {
       if (!confirm('¿Rechazar solicitud?')) return;
-      try {
-        await db.collection('users').doc(uid).update({ role: 'cliente' });
-        alert('Solicitud rechazada: role cambiado a cliente.');
-        listPendingMensajeros();
-      } catch (e) {
-        console.error('Error rechazando:', e);
-        alert('Error al rechazar. Revisa la consola.');
-      }
-    }
+      try
     window.rejectMensajero = rejectMensajero;
 
     // ===== Cobros & Costos (admin) =====
@@ -1199,6 +1200,13 @@
         if (clickCount >= 3) {
           document.getElementById('debug-info').classList.toggle('hidden');
           clickCount = 0;
+        }
+        
+        // También mostrar información de Firebase en consola
+        if (clickCount === 2) {
+          console.log("Firebase Config:", firebaseConfig);
+          console.log("Firebase App:", app);
+          console.log("Firebase Auth:", auth);
         }
       });
     });
