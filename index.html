@@ -6,9 +6,16 @@
   <title>Ray Mess Co — Dashboard</title>
   <meta name="theme-color" content="#CF9524">
   <meta name="description" content="Sistema de gestión de servicios de mensajería">
-  <link rel="icon" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="manifest" href="manifest.json">
+  
+  <!-- Meta tags para iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
+  <link rel="apple-touch-icon" href="https://raymessco.github.io/app_raymessco/icon-192.png">
+  
+  <!-- Manifest debe estar en la raíz o URL absoluta -->
+  <link rel="manifest" href="https://raymessco.github.io/app_raymessco/manifest.json">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root { --gold:#CF9524; }
@@ -37,7 +44,7 @@
       .mobile-mt-2 { margin-top: 0.5rem; }
       .mobile-mb-2 { margin-bottom: 0.5rem; }
       .mobile-btn { min-height: 44px; display: flex; align-items: center; justify-content: center; }
-      input, textarea, select { font-size: 16px !important; } /* Previene zoom en iOS */
+      input, textarea, select { font-size: 16px !important; }
     }
     
     /* Mejoras de UI para móviles */
@@ -69,7 +76,7 @@
   <div id="login-view" class="flex-1 flex items-center justify-center p-6">
     <div class="w-full max-w-md bg-[#0a0a0a] border border-[var(--gold)] rounded-2xl p-6 shadow-xl">
       <div class="flex flex-col items-center gap-3">
-        <img src="icon-192.png" class="w-20 h-20" alt="logo">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" class="w-20 h-20" alt="logo">
         <h1 class="text-2xl font-bold text-[var(--gold)]">Ray Mess Co</h1>
         <p class="text-center text-sm text-[#d1b070]">Accede con tu cuenta de Google</p>
         <button id="btn-google" class="w-full mt-4 bg-[var(--gold)] text-black font-bold py-3 rounded-xl hover:opacity-90 transition mobile-btn">Continuar con Google</button>
@@ -91,7 +98,7 @@
       <div class="flex items-center gap-3">
         <button onclick="toggleSidebar()" class="text-[var(--gold)] text-2xl font-bold mobile-btn">☰</button>
         <h1 class="text-xl md:text-2xl font-bold flex items-center gap-3 text-[var(--gold)] mobile-text-lg">
-          <img src="icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
+          <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
           <span id="role-badge" class="chip"></span>
         </h1>
       </div>
@@ -179,7 +186,7 @@
   <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
     <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-center">
-        <img src="icon-192.png" alt="Logo" class="w-16 h-16 mb-2">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" class="w-16 h-16 mb-2">
       </div>
       <h2 class="text-xl font-bold mb-4 text-center">Registrar servicio</h2>
 
@@ -953,7 +960,7 @@
             <div class="text-xs text-gray-300 mb-2">${escapeHtml(u.email || '')} · UID: ${doc.id}</div>
             <div class="flex gap-2">
               <button class="bg-green-600 px-3 py-2 rounded text-black font-bold mobile-btn" onclick="approveMensajero('${doc.id}')">Aprobar</button>
-              <button class="bg-red-600 px-3 py-2 rounded text-white mobile-btn" onclick="rejectMensajero('${doc.id}')">Rechazar</button>
+              <button class="bg-red-600 px-3 py-2 rounded text-white mobile-btn" onclick="rejectMensajero('${doc.id')">Rechazar</button>
             </div>
           `;
           container.appendChild(row);
@@ -1047,19 +1054,6 @@
     // Expose debug
     window._debug = { currentRole: () => currentRole, currentUser: () => currentUser, services: () => services };
 
-  </script>
-  
-  <!-- Service Worker Registration for PWA -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js').then(function(registration) {
-          console.log('ServiceWorker registration successful with scope: ', registration.scope);
-        }, function(err) {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-      });
-    }
   </script>
 </body>
 </html>
