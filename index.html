@@ -4,95 +4,418 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Ray Mess Co — Dashboard</title>
-
-  <!-- PWA meta -->
   <meta name="theme-color" content="#CF9524">
   <meta name="description" content="Sistema de gestión de servicios de mensajería">
+  
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
-
-  <!-- Icons -->
   <link rel="apple-touch-icon" href="/icon-192.png">
+  
   <link rel="manifest" href="/manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
-
-  <!-- Tailwind desde CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
+  
+  <link rel="stylesheet" href="/tailwind.css">
   <style>
     :root { --gold:#CF9524; }
-    body { background:#000; color:var(--gold); font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background:#000; color:#CF9524; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; touch-action: manipulation; }
+    .hidden { display:none; }
     .chip { border:1px solid var(--gold); padding:.15rem .5rem; border-radius:.5rem; font-size:.75rem; }
-    #install-button {
-      position: fixed; bottom: 20px; right: 20px;
-      background-color: var(--gold); color: black; border: none;
-      padding: 12px 20px; border-radius: 50px; font-weight: bold;
-      cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000;
+    .state-pendiente{ color:#b91c1c }
+    .state-en_ruta{ color:#a16207 }
+    .state-entregado{ color:#15803d }
+    .state-cancelado{ color:#6b7280 }
+    .service-card { transition: all 0.2s ease; }
+    .service-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(207,149,36,0.12); }
+    .available-service { border: 2px solid #CF9524; }
+    .btn-take { background-color: #15803d; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: bold; }
+    .btn-take:hover { background-color: #166534; }
+    a.underline { text-decoration: underline; }
+    .rounded-2xl { border-radius: 1rem; }
+    input::placeholder, textarea::placeholder { color:#000 !important; opacity:1; }
+    body.modal-open { height:100vh; overflow:hidden; }
+    
+    /* Mejoras para móviles */
+    @media (max-width: 768px) {
+      .mobile-text-lg { font-size: 1.125rem; }
+      .mobile-p-3 { padding: 0.75rem; }
+      .mobile-mt-2 { margin-top: 0.5rem; }
+      .mobile-mb-2 { margin-bottom: 0.5rem; }
+      .mobile-btn { min-height: 44px; display: flex; align-items: center; justify-content: center; }
+      input, textarea, select { font-size: 16px !important; }
     }
-    #install-button.hidden { display: none; }
+    
+    /* Mejoras de UI para móviles */
+    .sidebar-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 30;
+      display: none;
+    }
+    
+    /* Nuevos estilos para las mejoras */
+    .camera-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    #videoElement {
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid var(--gold);
+    }
+    
+    .capture-btn {
+      background-color: var(--gold);
+      color: black;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    
+    .payment-method {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .payment-option.selected {
+      background-color: rgba(207, 149, 36, 0.2);
+    }
+    
+    .history-section {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+    }
+    
+    .financial-summary {
+      background-color: rgba(207, 149, 36, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .clickable {
+      color: #3b82f6;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    
+    .day-section {
+      margin-bottom: 25px;
+      border-bottom: 1px solid var(--gold);
+      padding-bottom: 15px;
+    }
+    
+    .day-header {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: var(--gold);
+    }
+    
+    .service-paid {
+      opacity: 0.7;
+      background-color: rgba(21, 128, 61, 0.1) !important;
+    }
+    
+    /* Botón de instalación */
+    #install-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--gold);
+      color: black;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    #install-button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- LOGIN VIEW -->
   <div id="login-view" class="flex-1 flex items-center justify-center p-6">
-    <div class="w-full max-w-md bg-neutral-900 border border-[var(--gold)] rounded-2xl p-6 shadow-xl">
+    <div class="w-full max-w-md bg-[#0a0a0a] border border-[var(--gold)] rounded-2xl p-6 shadow-xl">
       <div class="flex flex-col items-center gap-3">
         <img src="/icon-192.png" class="w-20 h-20" alt="logo">
-        <h1 class="text-2xl font-bold">Ray Mess Co</h1>
+        <h1 class="text-2xl font-bold text-[var(--gold)]">Ray Mess Co</h1>
         <p class="text-center text-sm text-[#d1b070]">Accede con tu cuenta de Google</p>
+        
         <div id="auth-status" class="hidden text-center text-sm my-2 p-2 rounded"></div>
-        <button id="btn-google" class="w-full mt-4 bg-[var(--gold)] text-black font-bold py-3 rounded-xl hover:opacity-90 transition flex items-center justify-center">
+        
+        <button id="btn-google" class="w-full mt-4 bg-[var(--gold)] text-black font-bold py-3 rounded-xl hover:opacity-90 transition mobile-btn flex items-center justify-center">
           <span id="btn-text">Continuar con Google</span>
           <div id="btn-loader" class="loader hidden"></div>
         </button>
+        
         <p class="text-xs text-gray-400 mt-2">Dominios autorizados: usa <span class="chip">http://localhost</span> o tu dominio</p>
       </div>
     </div>
   </div>
 
-  <!-- DASHBOARD -->
   <div id="app" class="hidden flex-1 flex flex-col w-full h-screen">
-    <div class="sticky top-0 bg-black border-b border-[var(--gold)] p-3 z-20 flex justify-between items-center">
-      <h1 class="text-xl font-bold flex items-center gap-3">
-        <img src="/icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
-        <span id="role-badge" class="chip"></span>
-      </h1>
+
+    <div class="sticky top-0 bg-black/90 backdrop-blur border-b border-[var(--gold)] p-3 z-20 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="text-[var(--gold)] text-2xl font-bold mobile-btn">☰</button>
+        <h1 class="text-xl md:text-2xl font-bold flex items-center gap-3 text-[var(--gold)] mobile-text-lg">
+          <img src="/icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
+          <span id="role-badge" class="chip"></span>
+        </h1>
+      </div>
       <div class="flex items-center gap-2">
         <span id="user-name" class="text-xs md:text-sm text-[#d1b070] hidden md:block"></span>
-        <button id="btn-logout" class="bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold">Salir</button>
+        <button id="btn-logout" class="bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold mobile-btn">Salir</button>
       </div>
     </div>
+
+    <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+    <div id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-[#0b0b0b] border-r border-[var(--gold)] text-[var(--gold)] transform -translate-x-full transition-transform duration-300 z-40">
+      <div class="p-4 border-b border-[var(--gold)] font-bold text-xl flex justify-between items-center">
+        <span>Menú</span>
+        <button onclick="toggleSidebar()" class="text-[var(--gold)] text-2xl">✕</button>
+      </div>
+      <div class="sidebar-swipe-close" onclick="toggleSidebar()"></div>
+      <ul class="flex flex-col p-4 gap-3">
+        <li><button onclick="showSection('services')" class="w-full text-left py-3 mobile-btn">📋 Servicios</button></li>
+        <li id="menu-registrar"><button onclick="openModal()" class="w-full text-left py-3 mobile-btn">➕ Registrar servicio</button></li>
+        <li id="menu-historial"><button onclick="showHistory()" class="w-full text-left py-3 mobile-btn">📋 Historial de servicios</button></li>
+        <li id="menu-finanzas-mensajero" class="hidden"><button onclick="showFinancialSummary()" class="w-full text-left py-3 mobile-btn">💰 Mis finanzas</button></li>
+        <li id="menu-costos" class="hidden"><button onclick="showSection('costos')" class="w-full text-left py-3 mobile-btn">💰 Costos por empresa</button></li>
+        <li id="menu-cobros" class="hidden"><button onclick="showSection('cobros')" class="w-full text-left py-3 mobile-btn">💵 Cobros contra entrega</button></li>
+        <li id="menu-pendientes" class="hidden"><button onclick="listPendingMensajeros()" class="w-full text-left py-3 mobile-btn">📝 Solicitudes mensajero</button></li>
+        <li><button onclick="openEditProfile()" class="w-full text-left py-3 mobile-btn">👤 Editar perfil</button></li>
+      </ul>
+    </div>
+
     <div class="flex-1 overflow-auto p-4 space-y-4">
-      <h2 class="text-xl font-bold">Bienvenido a Ray Mess Co 🚀</h2>
-      <p class="text-sm">Aquí va tu dashboard completo...</p>
+
+      <div id="pending-banner" class="hidden bg-yellow-900 text-black p-3 rounded-md text-center font-semibold">
+        Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
+      </div>
+
+      <div id="filters" class="flex flex-wrap gap-2">
+        <button onclick="setFilter('all')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Todos</button>
+        <button onclick="setFilter('pendiente')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Pendientes</button>
+        <button onclick="setFilter('en_ruta')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">En ruta</button>
+        <button onclick="setFilter('entregado')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Entregados</button>
+        <button onclick="setFilter('cancelado')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Cancelados</button>
+      </div>
+
+      <div id="services-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+
+      <div id="history-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-4">Historial de servicios entregados</h2>
+        <div id="history-list"></div>
+      </div>
+
+      <div id="financial-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-4">Resumen financiero</h2>
+        <div class="financial-summary">
+          <p class="text-lg">Total ganado: <span id="total-earned" class="font-bold">$0</span></p>
+          <p class="text-lg">Total pendiente de pago: <span id="total-pending" class="font-bold">$0</span></p>
+          <p class="text-lg">Total pagado: <span id="total-paid" class="font-bold">$0</span></p>
+        </div>
+        <h3 class="text-lg font-bold text-[var(--gold)] mt-6 mb-4">Detalle de servicios por día</h3>
+        <div id="financial-list"></div>
+      </div>
+
+      <div id="pending-container" class="hidden p-4"></div>
+
+      <div id="costos-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-2">Costos por empresa</h2>
+        <div id="costos-body" class="space-y-4"></div>
+      </div>
+
+      <div id="cobros-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-2">Cobros contra entrega</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-[var(--gold)] border border-[var(--gold)] min-w-max">
+            <thead class="bg-[#151515]">
+              <tr>
+                <th class="border border-[var(--gold)] p-2">Dirección de entrega</th>
+                <th class="border border-[var(--gold)] p-2">Valor</th>
+              </tr>
+            </thead>
+            <tbody id="cobros-body"></tbody>
+            <tfoot>
+              <tr>
+                <td class="border border-[var(--gold)] p-2 font-bold">TOTAL</td>
+                <td id="cobros-total" class="border border-[var(--gold)] p-2 font-bold"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Botón de instalación -->
-  <button id="install-button" class="hidden">Instalar App</button>
+  <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-center">
+        <img src="/icon-192.png" alt="Logo" class="w-16 h-16 mb-2">
+      </div>
+      <h2 class="text-xl font-bold mb-4 text-center">Registrar servicio</h2>
 
-  <!-- Firebase (compat) -->
+      <form id="service-form" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input name="empresaCliente" placeholder="Empresa o cliente" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded md:col-span-2 mobile-btn" required>
+        <input name="contacto" placeholder="Nombre de contacto receptor" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="telefono" placeholder="Teléfono" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" inputmode="tel">
+        <input name="recoger" placeholder="Dirección de recogida" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="entregar" placeholder="Dirección de entrega" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="volumen" placeholder="Volumen (cantidad/medidas)" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn">
+
+        <input type="number" name="costoCliente" id="field-costo-cliente" placeholder="Costo de mensajería" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" min="0">
+
+        <div class="md:col-span-2">
+          <label for="field-mensajero" class="text-sm text-[#d1b070]">Asignar mensajero (solo admin):</label>
+          <select name="uidMensajero" id="field-mensajero" class="p-3 bg-[var(--gold)] text-black rounded mobile-btn w-full hidden">
+            <option value="">Seleccionar mensajero</option>
+          </select>
+        </div>
+        
+        <input type="number" name="pagoMensajero" id="field-pago" placeholder="Pago al mensajero" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn hidden" min="0">
+
+        <div class="col-span-1 md:col-span-2 flex items-center gap-2 mobile-p-3">
+          <input type="checkbox" id="cobrar-check" name="cobrarCheck" class="w-5 h-5 accent-[var(--gold)]">
+          <label for="cobrar-check">¿Cobrar producto a la entrega?</label>
+        </div>
+        <input type="number" name="cobrarProducto" id="cobrar-field" placeholder="Valor a cobrar (producto)" class="hidden p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" min="0">
+
+        <textarea name="observaciones" placeholder="Observaciones" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded overflow-y-scroll resize-y md:col-span-2 mobile-btn" style="height:120px; min-height:60px;"></textarea>
+
+        <div class="md:col-span-2 flex gap-2 mt-2">
+          <button type="submit" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn">Registrar</button>
+          <button type="button" onclick="closeModal()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="evidence-modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4 text-center">Evidencia de entrega</h2>
+      
+      <div class="camera-container">
+        <video id="videoElement" autoplay></video>
+        <button id="capture-btn" class="capture-btn w-full">Tomar foto</button>
+        <canvas id="canvasElement" class="hidden"></canvas>
+      </div>
+      
+      <div id="captured-image-container" class="hidden mt-4">
+        <img id="capturedImage" class="w-full rounded-lg border border-[var(--gold)]">
+        <button id="retake-btn" class="capture-btn w-full mt-2">Volver a tomar</button>
+      </div>
+      
+      <div class="payment-method mt-4">
+        <h3 class="font-bold">Método de pago:</h3>
+        <div class="payment-option" onclick="selectPaymentMethod('efectivo')">
+          <input type="radio" id="efectivo" name="paymentMethod" value="efectivo">
+          <label for="efectivo">Efectivo</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('davivienda')">
+          <input type="radio" id="davivienda" name="paymentMethod" value="davivienda">
+          <label for="davivienda">Transferencia Davivienda</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('bancolombia')">
+          <input type="radio" id="bancolombia" name="paymentMethod" value="bancolombia">
+          <label for="bancolombia">Transferencia Bancolombia</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('nequi')">
+          <input type="radio" id="nequi" name="paymentMethod" value="nequi">
+          <label for="nequi">Nequi</label>
+        </div>
+      </div>
+      
+      <div class="flex gap-2 mt-4">
+        <button id="confirm-delivery" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn" disabled>Confirmar entrega</button>
+        <button onclick="closeEvidenceModal()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="edit-profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4 text-center">Editar perfil</h2>
+      
+      <form id="profile-form" class="grid grid-cols-1 gap-3">
+        <input type="text" id="profile-displayName" placeholder="Nombre para mostrar" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        
+        <div class="flex gap-2 mt-2">
+          <button type="submit" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn">Guardar</button>
+          <button type="button" onclick="closeEditProfile()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="roleChoiceModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-60 p-4">
+    <div class="bg-[#111] border border-[var(--gold)] p-6 rounded-xl w-full max-w-sm text-[var(--gold)]">
+      <h3 class="text-xl font-bold mb-4 text-center">Bienvenido 👋</h3>
+      <p class="text-sm text-gray-300 mb-4 text-center">Selecciona tu rol en la aplicación:</p>
+      <div class="flex gap-3">
+        <button id="choose-cliente" class="flex-1 bg-[var(--gold)] text-black py-3 rounded font-bold mobile-btn">Soy cliente</button>
+        <button id="choose-mensajero" class="flex-1 bg-black border border-[var(--gold)] text-[var(--gold)] py-3 rounded font-bold mobile-btn">Soy mensajero</button>
+      </div>
+      <p class="text-xs text-gray-500 mt-3">Un administrador revisará las solicitudes de mensajero.</p>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+  <button id="install-button" class="hidden">Instalar App</button>
+
   <script>
-    /***** CONFIG FIREBASE *****/
+    /***** CONFIGURA TU FIREBASE AQUI *****/
     const firebaseConfig = {
       apiKey: "AIzaSyCkjLdn1NYI5eApE4N5ylkGJnlYsmO5hq4",
       authDomain: "raymessco-ce1c0.firebaseapp.com",
       projectId: "raymessco-ce1c0",
-      storageBucket: "raymessco-ce1c0.appspot.com",
+      storageBucket: "raymessco-ce1c0.firebasestorage.app",
       messagingSenderId: "829091900185",
       appId: "1:829091900185:web:1c61887780ff2639a5f388",
       measurementId: "G-38Q9K6CV7D"
     };
+    /****************************************/
 
+    // Inicializar Firebase
     let app, auth, db;
+    
     try {
       app = firebase.initializeApp(firebaseConfig);
       auth = app.auth();
@@ -102,38 +425,760 @@
       console.error("Error inicializando Firebase:", error);
     }
 
-    // ===== PWA INSTALL =====
-    let deferredPrompt;
+    // estado global
+    let currentUser = null;
+    let currentRole = null;
+    let services = [];
+    let currentFilter = 'all';
+    let _userProfileUnsub = null;
+    let currentServiceIdForEvidence = null;
+    let selectedPaymentMethod = null;
+    let mensajerosList = [];
+
+    // UI refs
+    const loginView   = document.getElementById('login-view');
+    const appView     = document.getElementById('app');
+    const roleBadge   = document.getElementById('role-badge');
+    const userNameEl  = document.getElementById('user-name');
+    const menuRegistrar = document.getElementById('menu-registrar');
+    const menuCostos    = document.getElementById('menu-costos');
+    const menuCobros    = document.getElementById('menu-cobros');
+    const menuPendientes= document.getElementById('menu-pendientes');
+    const menuHistorial = document.getElementById('menu-historial');
+    const menuFinanzasMensajero = document.getElementById('menu-finanzas-mensajero');
+    const roleChoiceModal = document.getElementById('roleChoiceModal');
     const installButton = document.getElementById('install-button');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    const mensajeroSelect = document.getElementById('field-mensajero');
+
+    // ===== PWA Installation =====
+    let deferredPrompt;
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installButton.classList.remove('hidden');
+      if (installButton) installButton.classList.remove('hidden');
     });
 
-    installButton.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') console.log('PWA instalada');
-      deferredPrompt = null;
-      installButton.classList.add('hidden');
-    });
-
-    window.addEventListener('appinstalled', () => {
-      console.log('PWA instalada (evento appinstalled)');
-      installButton.classList.add('hidden');
-    });
-
-    // ===== Service Worker =====
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('SW registrado:', reg))
-          .catch(err => console.error('Error registrando SW:', err));
+    if (installButton) {
+      installButton.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          installButton.classList.add('hidden');
+        }
+        
+        deferredPrompt = null;
       });
     }
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(reg => {
+          console.log('SW registrado:', reg);
+        }).catch(err => {
+          console.error('Error registrando SW:', err);
+        });
+      });
+    }
+
+    // ===== Mejoras para móviles =====
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('-translate-x-full');
+      sidebarBackdrop.style.display = sidebar.classList.contains('-translate-x-full') ? 'none' : 'block';
+      
+      if (!sidebar.classList.contains('-translate-x-full')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
+    }
+    
+    function closeSidebarOnClick() {
+      if (window.innerWidth < 768) {
+        toggleSidebar();
+      }
+    }
+
+    // ===== Auth & Firestore Logic =====
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        console.log("Usuario autenticado:", user.uid);
+        
+        const userProfileRef = db.collection('users').doc(user.uid);
+        _userProfileUnsub = userProfileRef.onSnapshot(doc => {
+          if (doc.exists) {
+            const userData = doc.data();
+            currentRole = userData.role || 'cliente';
+            
+            // Check for pending messenger approval
+            if (userData.role === 'mensajero_pending') {
+                document.getElementById('pending-banner').classList.remove('hidden');
+            } else {
+                document.getElementById('pending-banner').classList.add('hidden');
+            }
+            
+            updateUI();
+            
+            // Si el rol es admin, carga la lista de mensajeros
+            if(currentRole === 'admin') {
+              loadMensajerosForAdmin();
+            }
+          } else {
+            showRoleChoiceModal();
+          }
+        });
+
+      } else {
+        currentUser = null;
+        currentRole = null;
+        if (_userProfileUnsub) {
+          _userProfileUnsub();
+          _userProfileUnsub = null;
+        }
+        showLogin();
+      }
+    });
+
+    function showLogin() {
+      loginView.classList.remove('hidden');
+      appView.classList.add('hidden');
+    }
+
+    function updateUI() {
+      loginView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      userNameEl.textContent = currentUser.displayName;
+      userNameEl.classList.remove('hidden');
+      
+      roleBadge.textContent = currentRole;
+      roleBadge.classList.remove('hidden');
+
+      // Show/hide menu items based on role
+      menuRegistrar.classList.toggle('hidden', currentRole === 'mensajero');
+      menuHistorial.classList.toggle('hidden', currentRole === 'mensajero');
+      menuCostos.classList.toggle('hidden', currentRole !== 'admin');
+      menuCobros.classList.toggle('hidden', currentRole !== 'admin');
+      menuPendientes.classList.toggle('hidden', currentRole !== 'admin');
+      menuFinanzasMensajero.classList.toggle('hidden', currentRole !== 'mensajero');
+      
+      // Update the main view
+      if (currentRole === 'mensajero') {
+        showSection('services');
+        document.getElementById('filters').classList.remove('hidden');
+        document.getElementById('service-form').reset();
+        document.getElementById('field-mensajero').classList.add('hidden');
+        document.getElementById('field-pago').classList.add('hidden');
+        document.getElementById('field-costo-cliente').classList.add('hidden');
+        document.getElementById('cobrar-check').parentNode.classList.add('hidden');
+        document.getElementById('cobrar-field').classList.add('hidden');
+        
+        // Load messenger's services
+        loadServicesForMessenger();
+      } else if (currentRole === 'cliente') {
+        showSection('services');
+        document.getElementById('filters').classList.remove('hidden');
+        document.getElementById('service-form').reset();
+        document.getElementById('field-mensajero').classList.add('hidden');
+        document.getElementById('field-pago').classList.add('hidden');
+        document.getElementById('field-costo-cliente').classList.remove('hidden');
+        document.getElementById('cobrar-check').parentNode.classList.remove('hidden');
+        
+        // Load client's services
+        loadServicesForClient();
+      } else if (currentRole === 'admin') {
+        showSection('services');
+        document.getElementById('filters').classList.remove('hidden');
+        document.getElementById('field-mensajero').classList.remove('hidden');
+        document.getElementById('field-pago').classList.remove('hidden');
+        document.getElementById('field-costo-cliente').classList.remove('hidden');
+        document.getElementById('cobrar-check').parentNode.classList.remove('hidden');
+        
+        // Load all services
+        loadAllServices();
+      }
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll('#app .flex-1.overflow-auto > div').forEach(section => {
+        section.classList.add('hidden');
+      });
+      document.getElementById(sectionId + '-section').classList.remove('hidden');
+    }
+
+    // Services
+    function loadServicesForMessenger() {
+        db.collection('services')
+            .where('uidMensajero', '==', currentUser.uid)
+            .orderBy('fechaCreacion', 'desc')
+            .onSnapshot(snapshot => {
+                services = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                renderServices();
+            });
+    }
+
+    function loadServicesForClient() {
+      db.collection('services')
+          .where('uidCliente', '==', currentUser.uid)
+          .orderBy('fechaCreacion', 'desc')
+          .onSnapshot(snapshot => {
+              services = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+              renderServices();
+          });
+    }
+    
+    function loadAllServices() {
+        db.collection('services')
+            .orderBy('fechaCreacion', 'desc')
+            .onSnapshot(snapshot => {
+                services = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                renderServices();
+            });
+    }
+    
+    function renderServices() {
+        const list = document.getElementById('services-section');
+        list.innerHTML = '';
+        services.filter(s => currentFilter === 'all' || s.estado === currentFilter).forEach(service => {
+            const card = document.createElement('div');
+            card.className = `service-card bg-[#0a0a0a] border rounded-2xl p-4 shadow-md border-${service.estado === 'pendiente' ? '[var(--gold)]' : 'gray-700'}`;
+            
+            let cardContent = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="chip state-${service.estado}">${service.estado.replace('_', ' ')}</span>
+                        ${service.cobrarProducto > 0 ? `<span class="chip ml-2">Cobro: $${service.cobrarProducto}</span>` : ''}
+                        <h3 class="text-lg font-bold mt-2">${service.empresaCliente}</h3>
+                        <p class="text-sm text-gray-400">Recoger en: ${service.recoger}</p>
+                        <p class="text-sm text-gray-400">Entregar en: ${service.entregar}</p>
+                        ${service.observaciones ? `<p class="text-xs mt-2 text-gray-500">Obs: ${service.observaciones}</p>` : ''}
+                    </div>
+                    ${(currentRole === 'cliente' || currentRole === 'admin') && service.costo > 0 ? `<div class="text-xl font-bold">$${service.costo}</div>` : ''}
+                </div>
+            `;
+            
+            if (currentRole === 'mensajero' && service.estado === 'pendiente') {
+                cardContent += `<button onclick="takeService('${service.id}')" class="btn-take w-full mt-4">Tomar servicio</button>`;
+            } else if (currentRole === 'mensajero' && service.estado === 'en_ruta') {
+                cardContent += `<button onclick="openEvidenceModal('${service.id}')" class="btn-take w-full mt-4 bg-blue-500 hover:bg-blue-600">Marcar como entregado</button>`;
+            }
+            
+            if (currentRole === 'admin') {
+                cardContent += `<button onclick="editService('${service.id}')" class="btn-take w-full mt-4 bg-gray-500 hover:bg-gray-600">Editar</button>`;
+            }
+
+            card.innerHTML = cardContent;
+            list.appendChild(card);
+        });
+    }
+
+    function takeService(serviceId) {
+        db.collection('services').doc(serviceId).update({
+            uidMensajero: currentUser.uid,
+            mensajeroName: currentUser.displayName,
+            estado: 'en_ruta'
+        }).then(() => {
+            alert('Servicio tomado. ¡Buena suerte!');
+        }).catch(err => {
+            console.error(err);
+            alert('Error al tomar el servicio.');
+        });
+    }
+    
+    function editService(serviceId) {
+      const service = services.find(s => s.id === serviceId);
+      if (!service) return;
+      
+      const form = document.getElementById('service-form');
+      form.querySelector('input[name="empresaCliente"]').value = service.empresaCliente || '';
+      form.querySelector('input[name="contacto"]').value = service.contacto || '';
+      form.querySelector('input[name="telefono"]').value = service.telefono || '';
+      form.querySelector('input[name="recoger"]').value = service.recoger || '';
+      form.querySelector('input[name="entregar"]').value = service.entregar || '';
+      form.querySelector('input[name="volumen"]').value = service.volumen || '';
+      form.querySelector('input[name="costoCliente"]').value = service.costo || '';
+      form.querySelector('input[name="pagoMensajero"]').value = service.pagoMensajero || '';
+      form.querySelector('#field-mensajero').value = service.uidMensajero || '';
+      
+      const cobrarCheck = form.querySelector('#cobrar-check');
+      const cobrarField = form.querySelector('#cobrar-field');
+      if (service.cobrarProducto > 0) {
+          cobrarCheck.checked = true;
+          cobrarField.value = service.cobrarProducto;
+          cobrarField.classList.remove('hidden');
+      } else {
+          cobrarCheck.checked = false;
+          cobrarField.value = '';
+          cobrarField.classList.add('hidden');
+      }
+      
+      form.querySelector('textarea[name="observaciones"]').value = service.observaciones || '';
+      form.dataset.docId = serviceId;
+      openModal();
+    }
+    
+    // Filters
+    function setFilter(filter) {
+      currentFilter = filter;
+      renderServices();
+    }
+
+    // Modals
+    function openModal() {
+      document.getElementById('modal').classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+      document.getElementById('service-form').reset();
+      delete document.getElementById('service-form').dataset.docId;
+    }
+    
+    function showHistory() {
+      showSection('history');
+      db.collection('services')
+          .where('estado', '==', 'entregado')
+          .orderBy('fechaEntrega', 'desc')
+          .onSnapshot(snapshot => {
+              renderHistory(snapshot.docs.map(doc => doc.data()));
+          });
+    }
+    
+    function showFinancialSummary() {
+        showSection('financial');
+        db.collection('services')
+            .where('uidMensajero', '==', currentUser.uid)
+            .where('estado', '==', 'entregado')
+            .orderBy('fechaEntrega', 'desc')
+            .onSnapshot(snapshot => {
+                const services = snapshot.docs.map(doc => doc.data());
+                renderFinancialSummary(services);
+            });
+    }
+
+    function renderHistory(historyData) {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '';
+      
+      const groupedByDay = historyData.reduce((acc, service) => {
+          const date = service.fechaEntrega.toDate().toLocaleDateString('es-CO');
+          if (!acc[date]) acc[date] = [];
+          acc[date].push(service);
+          return acc;
+      }, {});
+      
+      for (const date in groupedByDay) {
+          const daySection = document.createElement('div');
+          daySection.className = 'day-section';
+          daySection.innerHTML = `<h3 class="day-header">${date}</h3>`;
+          
+          groupedByDay[date].forEach(service => {
+              const card = document.createElement('div');
+              card.className = `service-card bg-[#0a0a0a] border border-gray-700 rounded-2xl p-4 shadow-md mb-2 ${service.pagadoMensajero ? 'service-paid' : ''}`;
+              card.innerHTML = `
+                  <div class="flex justify-between items-start">
+                      <div>
+                          <h3 class="text-lg font-bold mt-2">${service.empresaCliente}</h3>
+                          <p class="text-sm text-gray-400">Entrega: ${service.entregar}</p>
+                          <p class="text-sm text-gray-400">Mensajero: ${service.mensajeroName}</p>
+                      </div>
+                      <div class="text-xl font-bold">$${service.costo}</div>
+                  </div>
+              `;
+              daySection.appendChild(card);
+          });
+          historyList.appendChild(daySection);
+      }
+    }
+
+    function renderFinancialSummary(services) {
+      const financialList = document.getElementById('financial-list');
+      financialList.innerHTML = '';
+      
+      let totalEarned = 0;
+      let totalPaid = 0;
+      
+      const groupedByDay = services.reduce((acc, service) => {
+          const date = service.fechaEntrega.toDate().toLocaleDateString('es-CO');
+          if (!acc[date]) acc[date] = [];
+          acc[date].push(service);
+          return acc;
+      }, {});
+      
+      for (const date in groupedByDay) {
+          const daySection = document.createElement('div');
+          daySection.className = 'day-section';
+          daySection.innerHTML = `<h3 class="day-header">${date}</h3>`;
+          
+          groupedByDay[date].forEach(service => {
+              totalEarned += service.pagoMensajero;
+              if(service.pagadoMensajero) {
+                  totalPaid += service.pagoMensajero;
+              }
+              const card = document.createElement('div');
+              card.className = `service-card bg-[#0a0a0a] border border-gray-700 rounded-2xl p-4 shadow-md mb-2 ${service.pagadoMensajero ? 'service-paid' : ''}`;
+              card.innerHTML = `
+                  <div class="flex justify-between items-center">
+                      <div>
+                          <p class="text-sm font-bold">${service.empresaCliente}</p>
+                          <p class="text-xs text-gray-400">Entrega: ${service.entregar}</p>
+                          <p class="text-xs text-gray-400">Cobro a cliente: $${service.cobrarProducto}</p>
+                          ${service.pagadoMensajero ? '<p class="text-xs text-green-500 mt-1">✓ Pagado</p>' : ''}
+                      </div>
+                      <div class="text-lg font-bold text-green-500">$${service.pagoMensajero}</div>
+                  </div>
+              `;
+              daySection.appendChild(card);
+          });
+          financialList.appendChild(daySection);
+      }
+      
+      document.getElementById('total-earned').textContent = `$${totalEarned}`;
+      document.getElementById('total-paid').textContent = `$${totalPaid}`;
+      document.getElementById('total-pending').textContent = `$${totalEarned - totalPaid}`;
+    }
+    
+    // Evidence modal
+    function openEvidenceModal(serviceId) {
+      currentServiceIdForEvidence = serviceId;
+      document.getElementById('evidence-modal').classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      document.getElementById('confirm-delivery').disabled = true;
+      document.getElementById('captured-image-container').classList.add('hidden');
+      
+      const paymentOptions = document.querySelectorAll('input[name="paymentMethod"]');
+      paymentOptions.forEach(radio => radio.checked = false);
+      selectedPaymentMethod = null;
+      
+      startCamera();
+    }
+    
+    function closeEvidenceModal() {
+      stopCamera();
+      document.getElementById('evidence-modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    }
+    
+    function startCamera() {
+      const video = document.getElementById('videoElement');
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(stream => {
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch(err => {
+            console.error("Error al acceder a la cámara:", err);
+            alert("No se pudo acceder a la cámara. Por favor, asegúrate de dar permisos.");
+          });
+      }
+    }
+    
+    function stopCamera() {
+      const video = document.getElementById('videoElement');
+      if (video.srcObject) {
+        const stream = video.srcObject;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        video.srcObject = null;
+      }
+    }
+    
+    document.getElementById('capture-btn').addEventListener('click', () => {
+      const video = document.getElementById('videoElement');
+      const canvas = document.getElementById('canvasElement');
+      const capturedImage = document.getElementById('capturedImage');
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      const imageDataURL = canvas.toDataURL('image/jpeg');
+      capturedImage.src = imageDataURL;
+      
+      document.getElementById('captured-image-container').classList.remove('hidden');
+      document.getElementById('confirm-delivery').disabled = !selectedPaymentMethod;
+    });
+    
+    document.getElementById('retake-btn').addEventListener('click', () => {
+      document.getElementById('captured-image-container').classList.add('hidden');
+      document.getElementById('confirm-delivery').disabled = true;
+    });
+
+    function selectPaymentMethod(method) {
+      const options = document.querySelectorAll('.payment-option');
+      options.forEach(opt => opt.classList.remove('selected'));
+      document.querySelector(`input[value="${method}"]`).parentElement.classList.add('selected');
+      selectedPaymentMethod = method;
+      
+      const capturedImage = document.getElementById('capturedImage');
+      document.getElementById('confirm-delivery').disabled = !capturedImage.src;
+    }
+    
+    document.getElementById('confirm-delivery').addEventListener('click', async () => {
+      if (!currentServiceIdForEvidence || !selectedPaymentMethod) return;
+      
+      const imageBlob = await fetch(document.getElementById('capturedImage').src).then(res => res.blob());
+      
+      // Aquí iría la lógica para subir la imagen a un servicio de almacenamiento como Firebase Storage.
+      // Por simplicidad, este ejemplo solo actualiza el estado.
+      
+      try {
+        await db.collection('services').doc(currentServiceIdForEvidence).update({
+          estado: 'entregado',
+          metodoPago: selectedPaymentMethod,
+          fechaEntrega: firebase.firestore.FieldValue.serverTimestamp(),
+          pagadoMensajero: false, // Default to false, admin will mark as paid
+        });
+        alert('Servicio marcado como entregado con éxito.');
+        closeEvidenceModal();
+      } catch (err) {
+        console.error("Error al marcar como entregado:", err);
+        alert('Error al marcar como entregado. Inténtalo de nuevo.');
+      }
+    });
+
+    // Handle role choice on first login
+    function showRoleChoiceModal() {
+      roleChoiceModal.classList.remove('hidden');
+    }
+    
+    document.getElementById('choose-cliente').addEventListener('click', async () => {
+      await saveRole('cliente');
+      roleChoiceModal.classList.add('hidden');
+    });
+
+    document.getElementById('choose-mensajero').addEventListener('click', async () => {
+      await saveRole('mensajero_pending');
+      roleChoiceModal.classList.add('hidden');
+    });
+    
+    async function saveRole(role) {
+      const userRef = db.collection('users').doc(currentUser.uid);
+      try {
+        await userRef.set({
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName,
+          role: role,
+        });
+        console.log("Rol guardado:", role);
+      } catch (e) {
+        console.error("Error al guardar el rol:", e);
+      }
+    }
+    
+    // Edit profile
+    function openEditProfile() {
+      document.getElementById('edit-profile-modal').classList.remove('hidden');
+      document.getElementById('profile-displayName').value = currentUser.displayName;
+    }
+    
+    function closeEditProfile() {
+      document.getElementById('edit-profile-modal').classList.add('hidden');
+    }
+    
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newName = document.getElementById('profile-displayName').value;
+      if (newName) {
+        try {
+          await currentUser.updateProfile({
+            displayName: newName
+          });
+          await db.collection('users').doc(currentUser.uid).update({
+            displayName: newName
+          });
+          alert('Nombre de usuario actualizado.');
+          closeEditProfile();
+        } catch(err) {
+          console.error("Error al actualizar el perfil:", err);
+          alert('Error al actualizar el perfil.');
+        }
+      }
+    });
+    
+    // Admin functions
+    async function loadMensajerosForAdmin() {
+        mensajerosList = [];
+        const snapshot = await db.collection('users').where('role', '==', 'mensajero').get();
+        snapshot.forEach(doc => {
+            mensajerosList.push({uid: doc.id, displayName: doc.data().displayName});
+        });
+        
+        mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
+        mensajerosList.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.uid;
+            option.textContent = m.displayName;
+            mensajeroSelect.appendChild(option);
+        });
+    }
+
+    function listPendingMensajeros() {
+      showSection('pending');
+      const pendingContainer = document.getElementById('pending-container');
+      pendingContainer.innerHTML = '';
+      
+      db.collection('users').where('role', '==', 'mensajero_pending').onSnapshot(snapshot => {
+        if (snapshot.empty) {
+          pendingContainer.innerHTML = '<p class="text-center text-gray-400">No hay solicitudes pendientes.</p>';
+          return;
+        }
+        
+        snapshot.forEach(doc => {
+          const user = doc.data();
+          const card = document.createElement('div');
+          card.className = "bg-[#0a0a0a] border border-[var(--gold)] rounded-2xl p-4 mb-3";
+          card.innerHTML = `
+            <h3 class="text-lg font-bold">${user.displayName}</h3>
+            <p class="text-sm text-gray-400">${user.email}</p>
+            <button onclick="approveMensajero('${doc.id}')" class="bg-green-600 text-white px-3 py-1 mt-2 rounded-lg">Aprobar</button>
+            <button onclick="rejectMensajero('${doc.id}')" class="bg-red-600 text-white px-3 py-1 mt-2 rounded-lg ml-2">Rechazar</button>
+          `;
+          pendingContainer.appendChild(card);
+        });
+      });
+    }
+    
+    async function approveMensajero(uid) {
+      try {
+        await db.collection('users').doc(uid).update({role: 'mensajero'});
+        alert('Mensajero aprobado.');
+      } catch (e) {
+        console.error('Error aprobando mensajero:', e);
+      }
+    }
+    
+    async function rejectMensajero(uid) {
+      try {
+        await db.collection('users').doc(uid).delete();
+        alert('Solicitud rechazada y usuario eliminado.');
+      } catch (e) {
+        console.error('Error rechazando solicitud:', e);
+      }
+    }
+    
+    document.getElementById('cobrar-check').addEventListener('change', (e) => {
+        const cobrarField = document.getElementById('cobrar-field');
+        cobrarField.classList.toggle('hidden', !e.target.checked);
+        if (!e.target.checked) {
+            cobrarField.value = '';
+        }
+    });
+
+    document.getElementById('btn-google').addEventListener('click', async () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const authStatus = document.getElementById('auth-status');
+      const btnText = document.getElementById('btn-text');
+      const btnLoader = document.getElementById('btn-loader');
+      
+      try {
+        btnText.classList.add('hidden');
+        btnLoader.classList.remove('hidden');
+        authStatus.textContent = 'Iniciando sesión...';
+        authStatus.className = 'text-center text-sm my-2 p-2 rounded bg-yellow-900 text-black';
+        await auth.signInWithPopup(provider);
+        authStatus.textContent = 'Autenticación exitosa. Redirigiendo...';
+        authStatus.className = 'text-center text-sm my-2 p-2 rounded bg-green-900 text-black';
+      } catch (error) {
+        console.error("Error de autenticación:", error);
+        authStatus.textContent = `Error: ${error.message}`;
+        authStatus.className = 'text-center text-sm my-2 p-2 rounded bg-red-900 text-black';
+      } finally {
+        btnText.classList.remove('hidden');
+        btnLoader.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        alert('Sesión cerrada.');
+      } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+      }
+    });
+    
+    document.getElementById('service-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const form = e.target;
+      const data = Object.fromEntries(new FormData(form).entries());
+      const docId = form.dataset.docId;
+
+      const payload = {
+        empresaCliente: data.empresaCliente || '',
+        contacto: data.contacto || '',
+        telefono: data.telefono || '',
+        recoger: data.recoger || '',
+        entregar: data.entregar || '',
+        volumen: data.volumen || '',
+        cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+        uidCliente: currentUser.uid,
+        fechaCreacion: docId ? undefined : firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      // Agregar campos según el rol
+      if (currentRole === 'admin') {
+        payload.uidMensajero = data.uidMensajero || "";
+        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+        payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
+      } else {
+        // Cliente
+        payload.costo = parseFloat(data.costoCliente || 0) || 0;
+        payload.pagoMensajero = 0;
+      }
+
+      if (!docId) {
+        payload.estado = "pendiente";
+      }
+
+      try {
+        if (docId) {
+          await db.collection('services').doc(docId).update(payload);
+        } else {
+          await db.collection('services').add(payload);
+        }
+        closeModal();
+        form.reset();
+      } catch (e) {
+        console.error('Error guardando servicio:', e);
+        alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
+      }
+    });
+
+    // ===== initial UI state =====
+    document.getElementById('filters').classList.remove('hidden');
+
+    // Expose functions to global scope
+    window.toggleSidebar = toggleSidebar;
+    window.closeSidebarOnClick = closeSidebarOnClick;
+    window.setFilter = setFilter;
+    window.takeService = takeService;
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.openEvidenceModal = openEvidenceModal;
+    window.closeEvidenceModal = closeEvidenceModal;
+    window.selectPaymentMethod = selectPaymentMethod;
+    window.openEditProfile = openEditProfile;
+    window.closeEditProfile = closeEditProfile;
+    window.showSection = showSection;
+    window.showHistory = showHistory;
+    window.showFinancialSummary = showFinancialSummary;
+    window.listPendingMensajeros = listPendingMensajeros;
+    window.approveMensajero = approveMensajero;
+    window.rejectMensajero = rejectMensajero;
+    window.editService = editService;
+
   </script>
 </body>
 </html>
