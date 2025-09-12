@@ -2,16 +2,27 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Ray Mess Co — Dashboard</title>
   <meta name="theme-color" content="#CF9524">
-  <link rel="manifest" href="manifest.json">
-
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Sistema de gestión de servicios de mensajería">
+  
+  <!-- Meta tags para iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
+  <link rel="apple-touch-icon" href="https://raymessco.github.io/app_raymessco/icon-192.png">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="https://raymessco.github.io/app_raymessco/manifest.json">
+  
+  <!-- Tailwind -->
+  <link rel="stylesheet" href="https://raymessco.github.io/app_raymessco/tailwind.css">
   <style>
     :root { --gold:#CF9524; }
-    * { box-sizing: border-box; }
-    body { background:#000; color:#CF9524; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background:#000; color:#CF9524; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; touch-action: manipulation; }
     .hidden { display:none; }
     .chip { border:1px solid var(--gold); padding:.15rem .5rem; border-radius:.5rem; font-size:.75rem; }
     .state-pendiente{ color:#b91c1c }
@@ -27,6 +38,111 @@
     .rounded-2xl { border-radius: 1rem; }
     input::placeholder, textarea::placeholder { color:#000 !important; opacity:1; }
     body.modal-open { height:100vh; overflow:hidden; }
+    
+    /* Mejoras para móviles */
+    @media (max-width: 768px) {
+      .mobile-text-lg { font-size: 1.125rem; }
+      .mobile-p-3 { padding: 0.75rem; }
+      .mobile-mt-2 { margin-top: 0.5rem; }
+      .mobile-mb-2 { margin-bottom: 0.5rem; }
+      .mobile-btn { min-height: 44px; display: flex; align-items: center; justify-content: center; }
+      input, textarea, select { font-size: 16px !important; }
+    }
+    
+    /* Mejoras de UI para móviles */
+    .sidebar-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 30;
+      display: none;
+    }
+    
+    /* Nuevos estilos para las mejoras */
+    .camera-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    #videoElement {
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid var(--gold);
+    }
+    
+    .capture-btn {
+      background-color: var(--gold);
+      color: black;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    
+    .payment-method {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .payment-option.selected {
+      background-color: rgba(207, 149, 36, 0.2);
+    }
+    
+    .history-section {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+    }
+    
+    .financial-summary {
+      background-color: rgba(207, 149, 36, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .clickable {
+      color: #3b82f6;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    
+    .day-section {
+      margin-bottom: 25px;
+      border-bottom: 1px solid var(--gold);
+      padding-bottom: 15px;
+    }
+    
+    .day-header {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: var(--gold);
+    }
+    
+    .service-paid {
+      opacity: 0.7;
+      background-color: rgba(21, 128, 61, 0.1) !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -35,10 +151,18 @@
   <div id="login-view" class="flex-1 flex items-center justify-center p-6">
     <div class="w-full max-w-md bg-[#0a0a0a] border border-[var(--gold)] rounded-2xl p-6 shadow-xl">
       <div class="flex flex-col items-center gap-3">
-        <img src="icon-192.png" class="w-20 h-20" alt="logo">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" class="w-20 h-20" alt="logo">
         <h1 class="text-2xl font-bold text-[var(--gold)]">Ray Mess Co</h1>
         <p class="text-center text-sm text-[#d1b070]">Accede con tu cuenta de Google</p>
-        <button id="btn-google" class="w-full mt-4 bg-[var(--gold)] text-black font-bold py-2 rounded-xl hover:opacity-90 transition">Continuar con Google</button>
+        
+        <!-- Mensaje de estado para autenticación -->
+        <div id="auth-status" class="hidden text-center text-sm my-2 p-2 rounded"></div>
+        
+        <button id="btn-google" class="w-full mt-4 bg-[var(--gold)] text-black font-bold py-3 rounded-xl hover:opacity-90 transition mobile-btn flex items-center justify-center">
+          <span id="btn-text">Continuar con Google</span>
+          <div id="btn-loader" class="loader hidden"></div>
+        </button>
+        
         <p class="text-xs text-gray-400 mt-2">Dominios autorizados: usa <span class="chip">http://localhost</span> o tu dominio</p>
       </div>
     </div>
@@ -46,28 +170,236 @@
 
   <!-- DASHBOARD -->
   <div id="app" class="hidden flex-1 flex flex-col w-full h-screen">
+
     <!-- HEADER -->
     <div class="sticky top-0 bg-black/90 backdrop-blur border-b border-[var(--gold)] p-3 z-20 flex justify-between items-center">
       <div class="flex items-center gap-3">
-        <button onclick="toggleSidebar()" class="text-[var(--gold)] text-2xl font-bold">☰</button>
-        <h1 class="text-xl md:text-2xl font-bold flex items-center gap-3 text-[var(--gold)]">
-          <img src="icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
+        <button onclick="toggleSidebar()" class="text-[var(--gold)] text-2xl font-bold mobile-btn">☰</button>
+        <h1 class="text-xl md:text-2xl font-bold flex items-center gap-3 text-[var(--gold)] mobile-text-lg">
+          <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
           <span id="role-badge" class="chip"></span>
         </h1>
       </div>
       <div class="flex items-center gap-2">
-        <span id="user-email" class="text-xs md:text-sm text-[#d1b070]"></span>
-        <button id="btn-logout" class="bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold">Salir</button>
+        <span id="user-name" class="text-xs md:text-sm text-[#d1b070] hidden md:block"></span>
+        <button id="btn-logout" class="bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold mobile-btn">Salir</button>
       </div>
     </div>
 
-    <!-- CONTENIDO -->
+    <!-- Backdrop para sidebar en móviles -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-[#0b0b0b] border-r border-[var(--gold)] text-[var(--gold)] transform -translate-x-full transition-transform duration-300 z-40">
+      <div class="p-4 border-b border-[var(--gold)] font-bold text-xl flex justify-between items-center">
+        <span>Menú</span>
+        <button onclick="toggleSidebar()" class="text-[var(--gold)] text-2xl">✕</button>
+      </div>
+      <div class="sidebar-swipe-close" onclick="toggleSidebar()"></div>
+      <ul class="flex flex-col p-4 gap-3">
+        <li><button onclick="showSection('services')" class="w-full text-left py-3 mobile-btn">📋 Servicios</button></li>
+        <li id="menu-registrar"><button onclick="openModal()" class="w-full text-left py-3 mobile-btn">➕ Registrar servicio</button></li>
+        <li id="menu-historial"><button onclick="showHistory()" class="w-full text-left py-3 mobile-btn">📋 Historial de servicios</button></li>
+        <li id="menu-finanzas-mensajero" class="hidden"><button onclick="showFinancialSummary()" class="w-full text-left py-3 mobile-btn">💰 Mis finanzas</button></li>
+        <li id="menu-costos" class="hidden"><button onclick="showSection('costos')" class="w-full text-left py-3 mobile-btn">💰 Costos por empresa</button></li>
+        <li id="menu-cobros" class="hidden"><button onclick="showSection('cobros')" class="w-full text-left py-3 mobile-btn">💵 Cobros contra entrega</button></li>
+        <li id="menu-pendientes" class="hidden"><button onclick="listPendingMensajeros()" class="w-full text-left py-3 mobile-btn">📝 Solicitudes mensajero</button></li>
+        <li><button onclick="openEditProfile()" class="w-full text-left py-3 mobile-btn">👤 Editar perfil</button></li>
+      </ul>
+    </div>
+
+    <!-- CONTENT -->
     <div class="flex-1 overflow-auto p-4 space-y-4">
+
+      <!-- pending banner -->
+      <div id="pending-banner" class="hidden bg-yellow-900 text-black p-3 rounded-md text-center font-semibold">
+        Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
+      </div>
+
+      <!-- FILTERS -->
+      <div id="filters" class="flex flex-wrap gap-2">
+        <button onclick="setFilter('all')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Todos</button>
+        <button onclick="setFilter('pendiente')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Pendientes</button>
+        <button onclick="setFilter('en_ruta')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">En ruta</button>
+        <button onclick="setFilter('entregado')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Entregados</button>
+        <button onclick="setFilter('cancelado')" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Cancelados</button>
+      </div>
+
+      <!-- SERVICES LIST -->
       <div id="services-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+
+      <!-- History section -->
+      <div id="history-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-4">Historial de servicios entregados</h2>
+        <div id="history-list"></div>
+      </div>
+
+      <!-- Financial summary for messengers -->
+      <div id="financial-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-4">Resumen financiero</h2>
+        <div class="financial-summary">
+          <p class="text-lg">Total ganado: <span id="total-earned" class="font-bold">$0</span></p>
+          <p class="text-lg">Total pendiente de pago: <span id="total-pending" class="font-bold">$0</span></p>
+          <p class="text-lg">Total pagado: <span id="total-paid" class="font-bold">$0</span></p>
+        </div>
+        <h3 class="text-lg font-bold text-[var(--gold)] mt-6 mb-4">Detalle de servicios por día</h3>
+        <div id="financial-list"></div>
+      </div>
+
+      <!-- Pending container for admin -->
+      <div id="pending-container" class="hidden p-4"></div>
+
+      <!-- COSTOS (ADMIN) -->
+      <div id="costos-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-2">Costos por empresa</h2>
+        <div id="costos-body" class="space-y-4"></div>
+      </div>
+
+      <!-- COBROS (ADMIN) -->
+      <div id="cobros-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-2">Cobros contra entrega</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-[var(--gold)] border border-[var(--gold)] min-w-max">
+            <thead class="bg-[#151515]">
+              <tr>
+                <th class="border border-[var(--gold)] p-2">Dirección de entrega</th>
+                <th class="border border-[var(--gold)] p-2">Valor</th>
+              </tr>
+            </thead>
+            <tbody id="cobros-body"></tbody>
+            <tfoot>
+              <tr>
+                <td class="border border-[var(--gold)] p-2 font-bold">TOTAL</td>
+                <td id="cobros-total" class="border border-[var(--gold)] p-2 font-bold"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Firebase -->
+  <!-- MODAL: registrar servicio -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-center">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" class="w-16 h-16 mb-2">
+      </div>
+      <h2 class="text-xl font-bold mb-4 text-center">Registrar servicio</h2>
+
+      <form id="service-form" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input name="empresaCliente" placeholder="Empresa o cliente" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded md:col-span-2 mobile-btn" required>
+        <input name="contacto" placeholder="Nombre de contacto receptor" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="telefono" placeholder="Teléfono" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" inputmode="tel">
+        <input name="recoger" placeholder="Dirección de recogida" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="entregar" placeholder="Dirección de entrega" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="volumen" placeholder="Volumen (cantidad/medidas)" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn">
+
+        <!-- Costo para cliente -->
+        <input type="number" name="costoCliente" id="field-costo-cliente" placeholder="Costo de mensajería" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" min="0">
+
+        <!-- Solo ADMIN: asignar mensajero y costos -->
+        <div class="md:col-span-2">
+          <label for="field-mensajero" class="text-sm text-[#d1b070]">Asignar mensajero (solo admin):</label>
+          <select name="uidMensajero" id="field-mensajero" class="p-3 bg-[var(--gold)] text-black rounded mobile-btn w-full hidden">
+            <option value="">Seleccionar mensajero</option>
+          </select>
+        </div>
+        
+        <input type="number" name="pagoMensajero" id="field-pago" placeholder="Pago al mensajero" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn hidden" min="0">
+
+        <!-- Cobro contra entrega -->
+        <div class="col-span-1 md:col-span-2 flex items-center gap-2 mobile-p-3">
+          <input type="checkbox" id="cobrar-check" name="cobrarCheck" class="w-5 h-5 accent-[var(--gold)]">
+          <label for="cobrar-check">¿Cobrar producto a la entrega?</label>
+        </div>
+        <input type="number" name="cobrarProducto" id="cobrar-field" placeholder="Valor a cobrar (producto)" class="hidden p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" min="0">
+
+        <!-- Observaciones -->
+        <textarea name="observaciones" placeholder="Observaciones" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded overflow-y-scroll resize-y md:col-span-2 mobile-btn" style="height:120px; min-height:60px;"></textarea>
+
+        <div class="md:col-span-2 flex gap-2 mt-2">
+          <button type="submit" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn">Registrar</button>
+          <button type="button" onclick="closeModal()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: tomar evidencia y marcar como entregado -->
+  <div id="evidence-modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4 text-center">Evidencia de entrega</h2>
+      
+      <div class="camera-container">
+        <video id="videoElement" autoplay></video>
+        <button id="capture-btn" class="capture-btn w-full">Tomar foto</button>
+        <canvas id="canvasElement" class="hidden"></canvas>
+      </div>
+      
+      <div id="captured-image-container" class="hidden mt-4">
+        <img id="capturedImage" class="w-full rounded-lg border border-[var(--gold)]">
+        <button id="retake-btn" class="capture-btn w-full mt-2">Volver a tomar</button>
+      </div>
+      
+      <div class="payment-method mt-4">
+        <h3 class="font-bold">Método de pago:</h3>
+        <div class="payment-option" onclick="selectPaymentMethod('efectivo')">
+          <input type="radio" id="efectivo" name="paymentMethod" value="efectivo">
+          <label for="efectivo">Efectivo</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('davivienda')">
+          <input type="radio" id="davivienda" name="paymentMethod" value="davivienda">
+          <label for="davivienda">Transferencia Davivienda</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('bancolombia')">
+          <input type="radio" id="bancolombia" name="paymentMethod" value="bancolombia">
+          <label for="bancolombia">Transferencia Bancolombia</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('nequi')">
+          <input type="radio" id="nequi" name="paymentMethod" value="nequi">
+          <label for="nequi">Nequi</label>
+        </div>
+      </div>
+      
+      <div class="flex gap-2 mt-4">
+        <button id="confirm-delivery" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn" disabled>Confirmar entrega</button>
+        <button onclick="closeEvidenceModal()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Editar perfil -->
+  <div id="edit-profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4 text-center">Editar perfil</h2>
+      
+      <form id="profile-form" class="grid grid-cols-1 gap-3">
+        <input type="text" id="profile-displayName" placeholder="Nombre para mostrar" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        
+        <div class="flex gap-2 mt-2">
+          <button type="submit" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn">Guardar</button>
+          <button type="button" onclick="closeEditProfile()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ROLE CHOICE MODAL (first time) -->
+  <div id="roleChoiceModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-60 p-4">
+    <div class="bg-[#111] border border-[var(--gold)] p-6 rounded-xl w-full max-w-sm text-[var(--gold)]">
+      <h3 class="text-xl font-bold mb-4 text-center">Bienvenido 👋</h3>
+      <p class="text-sm text-gray-300 mb-4 text-center">Selecciona tu rol en la aplicación:</p>
+      <div class="flex gap-3">
+        <button id="choose-cliente" class="flex-1 bg-[var(--gold)] text-black py-3 rounded font-bold mobile-btn">Soy cliente</button>
+        <button id="choose-mensajero" class="flex-1 bg-black border border-[var(--gold)] text-[var(--gold)] py-3 rounded font-bold mobile-btn">Soy mensajero</button>
+      </div>
+      <p class="text-xs text-gray-500 mt-3">Un administrador revisará las solicitudes de mensajero.</p>
+    </div>
+  </div>
+
+  <!-- Firebase (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -85,64 +417,1210 @@
     };
     /****************************************/
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = app.auth();
-    const db   = app.firestore();
+    // Inicializar Firebase
+    let app, auth, db;
+    
+    try {
+      app = firebase.initializeApp(firebaseConfig);
+      auth = app.auth();
+      db = app.firestore();
+      console.log("Firebase inicializado correctamente");
+    } catch (error) {
+      console.error("Error inicializando Firebase:", error);
+    }
+
+    // estado global
+    let currentUser = null;
+    let currentRole = null;
+    let services = [];
+    let currentFilter = 'all';
+    let _userProfileUnsub = null;
+    let currentServiceIdForEvidence = null;
+    let selectedPaymentMethod = null;
+    let mensajerosList = [];
 
     // UI refs
     const loginView   = document.getElementById('login-view');
     const appView     = document.getElementById('app');
-    const userEmailEl = document.getElementById('user-email');
-    const uidEl       = document.getElementById('uid');
+    const roleBadge   = document.getElementById('role-badge');
+    const userNameEl  = document.getElementById('user-name');
+    const menuRegistrar = document.getElementById('menu-registrar');
+    const menuCostos    = document.getElementById('menu-costos');
+    const menuCobros    = document.getElementById('menu-cobros');
+    const menuPendientes= document.getElementById('menu-pendientes');
+    const menuHistorial = document.getElementById('menu-historial');
+    const menuFinanzasMensajero = document.getElementById('menu-finanzas-mensajero');
+    const roleChoiceModal = document.getElementById('roleChoiceModal');
+    const installButton = document.getElementById('install-button');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    const mensajeroSelect = document.getElementById('field-mensajero');
 
-    // ===== BOTÓN LOGIN =====
+    // ===== PWA Installation =====
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installButton) installButton.classList.remove('hidden');
+    });
+
+    if (installButton) {
+      installButton.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          installButton.classList.add('hidden');
+        }
+        
+        deferredPrompt = null;
+      });
+    }
+
+    // ===== Mejoras para móviles =====
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('-translate-x-full');
+      sidebarBackdrop.style.display = sidebar.classList.contains('-translate-x-full') ? 'none' : 'block';
+      
+      if (!sidebar.classList.contains('-translate-x-full')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
+    }
+    
+    function closeSidebarOnClick() {
+      if (window.innerWidth < 768) {
+        toggleSidebar();
+      }
+    }
+
+    // ===== helpers UI =====
+    function showRoleChoiceModal() {
+      roleChoiceModal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+    
+    function hideRoleChoiceModal() {
+      roleChoiceModal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    }
+
+    // ===== Mostrar mensaje de estado =====
+    function showAuthStatus(message, isError = false) {
+      const statusEl = document.getElementById('auth-status');
+      statusEl.textContent = message;
+      statusEl.classList.remove('hidden', 'bg-green-800', 'bg-red-800');
+      statusEl.classList.add(isError ? 'bg-red-800' : 'bg-green-800');
+      
+      setTimeout(() => {
+        statusEl.classList.add('hidden');
+      }, 5000);
+    }
+
+    // ===== Botón de Google =====
     document.getElementById('btn-google').addEventListener('click', async () => {
+      const btnText = document.getElementById('btn-text');
+      const btnLoader = document.getElementById('btn-loader');
+      
       try {
+        btnText.textContent = 'Conectando...';
+        btnLoader.classList.remove('hidden');
+        
+        showAuthStatus("Conectando con Google...", false);
+        
         const provider = new firebase.auth.GoogleAuthProvider();
-        // ✅ Usar redirect en móviles y PWA
-        await auth.signInWithRedirect(provider);
-      } catch (e) {
-        console.error('Error de login:', e);
+        provider.addScope('email');
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
+        const result = await auth.signInWithPopup(provider);
+        showAuthStatus("¡Autenticación exitosa!", false);
+        
+      } catch (error) {
+        console.error("Error en autenticación:", error);
+        
+        let errorMessage = "Error de autenticación";
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage = "El popup fue bloqueado. Permite popups para este sitio.";
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = "El popup de autenticación fue cerrado. Intenta nuevamente.";
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = "Error de red. Verifica tu conexión a Internet.";
+        } else if (error.code) {
+          errorMessage = `Error: ${error.code}`;
+        }
+        
+        showAuthStatus(errorMessage, true);
+      } finally {
+        btnText.textContent = 'Continuar con Google';
+        btnLoader.classList.add('hidden');
       }
     });
 
     document.getElementById('btn-logout').addEventListener('click', () => {
+      if (_userProfileUnsub) { _userProfileUnsub(); _userProfileUnsub = null; }
+      if (window._unsub) { window._unsub(); window._unsub = null; }
+      if (window._unsub2) { window._unsub2(); window._unsub2 = null; }
       auth.signOut();
     });
 
-    // ===== Manejo de redirect =====
-    auth.getRedirectResult()
-      .then((result) => {
-        if (result.user) {
-          console.log("Usuario logueado con redirect:", result.user.email);
+    // ===== ensure user profile and role selection =====
+    async function ensureUserProfile(user) {
+      try {
+        const tokenResult = await user.getIdTokenResult(true);
+        if (tokenResult.claims && tokenResult.claims.role === 'admin') {
+          const refAdmin = db.collection('users').doc(user.uid);
+          const snap = await refAdmin.get();
+          if (!snap.exists) {
+            await refAdmin.set({
+              role: 'admin',
+              email: user.email || '',
+              displayName: user.displayName || '',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
+          return 'admin';
         }
-      })
-      .catch((error) => {
-        console.error("Error en redirect:", error);
-      });
-
-    // ===== Estado de sesión =====
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        appView.classList.add('hidden');
-        loginView.classList.remove('hidden');
-        return;
+      } catch (e) {
+        console.warn('No se pudo leer custom claims:', e);
       }
-      loginView.classList.add('hidden');
-      appView.classList.remove('hidden');
-      userEmailEl.textContent = user.email || '';
-    });
 
-    // ===== Registrar el Service Worker =====
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(registration => {
-          console.log('SW registrado exitosamente:', registration);
-        }).catch(registrationError => {
-          console.log('El registro del SW falló:', registrationError);
-        });
+      const userRef = db.collection('users').doc(user.uid);
+      const doc = await userRef.get();
+      if (doc.exists) {
+        return doc.data().role || 'cliente';
+      }
+
+      return await promptAndSaveRole(userRef, user);
+    }
+
+    function promptAndSaveRole(userRef, user) {
+      return new Promise((resolve, reject) => {
+        showRoleChoiceModal();
+        const btnCliente = document.getElementById('choose-cliente');
+        const btnMensajero = document.getElementById('choose-mensajero');
+
+        const cleanup = () => {
+          btnCliente.removeEventListener('click', onCliente);
+          btnMensajero.removeEventListener('click', onMensajero);
+        };
+
+        const onCliente = async () => {
+          try {
+            await userRef.set({
+              role: 'cliente',
+              email: user.email || '',
+              displayName: user.displayName || '',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            hideRoleChoiceModal();
+            cleanup();
+            resolve('cliente');
+          } catch (e) { cleanup(); reject(e); }
+        };
+
+        const onMensajero = async () => {
+          try {
+            await userRef.set({
+              role: 'pending_mensajero',
+              email: user.email || '',
+              displayName: user.displayName || '',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            hideRoleChoiceModal();
+            cleanup();
+            resolve('pending_mensajero');
+          } catch (e) { cleanup(); reject(e); }
+        };
+
+        btnCliente.addEventListener('click', onCliente);
+        btnMensajero.addEventListener('click', onMensajero);
       });
     }
+
+    // ===== subscribe to user profile so role changes propagate live =====
+    function subscribeToUserProfile(uid) {
+      if (_userProfileUnsub) { _userProfileUnsub(); _userProfileUnsub = null; }
+      const ref = db.collection('users').doc(uid);
+      _userProfileUnsub = ref.onSnapshot(doc => {
+        if (!doc.exists) return;
+        const newRole = doc.data().role;
+        if (newRole && newRole !== currentRole) {
+          console.log('Role actualizado en backend:', newRole);
+          currentRole = newRole;
+          roleBadge.textContent = currentRole.toUpperCase();
+          applyRoleUI();
+          subscribeServicesByRole();
+        }
+      }, err => console.error('profile listener err', err));
+    }
+
+    // ===== Auth state =====
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        currentUser = null;
+        currentRole = null;
+        services = [];
+        appView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+        if (_userProfileUnsub) { _userProfileUnsub(); _userProfileUnsub = null; }
+        if (window._unsub) { window._unsub(); window._unsub = null; }
+        if (window._unsub2) { window._unsub2(); window._unsub2 = null; }
+        return;
+      }
+
+      // user logged in
+      loginView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      currentUser = user;
+      
+      // Mostrar displayName en lugar de email
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          userNameEl.textContent = userData.displayName || user.displayName || user.email || '';
+        } else {
+          userNameEl.textContent = user.displayName || user.email || '';
+        }
+      } catch (error) {
+        console.error("Error obteniendo datos de usuario:", error);
+        userNameEl.textContent = user.displayName || user.email || '';
+      }
+      
+      try {
+        currentRole = await ensureUserProfile(user);
+      } catch (e) {
+        console.error('Error en perfil usuario:', e);
+        currentRole = 'cliente';
+      }
+
+      roleBadge.textContent = (currentRole || 'cliente').toUpperCase();
+      subscribeToUserProfile(user.uid);
+      applyRoleUI();
+      subscribeServicesByRole();
+      
+      // Cargar lista de mensajeros si es admin
+      if (currentRole === 'admin') {
+        loadMensajerosList();
+      }
+    });
+
+    // Cargar lista de mensajeros para el select
+    async function loadMensajerosList() {
+      try {
+        const mensajerosSnapshot = await db.collection('users')
+          .where('role', 'in', ['mensajero', 'admin'])
+          .get();
+        
+        mensajerosList = [];
+        mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
+        
+        mensajerosSnapshot.forEach(doc => {
+          const data = doc.data();
+          mensajerosList.push({
+            uid: doc.id,
+            displayName: data.displayName || data.email || doc.id
+          });
+          
+          const option = document.createElement('option');
+          option.value = doc.id;
+          option.textContent = data.displayName || data.email || doc.id;
+          mensajeroSelect.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error cargando mensajeros:', error);
+      }
+    }
+
+    // apply UI visibility based on role
+    function applyRoleUI() {
+      // default hide
+      menuRegistrar.classList.add('hidden');
+      menuCostos.classList.add('hidden');
+      menuCobros.classList.add('hidden');
+      menuPendientes.classList.add('hidden');
+      menuHistorial.classList.add('hidden');
+      menuFinanzasMensajero.classList.add('hidden');
+      document.getElementById('field-mensajero').classList.add('hidden');
+      document.getElementById('field-pago').classList.add('hidden');
+      document.getElementById('pending-banner').classList.add('hidden');
+
+      // Mostrar campo de costo para cliente
+      document.getElementById('field-costo-cliente').classList.add('hidden');
+
+      if (currentRole === 'admin') {
+        menuRegistrar.classList.remove('hidden');
+        menuCostos.classList.remove('hidden');
+        menuCobros.classList.remove('hidden');
+        menuPendientes.classList.remove('hidden');
+        menuHistorial.classList.remove('hidden');
+        document.getElementById('field-mensajero').classList.remove('hidden');
+        document.getElementById('field-pago').classList.remove('hidden');
+      } else if (currentRole === 'mensajero') {
+        menuRegistrar.classList.add('hidden');
+        menuCostos.classList.add('hidden');
+        menuCobros.classList.add('hidden');
+        menuHistorial.classList.remove('hidden');
+        menuFinanzasMensajero.classList.remove('hidden');
+        document.getElementById('field-mensajero').classList.add('hidden');
+      } else if (currentRole === 'pending_mensajero') {
+        menuRegistrar.classList.add('hidden');
+        menuCostos.classList.add('hidden');
+        menuCobros.classList.add('hidden');
+        document.getElementById('field-mensajero').classList.add('hidden');
+        document.getElementById('pending-banner').classList.remove('hidden');
+      } else {
+        // cliente
+        menuRegistrar.classList.remove('hidden');
+        menuHistorial.classList.remove('hidden');
+        menuCostos.classList.add('hidden');
+        menuCobros.classList.add('hidden');
+        document.getElementById('field-mensajero').classList.add('hidden');
+        document.getElementById('field-costo-cliente').classList.remove('hidden');
+      }
+    }
+
+    // ===== Subscribe services by role =====
+    function safeTimestampToMillis(t) {
+      if (!t) return 0;
+      if (typeof t.toMillis === 'function') return t.toMillis();
+      if (t.seconds) return t.seconds * 1000 + (t.nanoseconds || 0)/1e6;
+      return Number(t) || 0;
+    }
+
+    function subscribeServicesByRole() {
+      const servicesEl = document.getElementById('services-section');
+      servicesEl.innerHTML = '<div class="text-center text-[#d1b070]">Cargando servicios…</div>';
+      if (window._unsub) { 
+        try { window._unsub(); } catch(e){} 
+        window._unsub = null; 
+      }
+      if (window._unsub2) { 
+        try { window._unsub2(); } catch(e){} 
+        window._unsub2 = null; 
+      }
+
+      const ref = db.collection('services');
+
+      if (currentRole === 'admin') {
+        window._unsub = ref.orderBy('fechaCreacion', 'desc').onSnapshot(
+          (snap) => {
+            services = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            renderServices();
+          },
+          (err) => {
+            console.error('Error escuchando servicios (admin):', err);
+            servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios: ' + err.message + '</div>';
+          }
+        );
+        return;
+      }
+
+      if (currentRole === 'cliente') {
+        const q = ref.where('uidCliente', '==', currentUser.uid);
+        window._unsub = q.onSnapshot(
+          (snap) => {
+            services = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            services.sort((a,b) => safeTimestampToMillis(b.fechaCreacion) - safeTimestampToMillis(a.fechaCreacion));
+            renderServices();
+          },
+          (err) => {
+            console.error('Error escuchando servicios (cliente):', err);
+            servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando tus servicios: ' + err.message + '</div>';
+          }
+        );
+        return;
+      }
+
+      if (currentRole === 'mensajero') {
+        const qPendientes = ref.where('estado', '==', 'pendiente');
+        const qAsignados  = ref.where('uidMensajero', '==', currentUser.uid);
+
+        let docsPend = [];
+        let docsAsig = [];
+
+        function updateCombined() {
+          const map = {};
+          [...docsPend, ...docsAsig].forEach(d => { map[d.id] = d; });
+          services = Object.values(map);
+          services.sort((a,b) => safeTimestampToMillis(b.fechaCreacion) - safeTimestampToMillis(a.fechaCreacion));
+          renderServices();
+        }
+
+        window._unsub = qPendientes.onSnapshot(
+          (snap) => { docsPend = snap.docs.map(d => ({ id: d.id, ...d.data() })); updateCombined(); },
+          (err) => {
+            console.error('Error escuchando pendientes:', err);
+            servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios pendientes</div>';
+          }
+        );
+
+        window._unsub2 = qAsignados.onSnapshot(
+          (snap) => { docsAsig = snap.docs.map(d => ({ id: d.id, ...d.data() })); updateCombined(); },
+          (err) => {
+            console.error('Error escuchando asignados:', err);
+            servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios asignados</div>';
+          }
+        );
+
+        return;
+      }
+
+      // pending_mensajero o roles desconocidos: vaciar lista
+      services = [];
+      renderServices();
+    }
+
+    // ===== UI sections =====
+    function showSection(section) {
+      document.getElementById("services-section").classList.add("hidden");
+      document.getElementById("filters").classList.add("hidden");
+      document.getElementById("costos-section").classList.add("hidden");
+      document.getElementById("cobros-section").classList.add("hidden");
+      document.getElementById("pending-container").classList.add("hidden");
+      document.getElementById("history-section").classList.add("hidden");
+      document.getElementById("financial-section").classList.add("hidden");
+
+      if (section === "services") {
+        document.getElementById("filters").classList.remove("hidden");
+        document.getElementById("services-section").classList.remove("hidden");
+      } else if (section === "costos") {
+        if (currentRole !== 'admin') return;
+        document.getElementById("costos-section").classList.remove("hidden");
+        renderCostos();
+      } else if (section === "cobros") {
+        if (currentRole !== 'admin') return;
+        document.getElementById("cobros-section").classList.remove("hidden");
+        renderCobros();
+      }
+      closeSidebarOnClick();
+    }
+
+    function setFilter(f) { 
+      currentFilter = f; 
+      renderServices(); 
+    }
+
+    // ===== Modal open/edit =====
+    function openModal(editId = null) {
+      const modal = document.getElementById('modal');
+      const form  = document.getElementById('service-form');
+      form.reset();
+      form.dataset.editId = editId || '';
+      
+      // Mensajero pending or mensajero cannot open modal
+      if (currentRole === 'mensajero' || currentRole === 'pending_mensajero') return;
+
+      if (editId) {
+        if (currentRole !== 'admin' && currentRole !== 'cliente') return;
+        const s = services.find(x => x.id === editId);
+        if (s) {
+          form.empresaCliente.value = s.empresa || s.cliente || '';
+          form.contacto.value = s.contacto || '';
+          form.telefono.value = s.telefono || '';
+          form.recoger.value = s.recoger || '';
+          form.entregar.value = s.entregar || '';
+          form.volumen.value = s.volumen || '';
+          
+          // Para admin
+          if (currentRole === 'admin') {
+            form.uidMensajero.value = s.uidMensajero || '';
+            form.pagoMensajero.value = s.pagoMensajero || 0;
+          } else {
+            // Para cliente
+            form.costoCliente.value = s.costo || 0;
+          }
+          
+          if (s.cobrarProducto && s.cobrarProducto > 0) {
+            document.getElementById('cobrar-check').checked = true;
+            document.getElementById('cobrar-field').classList.remove('hidden');
+            form.cobrarProducto.value = s.cobrarProducto;
+          } else {
+            document.getElementById('cobrar-check').checked = false;
+            document.getElementById('cobrar-field').classList.add('hidden');
+          }
+        }
+      } else {
+        document.getElementById('cobrar-check').checked = false;
+        document.getElementById('cobrar-field').classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+    
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    }
+
+    // Toggle cobrar field
+    document.getElementById('cobrar-check').addEventListener('change', (e) => {
+      document.getElementById('cobrar-field').classList.toggle('hidden', !e.target.checked);
+    });
+
+    // Helpers
+    function fmt(n) { return new Intl.NumberFormat('es-CO').format(n || 0); }
+    function escapeHtml(text) {
+      if (!text && text !== 0) return '';
+      return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+    }
+
+    // ===== Render services =====
+    function renderServices() {
+      const list = document.getElementById('services-section');
+      list.innerHTML = "";
+      
+      if (currentRole === 'pending_mensajero') {
+        list.innerHTML = '<div class="text-center text-[#d1b070] w-full">Tu cuenta está en revisión. No puedes ver ni crear pedidos hasta que seas aprobado.</div>';
+        return;
+      }
+      
+      // Filtrar servicios según el rol
+      let filtered = services;
+      filtered = filtered.filter(s => currentFilter === 'all' ? true : (s.estado || 'pendiente') === currentFilter);
+      
+      // Para mensajeros, no mostrar servicios entregados en la vista principal
+      if (currentRole === 'mensajero') {
+        filtered = filtered.filter(s => (s.estado || 'pendiente') !== 'entregado');
+      }
+      
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="text-center text-[#d1b070] w-full">No hay servicios para mostrar.</div>';
+        return;
+      }
+      
+      filtered.forEach(s => {
+        const card = document.createElement('div');
+        const estado = s.estado || 'pendiente';
+        const isAvailable = estado === 'pendiente' && currentRole === 'mensajero';
+        
+        card.className = `service-card bg-[var(--gold)] text-black p-4 rounded-xl shadow flex flex-col ${isAvailable ? 'available-service' : ''}`;
+        
+        let actionButtons = '';
+        let mensajeroInfo = '';
+        
+        // Hacer direcciones y teléfonos clickeables
+        const direccionRecoger = s.recoger ? `<p class="text-sm mt-1">📍 Recoger: <span class="clickable" onclick="openMaps('${s.recoger}')">${escapeHtml(s.recoger)}</span></p>` : '';
+        const direccionEntregar = s.entregar ? `<p class="text-sm">📍 Entregar: <span class="clickable" onclick="openMaps('${s.entregar}')">${escapeHtml(s.entregar)}</span></p>` : '';
+        const telefono = s.telefono ? `<p class="text-sm">📞 <a href="tel:${encodeURIComponent(s.telefono)}" class="clickable">${escapeHtml(s.telefono)}</a></p>` : '';
+        
+        if (currentRole === 'admin') {
+          actionButtons = `
+            <button onclick="openModal('${s.id}')" class="flex-1 bg-blue-600 text-white px-2 py-2 rounded mobile-btn">✏️ Editar</button>
+            <button onclick="deleteService('${s.id}')" class="flex-1 bg-red-600 text-white px-2 py-2 rounded mobile-btn">🗑️ Eliminar</button>
+          `;
+        } else if (currentRole === 'cliente') {
+          if (estado === 'pendiente') {
+            actionButtons = `
+              <button onclick="openModal('${s.id}')" class="flex-1 bg-blue-600 text-white px-2 py-2 rounded mobile-btn">✏️ Editar</button>
+              <button onclick="deleteService('${s.id}')" class="flex-1 bg-red-600 text-white px-2 py-2 rounded mobile-btn">🗑️ Eliminar</button>
+            `;
+          }
+        } else if (currentRole === 'mensajero') {
+          if (estado === 'pendiente') {
+            actionButtons = `
+              <button onclick="takeService('${s.id}')" class="btn-take mobile-btn">🚚 Tomar servicio</button>
+            `;
+          } else if (s.uidMensajero === currentUser.uid) {
+            actionButtons = `
+              <select onchange="changeEstado('${s.id}', this.value)" class="flex-1 bg-black text-[var(--gold)] px-2 py-2 rounded mobile-btn">
+                <option value="en_ruta" ${estado==='en_ruta'?'selected':''}>En ruta</option>
+                <option value="entregado" ${estado==='entregado'?'selected':''}>Entregado</option>
+                <option value="cancelado" ${estado==='cancelado'?'selected':''}>Cancelado</option>
+              </select>
+              ${estado === 'en_ruta' ? `<button onclick="openEvidenceModal('${s.id}')" class="flex-1 bg-blue-500 text-white px-2 py-2 rounded mobile-btn">📸 Tomar evidencia</button>` : ''}
+            `;
+          }
+          
+          if (s.uidMensajero) {
+            const mensajeroName = mensajerosList.find(m => m.uid === s.uidMensajero)?.displayName || s.uidMensajero;
+            mensajeroInfo = `<p class="text-sm mt-1"><strong>Asignado a:</strong> ${s.uidMensajero === currentUser.uid ? 'TÚ' : escapeHtml(mensajeroName)}</p>`;
+          }
+        }
+        
+        card.innerHTML = `
+          <div class="flex justify-between items-start gap-2">
+            <div>
+              <p class="font-bold">${escapeHtml(s.empresa || s.cliente || "-")}</p>
+              <p class="text-sm">Contacto: ${escapeHtml(s.contacto || "-")}</p>
+              ${telefono}
+            </div>
+            <span class="chip state-${estado}">${estado.replace('_',' ')}</span>
+          </div>
+          ${direccionRecoger}
+          ${direccionEntregar}
+          ${ s.volumen ? `<p class="text-sm"><strong>Volumen:</strong> ${escapeHtml(s.volumen)}</p>` : "" }
+          ${mensajeroInfo}
+          ${(currentRole==='admin' || currentRole==='cliente') ? `<p class="text-sm"><strong>Costo:</strong> $ ${fmt(s.costo || s.pagoMensajero)}</p>` : ""}
+          ${(currentRole==='mensajero' && s.pagoMensajero) ? `<p class="text-sm"><strong>Tu pago:</strong> $ ${fmt(s.pagoMensajero)}</p>` : ""}
+          ${(currentRole==='admin' && s.cobrarProducto) ? `<p class="text-sm"><strong>COBRO:</strong> $ ${fmt(s.cobrarProducto)}</p>` : ""}
+          ${ s.observaciones ? `<p class="text-sm mt-2"><strong>Obs:</strong> ${escapeHtml(s.observaciones)}</p>` : "" }
+          <div class="flex gap-2 mt-3">
+            ${actionButtons}
+          </div>
+        `;
+        list.appendChild(card);
+      });
+      
+      if (currentRole === 'admin') { 
+        renderCobros(); 
+        renderCostos(); 
+      }
+    }
+
+    // ===== Funciones para abrir mapas y llamar =====
+    function openMaps(address) {
+      const encodedAddress = encodeURIComponent(address);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+    }
+
+    // ===== Funcionalidad para tomar servicio =====
+    async function takeService(id) {
+      try {
+        await db.collection('services').doc(id).update({
+          estado: 'en_ruta',
+          uidMensajero: currentUser.uid
+        });
+        alert('Servicio tomado con éxito. Ahora está en estado "En ruta".');
+      } catch (e) {
+        console.error('Error tomando servicio:', e);
+        alert('No se pudo tomar el servicio. Verifica que tengas permisos y que el servicio siga disponible.');
+      }
+    }
+    window.takeService = takeService;
+
+    // ===== change, delete =====
+    async function changeEstado(id, estado) {
+      try {
+        await db.collection('services').doc(id).update({ estado });
+        
+        // Si se marca como entregado, actualizar la lista
+        if (estado === 'entregado') {
+          subscribeServicesByRole();
+        }
+      } catch (e) {
+        alert('No se pudo actualizar el estado');
+        console.error(e);
+      }
+    }
+    window.changeEstado = changeEstado;
+
+    async function deleteService(id) {
+      if (!confirm("¿Eliminar este servicio permanentemente?")) return;
+      try {
+        await db.collection('services').doc(id).delete();
+      } catch (e) {
+        alert('No se pudo eliminar'); console.error(e);
+      }
+    }
+    window.deleteService = deleteService;
+
+    // ===== Evidencia de entrega =====
+    function openEvidenceModal(serviceId) {
+      currentServiceIdForEvidence = serviceId;
+      const modal = document.getElementById('evidence-modal');
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      
+      // Iniciar cámara
+      startCamera();
+    }
+    window.openEvidenceModal = openEvidenceModal;
+
+    function closeEvidenceModal() {
+      const modal = document.getElementById('evidence-modal');
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+      stopCamera();
+      resetEvidenceModal();
+    }
+    window.closeEvidenceModal = closeEvidenceModal;
+
+    let stream = null;
+
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const videoElement = document.getElementById('videoElement');
+        videoElement.srcObject = stream;
+      } catch (err) {
+        console.error('Error al acceder a la cámara:', err);
+        alert('No se pudo acceder a la cámara. Asegúrate de permitir el acceso.');
+      }
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+    }
+
+    function resetEvidenceModal() {
+      document.getElementById('captured-image-container').classList.add('hidden');
+      document.getElementById('videoElement').classList.remove('hidden');
+      document.getElementById('capture-btn').classList.remove('hidden');
+      document.querySelectorAll('.payment-option').forEach(opt => {
+        opt.classList.remove('selected');
+        opt.querySelector('input').checked = false;
+      });
+      selectedPaymentMethod = null;
+      document.getElementById('confirm-delivery').disabled = true;
+    }
+
+    document.getElementById('capture-btn').addEventListener('click', () => {
+      const video = document.getElementById('videoElement');
+      const canvas = document.getElementById('canvasElement');
+      const context = canvas.getContext('2d');
+      
+      // Establecer dimensiones del canvas igual al video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Dibujar el frame actual del video en el canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Obtener la imagen como data URL
+      const imageData = canvas.toDataURL('image/png');
+      
+      // Mostrar la imagen capturada
+      const capturedImage = document.getElementById('capturedImage');
+      capturedImage.src = imageData;
+      
+      // Ocultar video y botón de captura, mostrar imagen y botón de retomar
+      video.classList.add('hidden');
+      document.getElementById('capture-btn').classList.add('hidden');
+      document.getElementById('captured-image-container').classList.remove('hidden');
+      
+      // Detener la cámara
+      stopCamera();
+    });
+
+    document.getElementById('retake-btn').addEventListener('click', () => {
+      // Ocultar imagen capturada, mostrar video y botón de captura
+      document.getElementById('captured-image-container').classList.add('hidden');
+      document.getElementById('videoElement').classList.remove('hidden');
+      document.getElementById('capture-btn').classList.remove('hidden');
+      
+      // Reiniciar la cámara
+      startCamera();
+    });
+
+    function selectPaymentMethod(method) {
+      selectedPaymentMethod = method;
+      document.querySelectorAll('.payment-option').forEach(opt => {
+        if (opt.querySelector('input').value === method) {
+          opt.classList.add('selected');
+          opt.querySelector('input').checked = true;
+        } else {
+          opt.classList.remove('selected');
+          opt.querySelector('input').checked = false;
+        }
+      });
+      
+      // Habilitar el botón de confirmar si hay método de pago seleccionado
+      document.getElementById('confirm-delivery').disabled = !selectedPaymentMethod;
+    }
+    window.selectPaymentMethod = selectPaymentMethod;
+
+    document.getElementById('confirm-delivery').addEventListener('click', async () => {
+      if (!currentServiceIdForEvidence || !selectedPaymentMethod) {
+        alert('Por favor, completa toda la información requerida.');
+        return;
+      }
+      
+      try {
+        // Obtener la imagen capturada
+        const capturedImage = document.getElementById('capturedImage').src;
+        
+        // Actualizar el servicio en la base de datos
+        await db.collection('services').doc(currentServiceIdForEvidence).update({
+          estado: 'entregado',
+          evidenciaEntrega: capturedImage,
+          metodoPago: selectedPaymentMethod,
+          fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        alert('Servicio marcado como entregado con éxito.');
+        closeEvidenceModal();
+        
+        // Actualizar la lista de servicios
+        subscribeServicesByRole();
+      } catch (error) {
+        console.error('Error al confirmar la entrega:', error);
+        alert('Error al confirmar la entrega. Por favor, intenta nuevamente.');
+      }
+    });
+
+    // ===== Historial de servicios =====
+    function showHistory() {
+      document.getElementById("services-section").classList.add("hidden");
+      document.getElementById("filters").classList.add("hidden");
+      document.getElementById("costos-section").classList.add("hidden");
+      document.getElementById("cobros-section").classList.add("hidden");
+      document.getElementById("pending-container").classList.add("hidden");
+      document.getElementById("financial-section").classList.add("hidden");
+      
+      document.getElementById("history-section").classList.remove("hidden");
+      renderHistory();
+      
+      closeSidebarOnClick();
+    }
+    window.showHistory = showHistory;
+
+    async function renderHistory() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '<div class="text-center text-[#d1b070]">Cargando historial...</div>';
+      
+      try {
+        // Para mensajeros, solo sus servicios entregados
+        let query = db.collection('services').where('estado', '==', 'entregado');
+        
+        if (currentRole === 'mensajero') {
+          query = query.where('uidMensajero', '==', currentUser.uid);
+        } else if (currentRole === 'cliente') {
+          query = query.where('uidCliente', '==', currentUser.uid);
+        }
+        
+        const snapshot = await query.orderBy('fechaEntrega', 'desc').get();
+        
+        if (snapshot.empty) {
+          historyList.innerHTML = '<div class="text-center text-[#d1b070] w-full">No hay servicios entregados.</div>';
+          return;
+        }
+        
+        const deliveredServices = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Agrupar servicios por día
+        const servicesByDay = {};
+        deliveredServices.forEach(service => {
+          let deliveryDate = 'Fecha no disponible';
+          if (service.fechaEntrega) {
+            const date = typeof service.fechaEntrega.toDate === 'function' ? 
+                         service.fechaEntrega.toDate() : new Date(service.fechaEntrega);
+            deliveryDate = date.toLocaleDateString('es-CO', { 
+              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+          }
+          
+          if (!servicesByDay[deliveryDate]) {
+            servicesByDay[deliveryDate] = [];
+          }
+          
+          servicesByDay[deliveryDate].push(service);
+        });
+        
+        // Renderizar servicios agrupados por día
+        historyList.innerHTML = '';
+        
+        Object.keys(servicesByDay).forEach(date => {
+          const daySection = document.createElement('div');
+          daySection.className = 'day-section';
+          
+          const dayHeader = document.createElement('div');
+          dayHeader.className = 'day-header';
+          dayHeader.textContent = date;
+          daySection.appendChild(dayHeader);
+          
+          servicesByDay[date].forEach(service => {
+            const card = document.createElement('div');
+            card.className = 'service-card bg-[var(--gold)] text-black p-4 rounded-xl shadow flex flex-col mb-3';
+            
+            // Formatear fecha de entrega
+            let fechaEntrega = 'Fecha no disponible';
+            if (service.fechaEntrega) {
+              const dateObj = typeof service.fechaEntrega.toDate === 'function' ? 
+                             service.fechaEntrega.toDate() : new Date(service.fechaEntrega);
+              fechaEntrega = dateObj.toLocaleString('es-CO');
+            }
+            
+            card.innerHTML = `
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <p class="font-bold">${escapeHtml(service.empresa || service.cliente || "-")}</p>
+                  <p class="text-sm">Contacto: ${escapeHtml(service.contacto || "-")}</p>
+                  <p class="text-sm">📞 <a href="tel:${encodeURIComponent(service.telefono || '')}" class="clickable">${escapeHtml(service.telefono || "-")}</a></p>
+                </div>
+                <span class="chip state-entregado">entregado</span>
+              </div>
+              <p class="text-sm mt-1">📍 Recoger: <span class="clickable" onclick="openMaps('${service.recoger}')">${escapeHtml(service.recoger || "-")}</span></p>
+              <p class="text-sm">📍 Entregar: <span class="clickable" onclick="openMaps('${service.entregar}')">${escapeHtml(service.entregar || "-")}</span></p>
+              ${ service.volumen ? `<p class="text-sm"><strong>Volumen:</strong> ${escapeHtml(service.volumen)}</p>` : "" }
+              <p class="text-sm"><strong>Fecha de entrega:</strong> ${fechaEntrega}</p>
+              <p class="text-sm"><strong>Método de pago:</strong> ${service.metodoPago || 'No especificado'}</p>
+              ${ service.pagoMensajero ? `<p class="text-sm"><strong>Pago mensajero:</strong> $ ${fmt(service.pagoMensajero)}</p>` : "" }
+              ${ service.evidenciaEntrega ? `<img src="${service.evidenciaEntrega}" class="rounded-lg max-h-48 w-auto object-contain mx-auto mt-2">` : "" }
+              ${ service.observaciones ? `<p class="text-sm mt-2"><strong>Obs:</strong> ${escapeHtml(service.observaciones)}</p>` : "" }
+            `;
+            daySection.appendChild(card);
+          });
+          
+          historyList.appendChild(daySection);
+        });
+      } catch (error) {
+        console.error('Error cargando historial:', error);
+        historyList.innerHTML = '<div class="text-center text-red-500">Error cargando el historial.</div>';
+      }
+    }
+
+    // ===== Resumen financiero para mensajeros =====
+    function showFinancialSummary() {
+      document.getElementById("services-section").classList.add("hidden");
+      document.getElementById("filters").classList.add("hidden");
+      document.getElementById("costos-section").classList.add("hidden");
+      document.getElementById("cobros-section").classList.add("hidden");
+      document.getElementById("pending-container").classList.add("hidden");
+      document.getElementById("history-section").classList.add("hidden");
+      
+      document.getElementById("financial-section").classList.remove("hidden");
+      renderFinancialSummary();
+      
+      closeSidebarOnClick();
+    }
+    window.showFinancialSummary = showFinancialSummary;
+
+    async function renderFinancialSummary() {
+      const financialList = document.getElementById('financial-list');
+      financialList.innerHTML = '<div class="text-center text-[#d1b070]">Cargando información financiera...</div>';
+      
+      try {
+        // Obtener servicios del mensajero actual que han sido entregados
+        const snapshot = await db.collection('services')
+          .where('uidMensajero', '==', currentUser.uid)
+          .where('estado', '==', 'entregado')
+          .orderBy('fechaEntrega', 'desc')
+          .get();
+        
+        if (snapshot.empty) {
+          financialList.innerHTML = '<div class="text-center text-[#d1b070] w-full">No hay servicios entregados.</div>';
+          return;
+        }
+        
+        const messengerServices = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Calcular totales
+        const totalEarned = messengerServices.reduce((sum, s) => sum + (parseFloat(s.pagoMensajero) || 0), 0);
+        const totalPending = messengerServices
+          .filter(s => !s.pagado)
+          .reduce((sum, s) => sum + (parseFloat(s.pagoMensajero) || 0), 0);
+        const totalPaid = totalEarned - totalPending;
+        
+        // Actualizar totales en la UI
+        document.getElementById('total-earned').textContent = `$${fmt(totalEarned)}`;
+        document.getElementById('total-pending').textContent = `$${fmt(totalPending)}`;
+        document.getElementById('total-paid').textContent = `$${fmt(totalPaid)}`;
+        
+        // Agrupar servicios por día
+        const servicesByDay = {};
+        messengerServices.forEach(service => {
+          let deliveryDate = 'Fecha no disponible';
+          if (service.fechaEntrega) {
+            const date = typeof service.fechaEntrega.toDate === 'function' ? 
+                         service.fechaEntrega.toDate() : new Date(service.fechaEntrega);
+            deliveryDate = date.toLocaleDateString('es-CO', { 
+              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+          }
+          
+          if (!servicesByDay[deliveryDate]) {
+            servicesByDay[deliveryDate] = [];
+          }
+          
+          servicesByDay[deliveryDate].push(service);
+        });
+        
+        // Renderizar servicios agrupados por día
+        financialList.innerHTML = '';
+        
+        Object.keys(servicesByDay).forEach(date => {
+          const daySection = document.createElement('div');
+          daySection.className = 'day-section';
+          
+          const dayHeader = document.createElement('div');
+          dayHeader.className = 'day-header';
+          
+          // Calcular total del día
+          const dayTotal = servicesByDay[date].reduce((sum, s) => sum + (parseFloat(s.pagoMensajero) || 0), 0);
+          const dayPaid = servicesByDay[date]
+            .filter(s => s.pagado)
+            .reduce((sum, s) => sum + (parseFloat(s.pagoMensajero) || 0), 0);
+          
+          dayHeader.textContent = `${date} - Total: $${fmt(dayTotal)} (Pagado: $${fmt(dayPaid)})`;
+          daySection.appendChild(dayHeader);
+          
+          servicesByDay[date].forEach(service => {
+            const isPaid = service.pagado || false;
+            
+            const card = document.createElement('div');
+            card.className = `service-card bg-[var(--gold)] text-black p-4 rounded-xl shadow flex flex-col mb-3 ${isPaid ? 'service-paid' : ''}`;
+            
+            card.innerHTML = `
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <p class="font-bold">${escapeHtml(service.empresa || service.cliente || "-")}</p>
+                  <p class="text-sm">📍 ${escapeHtml(service.entregar || "-")}</p>
+                </div>
+                <span class="chip state-entregado">entregado</span>
+              </div>
+              <p class="text-sm mt-1"><strong>Valor:</strong> $ ${fmt(service.pagoMensajero || 0)}</p>
+              <p class="text-sm"><strong>Estado de pago:</strong> ${isPaid ? 'Pagado' : 'Pendiente'}</p>
+              ${!isPaid ? `
+                <button onclick="markAsPaid('${service.id}')" class="bg-green-500 text-white px-3 py-1 rounded mt-2 mobile-btn">Marcar como pagado</button>
+              ` : ''}
+            `;
+            daySection.appendChild(card);
+          });
+          
+          financialList.appendChild(daySection);
+        });
+      } catch (error) {
+        console.error('Error cargando resumen financiero:', error);
+        financialList.innerHTML = '<div class="text-center text-red-500">Error cargando el resumen financiero.</div>';
+      }
+    }
+
+    async function markAsPaid(serviceId) {
+      try {
+        await db.collection('services').doc(serviceId).update({
+          pagado: true,
+          fechaPago: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Servicio marcado como pagado.');
+        renderFinancialSummary();
+      } catch (error) {
+        console.error('Error al marcar como pagado:', error);
+        alert('Error al marcar como pagado. Por favor, intenta nuevamente.');
+      }
+    }
+    window.markAsPaid = markAsPaid;
+
+    // ===== Editar perfil =====
+    function openEditProfile() {
+      const modal = document.getElementById('edit-profile-modal');
+      const form = document.getElementById('profile-form');
+      
+      // Cargar el nombre actual
+      document.getElementById('profile-displayName').value = userNameEl.textContent;
+      
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+    window.openEditProfile = openEditProfile;
+
+    function closeEditProfile() {
+      document.getElementById('edit-profile-modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    }
+    window.closeEditProfile = closeEditProfile;
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const displayName = document.getElementById('profile-displayName').value.trim();
+      
+      if (!displayName) {
+        alert('Por favor, ingresa un nombre válido.');
+        return;
+      }
+      
+      try {
+        // Actualizar en Firestore
+        await db.collection('users').doc(currentUser.uid).set({
+          displayName: displayName
+        }, { merge: true });
+        
+        // Actualizar en Auth
+        await currentUser.updateProfile({
+          displayName: displayName
+        });
+        
+        // Actualizar en la UI
+        userNameEl.textContent = displayName;
+        
+        alert('Perfil actualizado correctamente.');
+        closeEditProfile();
+      } catch (error) {
+        console.error('Error actualizando perfil:', error);
+        alert('Error al actualizar el perfil. Por favor, intenta nuevamente.');
+      }
+    });
+
+    // ===== submit form (create / edit) =====
+    document.getElementById('service-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!(currentRole === 'admin' || currentRole === 'cliente')) {
+        alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+        return;
+      }
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      const docId = form.dataset.editId || null;
+
+      // base payload
+      const payload = {
+        empresa: data.empresaCliente || "",
+        cliente: "",
+        contacto: data.contacto || "",
+        recoger: data.recoger || "",
+        entregar: data.entregar || "",
+        telefono: data.telefono || "",
+        volumen: data.volumen || "",
+        observaciones: data.observaciones || "",
+        cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+        uidCliente: currentUser.uid,
+        fechaCreacion: docId ? undefined : firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      // Agregar campos según el rol
+      if (currentRole === 'admin') {
+        payload.uidMensajero = data.uidMensajero || "";
+        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+        payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
+      } else {
+        // Cliente
+        payload.costo = parseFloat(data.costoCliente || 0) || 0;
+        payload.pagoMensajero = 0;
+      }
+
+      if (!docId) {
+        payload.estado = "pendiente";
+      }
+
+      try {
+        if (docId) {
+          await db.collection('services').doc(docId).update(payload);
+        } else {
+          await db.collection('services').add(payload);
+        }
+        closeModal();
+        form.reset();
+      } catch (e) {
+        console.error('Error guardando servicio:', e);
+        alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
+      }
+    });
+
+    // ===== initial UI state =====
+    document.getElementById('filters').classList.remove('hidden');
+
+    // Expose functions to global scope
+    window.toggleSidebar = toggleSidebar;
+    window.showSection = showSection;
+    window.setFilter = setFilter;
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.openMaps = openMaps;
+
   </script>
 </body>
 </html>
