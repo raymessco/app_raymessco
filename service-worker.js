@@ -1,70 +1,50 @@
-const CACHE_NAME = 'raymessco-cache-v2'; // cambiamos versión para limpiar el cache viejo
+const CACHE_NAME = 'raymessco-cache-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  'https://cdn.tailwindcss.com',
-  '/icon-192.png',
-  '/icon-512.png',
-  'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
-  'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
+  '/app_raymessco/index.html',
+  '/app_raymessco/tailwind.css',
+  '/app_raymessco/manifest.json',
+  '/app_raymessco/icon-192.png',
+  '/app_raymessco/icon-512.png',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+  'https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js',
+  'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js',
+  'https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js'
 ];
 
-// Instala el Service Worker y guarda los archivos estáticos en caché
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('Cache abierto');
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
-// Activa y limpia cachés viejos
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+
 self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(keys => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            console.log('Eliminando caché viejo:', key);
-            return caches.delete(key);
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
           }
         })
       );
-    })
-  );
-});
-
-// Intercepta peticiones de red
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      // Si está en caché, responde desde ahí
-      if (response) return response;
-
-      // Si no está en caché, lo busca en la red y lo guarda
-      return fetch(event.request).then(networkResponse => {
-        // Evitar cachear llamadas a Firestore/Auth para no romper sesión
-        if (
-          event.request.url.includes('firestore.googleapis.com') ||
-          event.request.url.includes('firebaseio.com') ||
-          event.request.url.includes('googleapis.com')
-        ) {
-          return networkResponse;
-        }
-
-        // Clonar y guardar en caché
-        return caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
-        });
-      }).catch(() => {
-        // Si falla la red y no está en caché, intenta devolver index.html
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-      });
     })
   );
 });
