@@ -7,21 +7,17 @@
   <meta name="theme-color" content="#CF9524">
   <meta name="description" content="Sistema de gestión de servicios de mensajería">
   
-  <!-- Meta tags para iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
   
-  <!-- Manifest con íconos optimizados -->
   <link rel="manifest" href="https://raymessco.github.io/app_raymessco/manifest.json">
   <link rel="icon" href="https://raymessco.github.io/app_raymessco/icon-192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="https://raymessco.github.io/app_raymessco/icon-192.png">
   
-  <!-- Font Awesome para iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Tailwind -->
   <link rel="stylesheet" href="https://raymessco.github.io/app_raymessco/tailwind.css">
   
   <style>
@@ -817,7 +813,6 @@
   </style>
 </head>
 <body>
-  <!-- LOGIN VIEW -->
   <div id="login-view" class="login-container">
     <div class="login-card">
       <div class="logo-container">
@@ -842,9 +837,7 @@
     </div>
   </div>
 
-  <!-- DASHBOARD -->
   <div id="app" class="app-container hidden">
-    <!-- HEADER -->
     <div class="app-header">
       <div class="header-left">
         <button id="sidebar-toggle" class="menu-btn">
@@ -865,10 +858,8 @@
       </div>
     </div>
 
-    <!-- SIDEBAR BACKDROP -->
     <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
-    <!-- SIDEBAR -->
     <div id="sidebar" class="sidebar">
       <div class="sidebar-header">
         <h2 class="sidebar-title">Menú</h2>
@@ -915,14 +906,11 @@
       </div>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
-      <!-- Pending banner -->
       <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
         <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
       </div>
 
-      <!-- FILTERS -->
       <div id="filters" class="filters-container">
         <button onclick="setFilter('all')" class="filter-btn active">Todos</button>
         <button onclick="setFilter('pendiente')" class="filter-btn">Pendientes</button>
@@ -931,10 +919,8 @@
         <button onclick="setFilter('cancelado')" class="filter-btn">Cancelados</button>
       </div>
 
-      <!-- SERVICES LIST -->
       <div id="services-section" class="services-grid"></div>
 
-      <!-- Financial summary for messengers -->
       <div id="financial-section" class="hidden">
         <h2 class="section-title">Resumen financiero</h2>
         <div class="financial-card">
@@ -955,19 +941,16 @@
         <div id="financial-list"></div>
       </div>
 
-      <!-- Pending container for admin -->
       <div id="pending-container" class="hidden">
         <h2 class="section-title">Solicitudes de mensajero</h2>
         <div id="pending-list"></div>
       </div>
 
-      <!-- COSTOS (ADMIN) -->
       <div id="costos-section" class="hidden">
         <h2 class="section-title">Costos por empresa</h2>
         <div id="costos-body"></div>
       </div>
 
-      <!-- COBROS (ADMIN) -->
       <div id="cobros-section" class="hidden">
         <h2 class="section-title">Cobros contra entrega</h2>
         <div id="cobros-body"></div>
@@ -975,7 +958,6 @@
     </div>
   </div>
 
-  <!-- MODAL: registrar servicio -->
   <div id="modal" class="modal-backdrop hidden">
     <div class="modal-content">
       <button class="modal-close" onclick="closeModal()">
@@ -1036,7 +1018,7 @@
             <input type="number" name="pagoMensajero" class="form-input" placeholder="Pago al mensajero" min="0" id="field-pago">
           </div>
         </div>
-        
+
         <div class="form-group">
           <div class="form-checkbox">
             <input type="checkbox" id="cobrar-check" name="cobrarCheck">
@@ -1053,7 +1035,7 @@
           <label class="form-label">Observaciones</label>
           <textarea name="observaciones" class="form-input" placeholder="Observaciones adicionales" rows="3"></textarea>
         </div>
-        
+
         <div class="form-actions">
           <button type="submit" class="btn-submit">
             <i class="fas fa-check"></i> Registrar
@@ -1066,7 +1048,6 @@
     </div>
   </div>
 
-  <!-- MODAL: tomar evidencia y marcar como entregado -->
   <div id="evidence-modal" class="modal-backdrop hidden">
     <div class="modal-content">
       <button class="modal-close" onclick="closeEvidenceModal()">
@@ -1076,7 +1057,7 @@
       <div class="modal-header">
         <h2 class="modal-title">Evidencia de entrega</h2>
       </div>
-      
+
       <div style="text-align: center; margin-bottom: 20px;">
         <video id="videoElement" style="width: 100%; max-width: 400px; border-radius: 8px; border: 2px solid var(--gold);"></video>
         <button id="capture-btn" style="background: var(--gold); color: black; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%; max-width: 400px;">
@@ -1084,7 +1065,7 @@
         </button>
         <canvas id="canvasElement" class="hidden"></canvas>
       </div>
-      
+
       <div id="captured-image-container" class="hidden" style="text-align: center;">
         <img id="capturedImage" style="width: 100%; max-width: 400px; border-radius: 8px; border: 2px solid var(--gold);">
         <button id="retake-btn" style="background: var(--gold); color: black; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%; max-width: 400px;">
@@ -1125,7 +1106,6 @@
     </div>
   </div>
 
-  <!-- MODAL: Editar perfil -->
   <div id="edit-profile-modal" class="modal-backdrop hidden">
     <div class="modal-content">
       <button class="modal-close" onclick="closeEditProfile()">
@@ -1135,7 +1115,7 @@
       <div class="modal-header">
         <h2 class="modal-title">Editar perfil</h2>
       </div>
-      
+
       <form id="profile-form">
         <div class="form-group">
           <label class="form-label">Nombre para mostrar</label>
@@ -1154,7 +1134,6 @@
     </div>
   </div>
 
-  <!-- ROLE CHOICE MODAL (first time) -->
   <div id="roleChoiceModal" class="modal-backdrop hidden">
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
@@ -1179,1269 +1158,882 @@
           <div class="role-description">Entregar servicios de mensajería</div>
         </div>
       </div>
-      
-      <p style="text-align: center; color: var(--text-gray); margin-top: 20px; font-size: 14px;">
-        <i class="fas fa-info-circle"></i> Un administrador revisará las solicitudes de mensajero.
-      </p>
     </div>
   </div>
 
-  <!-- Botón de instalación PWA - Mejorado -->
-  <button id="install-button" class="install-btn hidden">
-    <i class="fas fa-download"></i> Instalar App
-  </button>
-
-  <!-- Firebase (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+  
   <script>
-    // Configuración de Firebase
+    // Tu configuración de Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyCkjLdn1NYI5eApE4N5ylkGJnlYsmO5hq4",
-      authDomain: "raymessco-ce1c0.firebaseapp.com",
-      projectId: "raymessco-ce1c0",
-      storageBucket: "raymessco-ce1c0.appspot.com",
-      messagingSenderId: "829091900185",
-      appId: "1:829091900185:web:1c61887780ff2639a5f388",
-      measurementId: "G-38Q9K6CV7D"
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_STORAGE_BUCKET",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID",
+      appId: "TU_APP_ID"
     };
-
-    // Inicializar Firebase
-    let app, auth, db;
     
-    try {
-      app = firebase.initializeApp(firebaseConfig);
-      auth = app.auth();
-      db = app.firestore();
-      console.log("Firebase inicializado correctamente");
-    } catch (error) {
-      console.error("Error inicializando Firebase:", error);
-    }
-
-    // Estado global
-    let currentUser = null;
-    let currentRole = null;
-    let services = [];
-    let currentFilter = 'all';
-    let _userProfileUnsub = null;
-    let currentServiceIdForEvidence = null;
-    let selectedPaymentMethod = null;
-    let mensajerosList = [];
-    let deferredPrompt = null;
-
-    // Referencias a elementos UI
+    // Inicializar Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = app.auth();
+    const db = app.firestore();
+    const storage = app.storage();
+    
+    // Referencias a elementos del DOM
     const loginView = document.getElementById('login-view');
     const appView = document.getElementById('app');
-    const roleBadge = document.getElementById('role-badge');
+    const authStatus = document.getElementById('auth-status');
+    const btnGoogle = document.getElementById('btn-google');
+    const btnText = document.getElementById('btn-text');
+    const btnLoader = document.getElementById('btn-loader');
+    const btnLogout = document.getElementById('btn-logout');
     const userNameEl = document.getElementById('user-name');
+    const roleBadge = document.getElementById('role-badge');
+    const servicesSection = document.getElementById('services-section');
+    const modal = document.getElementById('modal');
+    const serviceForm = document.getElementById('service-form');
+    const financialSection = document.getElementById('financial-section');
+    const totalEarnedEl = document.getElementById('total-earned');
+    const totalPaidEl = document.getElementById('total-paid');
+    const totalPendingEl = document.getElementById('total-pending');
+    const financialListEl = document.getElementById('financial-list');
+    const pendingContainer = document.getElementById('pending-container');
+    const pendingListEl = document.getElementById('pending-list');
+    const costosSection = document.getElementById('costos-section');
+    const costosBody = document.getElementById('costos-body');
+    const cobrosSection = document.getElementById('cobros-section');
+    const cobrosBody = document.getElementById('cobros-body');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const closeSidebarBtn = document.querySelector('.close-sidebar');
     const menuRegistrar = document.getElementById('menu-registrar');
+    const menuFinanzas = document.getElementById('menu-finanzas-mensajero');
     const menuCostos = document.getElementById('menu-costos');
     const menuCobros = document.getElementById('menu-cobros');
     const menuPendientes = document.getElementById('menu-pendientes');
-    const menuFinanzasMensajero = document.getElementById('menu-finanzas-mensajero');
+    const pendingBanner = document.getElementById('pending-banner');
     const roleChoiceModal = document.getElementById('roleChoiceModal');
-    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const closeSidebarBtn = document.querySelector('.close-sidebar');
-    const fieldCostoClienteContainer = document.getElementById('field-costo-cliente-container');
-    const adminFields = document.getElementById('admin-fields');
-    const cobrarFieldContainer = document.getElementById('cobrar-field-container');
-    const installButton = document.getElementById('install-button');
-    const mensajeroSelect = document.getElementById('field-mensajero');
+    const editProfileModal = document.getElementById('edit-profile-modal');
+    
+    let currentUser = null;
+    let userRole = null;
+    
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) {
+        installBtn.classList.remove('hidden');
+      }
+    });
 
-    // Inicializar la aplicación
-    function initApp() {
-      // Event listeners para la interfaz
-      sidebarToggle.addEventListener('click', toggleSidebar);
-      closeSidebarBtn.addEventListener('click', toggleSidebar);
-      sidebarBackdrop.addEventListener('click', toggleSidebar);
-      
-      document.getElementById('cobrar-check').addEventListener('change', (e) => {
-        cobrarFieldContainer.classList.toggle('hidden', !e.target.checked);
-      });
-      
-      // Configurar el formulario de servicio
-      document.getElementById('service-form').addEventListener('submit', handleServiceSubmit);
-      
-      // Configurar el formulario de perfil
-      document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
-      
-      // Configurar botón de logout
-      document.getElementById('btn-logout').addEventListener('click', () => {
-        auth.signOut();
-      });
-      
-      // Configurar autenticación con Google
-      document.getElementById('btn-google').addEventListener('click', signInWithGoogle);
-      
-      // Configurar PWA installation
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installButton.classList.remove('hidden');
-      });
-      
-      installButton.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-          installButton.classList.add('hidden');
+    // PWA Install
+    const installBtn = document.getElementById('install-btn');
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log(`User response to the install prompt: ${outcome}`);
+          deferredPrompt = null;
+          installBtn.classList.add('hidden');
         }
-        
-        deferredPrompt = null;
       });
-      
-      // Observador de autenticación
-      auth.onAuthStateChanged(handleAuthStateChange);
     }
 
-    // Función para iniciar sesión con Google
-    async function signInWithGoogle() {
-      const btnText = document.getElementById('btn-text');
-      const btnLoader = document.getElementById('btn-loader');
+    // Google Sign-In
+    async function handleGoogleSignIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      btnText.textContent = 'Cargando...';
+      btnLoader.classList.remove('hidden');
       
       try {
-        btnText.textContent = 'Conectando...';
-        btnLoader.classList.remove('hidden');
-        
-        showAuthStatus("Conectando con Google...", false);
-        
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.addScope('email');
-        provider.setCustomParameters({
-          prompt: 'select_account'
-        });
-        
-        await auth.signInWithPopup(provider);
-        showAuthStatus("¡Autenticación exitosa!", false);
-        
+        const result = await auth.signInWithPopup(provider);
+        console.log("Inicio de sesión exitoso", result.user);
+        checkUserRole(result.user);
       } catch (error) {
-        console.error("Error en autenticación:", error);
-        
-        let errorMessage = "Error de autenticación";
-        if (error.code === 'auth/popup-blocked') {
-          errorMessage = "El popup fue bloqueado. Permite popups para este sitio.";
-        } else if (error.code === 'auth/popup-closed-by-user') {
-          errorMessage = "El popup de autenticación fue cerrado. Intenta nuevamente.";
-        } else if (error.code === 'auth/network-request-failed') {
-          errorMessage = "Error de red. Verifica tu conexión a Internet.";
-        } else if (error.code) {
-          errorMessage = `Error: ${error.code}`;
-        }
-        
-        showAuthStatus(errorMessage, true);
-      } finally {
+        console.error("Error de inicio de sesión", error);
+        showAuthStatus("Error de inicio de sesión.", 'error');
         btnText.textContent = 'Continuar con Google';
         btnLoader.classList.add('hidden');
       }
     }
 
-    // Manejar cambios en el estado de autenticación
-    async function handleAuthStateChange(user) {
-      if (!user) {
-        // Usuario no autenticado
-        currentUser = null;
-        currentRole = null;
-        services = [];
-        appView.classList.add('hidden');
-        loginView.classList.remove('hidden');
-        
-        if (_userProfileUnsub) {
-          _userProfileUnsub();
-          _userProfileUnsub = null;
-        }
-        
-        return;
-      }
-      
-      // Usuario autenticado
-      loginView.classList.add('hidden');
-      appView.classList.remove('hidden');
-      currentUser = user;
-      
-      // Obtener información del perfil
+    // Sign Out
+    async function handleSignOut() {
       try {
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          userNameEl.textContent = userData.displayName || user.displayName || user.email || '';
-          currentRole = userData.role || 'cliente';
-        } else {
-          // Usuario nuevo, mostrar selector de rol
-          userNameEl.textContent = user.displayName || user.email || '';
-          showRoleSelection();
-          return;
-        }
+        await auth.signOut();
+        console.log("Sesión cerrada");
+        showLoginView();
       } catch (error) {
-        console.error("Error obteniendo datos de usuario:", error);
-        userNameEl.textContent = user.displayName || user.email || '';
-        currentRole = 'cliente';
+        console.error("Error al cerrar sesión", error);
       }
-      
-      // Actualizar UI según el rol
-      updateUIByRole();
-      
-      // Suscribirse a cambios en el perfil
-      subscribeToUserProfile(user.uid);
-      
-      // Cargar servicios según el rol
-      subscribeServicesByRole();
-      
-      // Cargar lista de mensajeros si es admin
-      if (currentRole === 'admin') {
-        loadMensajerosList();
-      }
-      
-      // Siempre mostrar la sección de servicios al iniciar sesión
-      showSection('services');
-      setFilter('all');
     }
 
-    // Mostrar selección de rol para usuarios nuevos
-    function showRoleSelection() {
+    // Check user role
+    async function checkUserRole(user) {
+      const userRef = db.collection('users').doc(user.uid);
+      const doc = await userRef.get();
+      
+      if (doc.exists) {
+        userRole = doc.data().role;
+        console.log("Rol del usuario:", userRole);
+        showAppView(user, userRole);
+      } else {
+        showRoleChoiceModal(user);
+      }
+    }
+
+    // Show role choice modal
+    function showRoleChoiceModal(user) {
+      currentUser = user;
       roleChoiceModal.classList.remove('hidden');
     }
-
-    // Seleccionar rol (cliente o mensajero)
+    
+    // Select role
     async function selectRole(role) {
+      if (!currentUser) return;
+      
       try {
         await db.collection('users').doc(currentUser.uid).set({
-          role: role === 'mensajero' ? 'pending_mensajero' : 'cliente',
-          email: currentUser.email || '',
-          displayName: currentUser.displayName || '',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          displayName: currentUser.displayName,
+          email: currentUser.email,
+          photoURL: currentUser.photoURL,
+          role: role,
+          uid: currentUser.uid,
+          status: role === 'mensajero' ? 'pending' : 'active'
         });
         
-        currentRole = role === 'mensajero' ? 'pending_mensajero' : 'cliente';
+        userRole = role;
         roleChoiceModal.classList.add('hidden');
-        updateUIByRole();
-        subscribeToUserProfile(currentUser.uid);
+        showAppView(currentUser, userRole);
       } catch (error) {
-        console.error("Error guardando rol:", error);
-        alert("Error al guardar la selección de rol. Intenta nuevamente.");
+        console.error("Error al seleccionar el rol:", error);
+        alert("Hubo un error al seleccionar tu rol. Por favor, intenta de nuevo.");
       }
     }
     window.selectRole = selectRole;
 
-    // Suscribirse a cambios en el perfil del usuario
-    function subscribeToUserProfile(uid) {
-      if (_userProfileUnsub) {
-        _userProfileUnsub();
-        _userProfileUnsub = null;
+    // Show app view
+    async function showAppView(user, role) {
+      currentUser = user;
+      userRole = role;
+      
+      loginView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      
+      userNameEl.textContent = user.displayName;
+      roleBadge.textContent = role.toUpperCase();
+
+      updateMenuVisibility(role);
+      
+      if (role === 'mensajero') {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().status === 'pending') {
+          pendingBanner.classList.remove('hidden');
+        } else {
+          pendingBanner.classList.add('hidden');
+        }
       }
       
-      const ref = db.collection('users').doc(uid);
-      _userProfileUnsub = ref.onSnapshot(doc => {
-        if (!doc.exists) return;
-        
-        const userData = doc.data();
-        const newRole = userData.role;
-        
-        if (newRole && newRole !== currentRole) {
-          currentRole = newRole;
-          roleBadge.textContent = currentRole.toUpperCase();
-          updateUIByRole();
-          subscribeServicesByRole();
-        }
-        
-        if (userData.displayName) {
-          userNameEl.textContent = userData.displayName;
-        }
-      }, err => console.error('Error en listener de perfil:', err));
+      showSection('services');
+      renderServices(null, true);
     }
-
-    // Actualizar UI según el rol del usuario
-    function updateUIByRole() {
-      // Ocultar todos los elementos específicos de rol inicialmente
-      menuRegistrar.classList.add('hidden');
+    
+    function updateMenuVisibility(role) {
+      menuRegistrar.classList.remove('hidden');
+      menuFinanzas.classList.add('hidden');
       menuCostos.classList.add('hidden');
       menuCobros.classList.add('hidden');
       menuPendientes.classList.add('hidden');
-      menuFinanzasMensajero.classList.add('hidden');
-      fieldCostoClienteContainer.classList.add('hidden');
-      adminFields.classList.add('hidden');
-      document.getElementById('pending-banner').classList.add('hidden');
-      
-      // Mostrar elementos según el rol
-      if (currentRole === 'admin') {
-        menuRegistrar.classList.remove('hidden');
+
+      if (role === 'mensajero') {
+        menuFinanzas.classList.remove('hidden');
+        menuRegistrar.classList.add('hidden');
+      } else if (role === 'admin') {
         menuCostos.classList.remove('hidden');
         menuCobros.classList.remove('hidden');
         menuPendientes.classList.remove('hidden');
-        adminFields.classList.remove('hidden');
-      } else if (currentRole === 'mensajero') {
-        menuFinanzasMensajero.classList.remove('hidden');
-      } else if (currentRole === 'pending_mensajero') {
-        document.getElementById('pending-banner').classList.remove('hidden');
-      } else {
-        // cliente
         menuRegistrar.classList.remove('hidden');
-        fieldCostoClienteContainer.classList.remove('hidden');
       }
-      
-      // Actualizar badge de rol
-      roleBadge.textContent = currentRole.toUpperCase();
     }
 
-    // Alternar sidebar
+    // Show auth status message
+    function showAuthStatus(message, type) {
+      authStatus.textContent = message;
+      authStatus.className = `auth-status ${type}`;
+      authStatus.classList.remove('hidden');
+    }
+    
+    // Show login view
+    function showLoginView() {
+      loginView.classList.remove('hidden');
+      appView.classList.add('hidden');
+      authStatus.classList.add('hidden');
+      btnText.textContent = 'Continuar con Google';
+      btnLoader.classList.add('hidden');
+    }
+    
+    // Toggle sidebar
     function toggleSidebar() {
       sidebar.classList.toggle('open');
       sidebarBackdrop.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
     }
-    window.toggleSidebar = toggleSidebar;
 
-    // Mostrar mensaje de estado de autenticación
-    function showAuthStatus(message, isError = false) {
-      const statusEl = document.getElementById('auth-status');
-      statusEl.textContent = message;
-      statusEl.classList.remove('hidden', 'success', 'error');
-      statusEl.classList.add(isError ? 'error' : 'success');
-      
-      setTimeout(() => {
-        statusEl.classList.add('hidden');
-      }, 5000);
+    // Close sidebar
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarBackdrop.style.display = 'none';
     }
 
-    // Abrir modal de registro de servicio
-    function openModal(editId = null) {
-      const modal = document.getElementById('modal');
-      const form = document.getElementById('service-form');
-      form.reset();
-      form.dataset.editId = editId || '';
-      
-      // Mensajero pending or mensajero cannot open modal
-      if (currentRole === 'mensajero' || currentRole === 'pending_mensajero') return;
-      
-      if (editId) {
-        // Modo edición
-        const service = services.find(x => x.id === editId);
-        if (service) {
-          form.empresaCliente.value = service.empresa || service.cliente || '';
-          form.contacto.value = service.contacto || '';
-          form.telefono.value = service.telefono || '';
-          form.recoger.value = service.recoger || '';
-          form.entregar.value = service.entregar || '';
-          form.volumen.value = service.volumen || '';
-          
-          if (currentRole === 'admin') {
-            form.uidMensajero.value = service.uidMensajero || '';
-            form.pagoMensajero.value = service.pagoMensajero || 0;
-          } else {
-            form.costoCliente.value = service.costo || 0;
-          }
-          
-          if (service.cobrarProducto && service.cobrarProducto > 0) {
-            document.getElementById('cobrar-check').checked = true;
-            cobrarFieldContainer.classList.remove('hidden');
-            form.cobrarProducto.value = service.cobrarProducto;
-          }
-        }
-      }
-      
-      modal.classList.remove('hidden');
-    }
-    window.openModal = openModal;
-
-    // Cerrar modal
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-    }
-    window.closeModal = closeModal;
-
-    // Manejar envío del formulario de servicio
-    async function handleServiceSubmit(e) {
-      e.preventDefault();
-      
-      if (!(currentRole === 'admin' || currentRole === 'cliente')) {
-        alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
-        return;
-      }
-      
-      const form = e.target;
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      const docId = form.dataset.editId || null;
-      
-      // Preparar datos para Firestore
-      const payload = {
-        empresa: data.empresaCliente || "",
-        cliente: "",
-        contacto: data.contacto || "",
-        recoger: data.recoger || "",
-        entregar: data.entregar || "",
-        telefono: data.telefono || "",
-        volumen: data.volumen || "",
-        observaciones: data.observaciones || "",
-        cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-        uidCliente: currentUser.uid,
-        fechaCreacion: docId ? undefined : firebase.firestore.FieldValue.serverTimestamp()
-      };
-      
-      // Agregar campos según el rol
-      if (currentRole === 'admin') {
-        payload.uidMensajero = data.uidMensajero || "";
-        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
-        payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
-      } else {
-        // Cliente
-        payload.costo = parseFloat(data.costoCliente || 0) || 0;
-        payload.pagoMensajero = 0;
-      }
-      
-      if (!docId) {
-        payload.estado = "pendiente";
-      }
-      
-      try {
-        if (docId) {
-          await db.collection('services').doc(docId).update(payload);
-        } else {
-          await db.collection('services').add(payload);
-        }
-        closeModal();
-        form.reset();
-      } catch (e) {
-        console.error('Error guardando servicio:', e);
-        alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
-      }
-    }
-
-    // Cargar lista de mensajeros
-    async function loadMensajerosList() {
-      try {
-        const mensajerosSnapshot = await db.collection('users')
-          .where('role', 'in', ['mensajero', 'admin'])
-          .get();
-        
-        mensajerosList = [];
-        mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
-        
-        mensajerosSnapshot.forEach(doc => {
-          const data = doc.data();
-          mensajerosList.push({
-            uid: doc.id,
-            displayName: data.displayName || data.email || doc.id
-          });
-          
-          const option = document.createElement('option');
-          option.value = doc.id;
-          option.textContent = data.displayName || data.email || doc.id;
-          mensajeroSelect.appendChild(option);
-        });
-      } catch (error) {
-        console.error('Error cargando mensajeros:', error);
-      }
-    }
-
-    // Suscribirse a servicios según el rol - FUNCIÓN CORREGIDA
-    function subscribeServicesByRole() {
-      const servicesEl = document.getElementById('services-section');
-      servicesEl.innerHTML = '<div class="text-center text-gold">Cargando servicios...</div>';
-      
-      // Cancelar suscripciones anteriores si existen
-      if (window._unsubServices) {
-        window._unsubServices();
-        window._unsubServices = null;
-      }
-      
-      if (window._unsubPendientes) {
-        window._unsubPendientes();
-        window._unsubPendientes = null;
-      }
-      
-      if (window._unsubAsignados) {
-        window._unsubAsignados();
-        window._unsubAsignados = null;
-      }
-      
-      let query;
-      
-      if (currentRole === 'admin') {
-        // Admin ve todos los servicios
-        query = db.collection('services').orderBy('fechaCreacion', 'desc');
-        
-        window._unsubServices = query.onSnapshot(snapshot => {
-          services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          renderServices();
-        }, error => {
-          console.error('Error cargando servicios (admin):', error);
-          servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios</div>';
-        });
-        
-      } else if (currentRole === 'cliente') {
-        // Cliente ve solo sus servicios
-        query = db.collection('services')
-          .where('uidCliente', '==', currentUser.uid)
-          .orderBy('fechaCreacion', 'desc');
-        
-        window._unsubServices = query.onSnapshot(snapshot => {
-          services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          renderServices();
-        }, error => {
-          console.error('Error cargando servicios (cliente):', error);
-          servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios</div>';
-        });
-        
-      } else if (currentRole === 'mensajero') {
-        // Mensajero ve servicios pendientes Y los asignados a él
-        const queryPendientes = db.collection('services')
-          .where('estado', '==', 'pendiente')
-          .orderBy('fechaCreacion', 'desc');
-        
-        const queryAsignados = db.collection('services')
-          .where('uidMensajero', '==', currentUser.uid)
-          .orderBy('fechaCreacion', 'desc');
-        
-        // Inicializar arrays para almacenar resultados
-        let serviciosPendientes = [];
-        let serviciosAsignados = [];
-        
-        // Función para combinar y renderizar
-        const combinarYRenderizar = () => {
-          // Combinar arrays y eliminar duplicados
-          const todosServicios = [...serviciosPendientes, ...serviciosAsignados];
-          const serviciosUnicos = todosServicios.filter((servicio, index, self) =>
-            index === self.findIndex(s => s.id === servicio.id)
-          );
-          
-          services = serviciosUnicos;
-          renderServices();
-        };
-        
-        // Escuchar servicios pendientes
-        window._unsubPendientes = queryPendientes.onSnapshot(snapshot => {
-          serviciosPendientes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          combinarYRenderizar();
-        }, error => {
-          console.error('Error cargando servicios pendientes:', error);
-        });
-        
-        // Escuchar servicios asignados
-        window._unsubAsignados = queryAsignados.onSnapshot(snapshot => {
-          serviciosAsignados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          combinarYRenderizar();
-        }, error => {
-          console.error('Error cargando servicios asignados:', error);
-        });
-        
-      } else {
-        // pending_mensajero
-        servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios.</div>';
-      }
-    }
-
-    // Renderizar servicios
-    function renderServices() {
-      const servicesEl = document.getElementById('services-section');
-      
-      if (services.length === 0) {
-        servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
-        return;
-      }
-      
-      let filteredServices = services;
-      
-      if (currentFilter !== 'all') {
-        filteredServices = services.filter(s => s.estado === currentFilter);
-      }
-      
-      servicesEl.innerHTML = '';
-      
-      filteredServices.forEach(service => {
-        const serviceCard = document.createElement('div');
-        serviceCard.className = 'service-card';
-        
-        let actionsHTML = '';
-        let statusClass = '';
-        
-        // Formatear fecha de creación
-        let fechaCreacion = 'Fecha no disponible';
-        if (service.fechaCreacion) {
-          const date = typeof service.fechaCreacion.toDate === 'function' ? 
-                       service.fechaCreacion.toDate() : new Date(service.fechaCreacion);
-          fechaCreacion = date.toLocaleString('es-CO');
-        }
-        
-        // Formatear fecha de entrega si existe
-        let fechaEntregaHTML = '';
-        if (service.fechaEntrega) {
-          const date = typeof service.fechaEntrega.toDate === 'function' ? 
-                       service.fechaEntrega.toDate() : new Date(service.fechaEntrega);
-          fechaEntregaHTML = `<div class="service-date"><i class="fas fa-calendar-check"></i> Entregado: ${date.toLocaleString('es-CO')}</div>`;
-        }
-        
-        switch (service.estado) {
-          case 'pendiente':
-            statusClass = 'status-pendiente';
-            if (currentRole === 'mensajero') {
-              actionsHTML = `<button class="btn-primary action-btn" onclick="takeService('${service.id}')">Tomar servicio</button>`;
-            } else if (currentRole === 'admin' || currentRole === 'cliente') {
-              actionsHTML = `
-                <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
-                <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
-              `;
-            }
-            break;
-          case 'en_ruta':
-            statusClass = 'status-en_ruta';
-            if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-              actionsHTML = `
-                <select class="action-btn" onchange="changeEstado('${service.id}', this.value)">
-                  <option value="en_ruta" selected>En ruta</option>
-                  <option value="entregado">Entregado</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
-                <button class="btn-primary action-btn" onclick="openEvidenceModal('${service.id}')">Tomar evidencia</button>
-              `;
-            } else if (currentRole === 'admin') {
-              actionsHTML = `
-                <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
-                <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
-              `;
-            }
-            break;
-          case 'entregado':
-            statusClass = 'status-entregado';
-            if (currentRole === 'admin') {
-              actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
-            }
-            break;
-          case 'cancelado':
-            statusClass = 'status-cancelado';
-            if (currentRole === 'admin') {
-              actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
-            }
-            break;
-        }
-        
-        serviceCard.innerHTML = `
-          <div class="service-header">
-            <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-            <div class="service-status ${statusClass}">${service.estado}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-user"></i>
-            <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-phone"></i>
-            <div class="service-detail-content">${service.telefono || 'No especificado'}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-map-marker-alt"></i>
-            <div class="service-detail-content">
-              <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
-              <div><strong>Entregar:</strong> ${service.entregar || 'No especificado'}</div>
-            </div>
-          </div>
-          ${service.volumen ? `
-            <div class="service-detail">
-              <i class="fas fa-box"></i>
-              <div class="service-detail-content">${service.volumen}</div>
-            </div>
-          ` : ''}
-          ${service.observaciones ? `
-            <div class="service-detail">
-              <i class="fas fa-sticky-note"></i>
-              <div class="service-detail-content">${service.observaciones}</div>
-            </div>
-          ` : ''}
-          <div class="service-date">
-            <i class="fas fa-calendar"></i> Creado: ${fechaCreacion}
-          </div>
-          ${fechaEntregaHTML}
-          <div class="service-actions">
-            ${actionsHTML}
-          </div>
-        `;
-        
-        servicesEl.appendChild(serviceCard);
+    // Show content sections
+    function showSection(sectionId) {
+      document.querySelectorAll('.main-content > div').forEach(section => {
+        section.classList.add('hidden');
       });
-    }
-
-    // Cambiar estado de servicio
-    async function changeEstado(serviceId, newEstado) {
-      try {
-        await db.collection('services').doc(serviceId).update({
-          estado: newEstado
-        });
-        
-        if (newEstado === 'entregado') {
-          // Abrir modal de evidencia
-          openEvidenceModal(serviceId);
-        }
-      } catch (error) {
-        console.error('Error cambiando estado:', error);
-        alert('Error al cambiar el estado del servicio');
-      }
-    }
-    window.changeEstado = changeEstado;
-
-    // Tomar servicio
-    async function takeService(serviceId) {
-      try {
-        await db.collection('services').doc(serviceId).update({
-          estado: 'en_ruta',
-          uidMensajero: currentUser.uid
-        });
-        alert('Servicio tomado con éxito');
-      } catch (error) {
-        console.error('Error tomando servicio:', error);
-        alert('Error al tomar el servicio');
-      }
-    }
-    window.takeService = takeService;
-
-    // Eliminar servicio
-    async function deleteService(serviceId) {
-      if (!confirm('¿Estás seguro de que deseas eliminar este servicio?')) return;
-      
-      try {
-        await db.collection('services').doc(serviceId).delete();
-        alert('Servicio eliminado con éxito');
-      } catch (error) {
-        console.error('Error eliminando servicio:', error);
-        alert('Error al eliminar el servicio');
-      }
-    }
-    window.deleteService = deleteService;
-
-    // Abrir modal de evidencia
-    function openEvidenceModal(serviceId) {
-      currentServiceIdForEvidence = serviceId;
-      const modal = document.getElementById('evidence-modal');
-      modal.classList.remove('hidden');
-      
-      // Iniciar cámara
-      startCamera();
-    }
-    window.openEvidenceModal = openEvidenceModal;
-
-    // Cerrar modal de evidencia
-    function closeEvidenceModal() {
-      const modal = document.getElementById('evidence-modal');
-      modal.classList.add('hidden');
-      stopCamera();
-      resetEvidenceModal();
-    }
-    window.closeEvidenceModal = closeEvidenceModal;
-
-    // Iniciar cámara
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const videoElement = document.getElementById('videoElement');
-        videoElement.srcObject = stream;
-      } catch (error) {
-        console.error('Error accediendo a la cámara:', error);
-        alert('No se pudo acceder a la cámara. Asegúrate de permitir el acceso.');
-      }
-    }
-
-    // Detener cámara
-    function stopCamera() {
-      const videoElement = document.getElementById('videoElement');
-      if (videoElement.srcObject) {
-        videoElement.srcObject.getTracks().forEach(track => track.stop());
-        videoElement.srcObject = null;
-      }
-    }
-
-    // Reiniciar modal de evidencia
-    function resetEvidenceModal() {
-      document.getElementById('captured-image-container').classList.add('hidden');
-      document.getElementById('videoElement').classList.remove('hidden');
-      document.getElementById('capture-btn').classList.remove('hidden');
-      
-      document.querySelectorAll('input[name="paymentMethod"]').forEach(input => {
-        input.checked = false;
-      });
-      
-      selectedPaymentMethod = null;
-      document.getElementById('confirm-delivery').disabled = true;
-    }
-
-    // Capturar foto
-    document.getElementById('capture-btn').addEventListener('click', () => {
-      const video = document.getElementById('videoElement');
-      const canvas = document.getElementById('canvasElement');
-      const context = canvas.getContext('2d');
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      const imageData = canvas.toDataURL('image/png');
-      document.getElementById('capturedImage').src = imageData;
-      
-      document.getElementById('captured-image-container').classList.remove('hidden');
-      document.getElementById('videoElement').classList.add('hidden');
-      document.getElementById('capture-btn').classList.add('hidden');
-      
-      stopCamera();
-    });
-
-    // Volver a tomar foto
-    document.getElementById('retake-btn').addEventListener('click', () => {
-      document.getElementById('captured-image-container').classList.add('hidden');
-      document.getElementById('videoElement').classList.remove('hidden');
-      document.getElementById('capture-btn').classList.remove('hidden');
-      
-      startCamera();
-    });
-
-    // Seleccionar método de pago
-    function selectPaymentMethod(method) {
-      selectedPaymentMethod = method;
-      document.getElementById('confirm-delivery').disabled = false;
-    }
-    window.selectPaymentMethod = selectPaymentMethod;
-
-    // Confirmar entrega
-    document.getElementById('confirm-delivery').addEventListener('click', async () => {
-      if (!selectedPaymentMethod) {
-        alert('Por favor selecciona un método de pago');
-        return;
-      }
-      
-      try {
-        const imageData = document.getElementById('capturedImage').src;
-        
-        await db.collection('services').doc(currentServiceIdForEvidence).update({
-          estado: 'entregado',
-          evidenciaEntrega: imageData,
-          metodoPago: selectedPaymentMethod,
-          fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        alert('Entrega confirmada con éxito');
-        closeEvidenceModal();
-      } catch (error) {
-        console.error('Error confirmando entrega:', error);
-        alert('Error al confirmar la entrega');
-      }
-    }
-
-    // Mostrar sección
-    function showSection(section) {
-      document.querySelectorAll('.main-content > div:not(#filters)').forEach(div => {
-        div.classList.add('hidden');
-      });
-      
-      document.getElementById(`${section}-section`).classList.remove('hidden');
-      
-      if (section === 'services') {
-        document.getElementById('filters').classList.remove('hidden');
-      } else {
-        document.getElementById('filters').classList.add('hidden');
-      }
-      
-      if (section === 'costos' && currentRole === 'admin') {
-        renderCostos();
-      } else if (section === 'cobros' && currentRole === 'admin') {
-        renderCobros();
-      }
+      document.getElementById(`${sectionId}-section`).classList.remove('hidden');
+      closeSidebar();
     }
     window.showSection = showSection;
-
-    // Establecer filtro
-    function setFilter(filter) {
-      currentFilter = filter;
-      
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      event.target.classList.add('active');
-      
-      renderServices();
+    
+    // Set filter for services
+    function setFilter(status) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      renderServices(status);
     }
     window.setFilter = setFilter;
 
-    // Mostrar resumen financiero
-    function showFinancialSummary() {
+    // Render services
+    async function renderServices(filter = 'all', initialLoad = false) {
+      if (!currentUser) return;
+      
+      const userId = currentUser.uid;
+      const servicesRef = db.collection('services');
+      let query = servicesRef.orderBy('createdAt', 'desc');
+      
+      if (userRole === 'cliente') {
+        query = query.where('uidCliente', '==', userId);
+      } else if (userRole === 'mensajero') {
+        query = query.where('uidMensajero', '==', userId);
+        if (filter === 'all') {
+            // No filter
+        } else if (filter === 'pendiente' || filter === 'en_ruta' || filter === 'entregado' || filter === 'cancelado') {
+            query = query.where('status', '==', filter);
+        } else {
+            // Handle other filter cases
+        }
+      } else if (userRole === 'admin') {
+        if (filter === 'all') {
+            // No filter
+        } else if (filter === 'pendiente' || filter === 'en_ruta' || filter === 'entregado' || filter === 'cancelado') {
+            query = query.where('status', '==', filter);
+        } else {
+            // Handle other filter cases
+        }
+      }
+      
+      if (initialLoad) {
+        query.onSnapshot(snapshot => {
+          const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          servicesSection.innerHTML = services.length > 0 ? services.map(renderServiceCard).join('') : '<p class="text-center text-gray-400 mt-8">No hay servicios para mostrar.</p>';
+        }, error => {
+          console.error("Error al obtener servicios:", error);
+          servicesSection.innerHTML = '<p class="text-center text-red-400 mt-8">Error al cargar servicios.</p>';
+        });
+      } else {
+        const snapshot = await query.get();
+        const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        servicesSection.innerHTML = services.length > 0 ? services.map(renderServiceCard).join('') : '<p class="text-center text-gray-400 mt-8">No hay servicios para mostrar.</p>';
+      }
+    }
+    
+    function renderServiceCard(service) {
+      const statusClass = `status-${service.status}`;
+      
+      const adminActions = userRole === 'admin' ? `
+        <button class="action-btn btn-danger" onclick="cancelService('${service.id}')">Cancelar</button>
+      ` : '';
+      
+      const clientActions = userRole === 'cliente' && service.status === 'pendiente' ? `
+        <button class="action-btn btn-danger" onclick="cancelService('${service.id}')">Cancelar</button>
+      ` : '';
+
+      const messengerActions = userRole === 'mensajero' && service.status === 'pendiente' ? `
+        <button class="action-btn btn-primary" onclick="acceptService('${service.id}')">Aceptar</button>
+        <button class="action-btn btn-danger" onclick="declineService('${service.id}')">Rechazar</button>
+      ` : userRole === 'mensajero' && service.status === 'en_ruta' ? `
+        <button class="action-btn btn-primary" onclick="openEvidenceModal('${service.id}')">Marcar como entregado</button>
+      ` : '';
+      
+      const mapLinkRecoger = service.recoger ? `<span class="clickable" onclick="openMaps('${service.recoger}')">Ver en mapa</span>` : '';
+      const mapLinkEntregar = service.entregar ? `<span class="clickable" onclick="openMaps('${service.entregar}')">Ver en mapa</span>` : '';
+
+      return `
+        <div class="service-card">
+          <div class="service-header">
+            <div class="service-client">
+              <i class="fas fa-building"></i> ${service.empresaCliente}
+            </div>
+            <span class="service-status ${statusClass}">${service.status.replace('_', ' ').toUpperCase()}</span>
+          </div>
+          
+          <div class="service-detail">
+            <i class="fas fa-user-alt"></i>
+            <div class="service-detail-content">
+              <span>Contacto:</span> ${service.contacto}
+            </div>
+          </div>
+          
+          ${service.telefono ? `
+          <div class="service-detail">
+            <i class="fas fa-phone"></i>
+            <div class="service-detail-content">
+              <span>Teléfono:</span> <a href="tel:${service.telefono}" class="clickable">${service.telefono}</a>
+            </div>
+          </div>` : ''}
+          
+          <div class="service-detail">
+            <i class="fas fa-map-marker-alt"></i>
+            <div class="service-detail-content">
+              <span>Recogida:</span> ${service.recoger} ${mapLinkRecoger}
+            </div>
+          </div>
+          
+          <div class="service-detail">
+            <i class="fas fa-map-marker-alt"></i>
+            <div class="service-detail-content">
+              <span>Entrega:</span> ${service.entregar} ${mapLinkEntregar}
+            </div>
+          </div>
+          
+          ${service.volumen ? `
+          <div class="service-detail">
+            <i class="fas fa-box-open"></i>
+            <div class="service-detail-content">
+              <span>Volumen:</span> ${service.volumen}
+            </div>
+          </div>` : ''}
+
+          ${service.observaciones ? `
+          <div class="service-detail">
+            <i class="fas fa-sticky-note"></i>
+            <div class="service-detail-content">
+              <span>Observaciones:</span> ${service.observaciones}
+            </div>
+          </div>` : ''}
+
+          ${service.costoCliente ? `
+          <div class="service-detail">
+            <i class="fas fa-hand-holding-usd"></i>
+            <div class="service-detail-content">
+              <span>Costo:</span> $${service.costoCliente.toLocaleString()}
+            </div>
+          </div>` : ''}
+
+          ${service.cobrarProducto ? `
+          <div class="service-detail">
+            <i class="fas fa-cash-register"></i>
+            <div class="service-detail-content">
+              <span>Valor a cobrar:</span> $${service.cobrarProducto.toLocaleString()}
+            </div>
+          </div>` : ''}
+          
+          <div class="service-detail">
+            <i class="fas fa-motorcycle"></i>
+            <div class="service-detail-content">
+              <span>Mensajero:</span> ${service.mensajeroName || 'No asignado'}
+            </div>
+          </div>
+          
+          <div class="service-date">
+            <i class="fas fa-calendar-alt"></i> Creado: ${service.createdAt.toDate().toLocaleDateString()}
+          </div>
+          
+          <div class="service-actions">
+            ${adminActions}
+            ${clientActions}
+            ${messengerActions}
+          </div>
+        </div>
+      `;
+    }
+
+    // Modal
+    function openModal() {
+      modal.classList.remove('hidden');
+      closeSidebar();
+    }
+    window.openModal = openModal;
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      serviceForm.reset();
+      document.getElementById('field-costo-cliente-container').classList.add('hidden');
+      document.getElementById('admin-fields').classList.add('hidden');
+      document.getElementById('cobrar-field-container').classList.add('hidden');
+    }
+    window.closeModal = closeModal;
+
+    // Show or hide cobrar field
+    document.getElementById('cobrar-check').addEventListener('change', (e) => {
+      document.getElementById('cobrar-field-container').classList.toggle('hidden', !e.target.checked);
+    });
+
+    // Handle form submission
+    serviceForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(serviceForm);
+      const data = Object.fromEntries(formData.entries());
+      
+      if (userRole !== 'admin') {
+        data.costoCliente = 0;
+        data.uidMensajero = '';
+        data.pagoMensajero = 0;
+      }
+      
+      const newService = {
+        uidCliente: currentUser.uid,
+        empresaCliente: data.empresaCliente,
+        contacto: data.contacto,
+        telefono: data.telefono,
+        recoger: data.recoger,
+        entregar: data.entregar,
+        volumen: data.volumen,
+        costoCliente: data.costoCliente ? parseFloat(data.costoCliente) : 0,
+        cobrarProducto: data.cobrarProducto ? parseFloat(data.cobrarProducto) : 0,
+        observaciones: data.observaciones,
+        uidMensajero: data.uidMensajero || '',
+        pagoMensajero: data.pagoMensajero ? parseFloat(data.pagoMensajero) : 0,
+        status: data.uidMensajero ? 'en_ruta' : 'pendiente',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      
+      if (userRole === 'admin' && data.uidMensajero) {
+        const mensajeroDoc = await db.collection('users').doc(data.uidMensajero).get();
+        if (mensajeroDoc.exists) {
+          newService.mensajeroName = mensajeroDoc.data().displayName;
+        }
+      }
+      
+      try {
+        await db.collection('services').add(newService);
+        alert('Servicio registrado con éxito.');
+        closeModal();
+      } catch (error) {
+        console.error("Error al registrar servicio:", error);
+        alert('Error al registrar el servicio. Por favor, intenta de nuevo.');
+      }
+    });
+
+    // Accept Service (Mensajero)
+    async function acceptService(serviceId) {
+      if (userRole !== 'mensajero') return;
+      try {
+        await db.collection('services').doc(serviceId).update({
+          uidMensajero: currentUser.uid,
+          mensajeroName: currentUser.displayName,
+          status: 'en_ruta',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Servicio aceptado y en ruta.');
+      } catch (error) {
+        console.error("Error al aceptar servicio:", error);
+        alert('Error al aceptar el servicio.');
+      }
+    }
+    window.acceptService = acceptService;
+
+    // Decline Service (Mensajero)
+    async function declineService(serviceId) {
+      if (userRole !== 'mensajero') return;
+      try {
+        await db.collection('services').doc(serviceId).update({
+          uidMensajero: '',
+          mensajeroName: '',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Servicio rechazado.');
+      } catch (error) {
+        console.error("Error al rechazar servicio:", error);
+        alert('Error al rechazar el servicio.');
+      }
+    }
+    window.declineService = declineService;
+
+    // Cancel Service (Cliente/Admin)
+    async function cancelService(serviceId) {
+      if (userRole !== 'cliente' && userRole !== 'admin') return;
+      if (!confirm('¿Estás seguro de que quieres cancelar este servicio?')) return;
+      try {
+        await db.collection('services').doc(serviceId).update({
+          status: 'cancelado',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Servicio cancelado.');
+      } catch (error) {
+        console.error("Error al cancelar servicio:", error);
+        alert('Error al cancelar el servicio.');
+      }
+    }
+    window.cancelService = cancelService;
+
+    // Financial Summary
+    async function showFinancialSummary() {
+      if (userRole !== 'mensajero') return;
       showSection('financial');
-      renderFinancialSummary();
+      
+      const servicesRef = db.collection('services');
+      const services = (await servicesRef
+        .where('uidMensajero', '==', currentUser.uid)
+        .where('status', '==', 'entregado')
+        .get()).docs.map(doc => doc.data());
+
+      let totalEarned = 0;
+      let totalPaid = 0;
+      let totalsByDate = {};
+      
+      services.forEach(service => {
+        totalEarned += service.pagoMensajero;
+        totalPaid += service.paid ? service.pagoMensajero : 0;
+        
+        const date = service.createdAt.toDate().toLocaleDateString();
+        if (!totalsByDate[date]) {
+          totalsByDate[date] = { earned: 0, paid: 0, services: [] };
+        }
+        
+        totalsByDate[date].earned += service.pagoMensajero;
+        if (service.paid) {
+          totalsByDate[date].paid += service.pagoMensajero;
+        }
+        totalsByDate[date].services.push(service);
+      });
+      
+      totalEarnedEl.textContent = `$${totalEarned.toLocaleString()}`;
+      totalPaidEl.textContent = `$${totalPaid.toLocaleString()}`;
+      totalPendingEl.textContent = `$${(totalEarned - totalPaid).toLocaleString()}`;
+      
+      financialListEl.innerHTML = Object.entries(totalsByDate).map(async ([date, data]) => {
+        const servicesHtml = data.services.map(service => `
+            <div class="service-card" style="margin-bottom: 10px;">
+                <div class="service-header" style="border-bottom: 1px solid rgba(207, 149, 36, 0.3); padding-bottom: 10px; margin-bottom: 10px;">
+                    <span class="text-gold" style="font-weight: 600;">#${service.empresaCliente}</span>
+                    <span style="font-size: 14px;">Pago: $${service.pagoMensajero.toLocaleString()}</span>
+                </div>
+                <div class="service-detail" style="font-size: 12px; color: var(--text-gray);">
+                    <i class="fas fa-check-circle" style="color: green;"></i> Estado: ${service.paid ? 'Pagado' : 'Pendiente de pago'}
+                </div>
+            </div>
+        `).join('');
+        
+        return `
+            <div class="history-day">
+                <h4 class="history-date">${date}</h4>
+                ${servicesHtml}
+                <div style="text-align: right; font-weight: 600;">
+                    <span>Total del día:</span>
+                    <span class="text-gold">$${data.earned.toLocaleString()}</span>
+                </div>
+            </div>
+        `;
+      }).join('');
     }
     window.showFinancialSummary = showFinancialSummary;
 
-    // Renderizar resumen financiero
-    async function renderFinancialSummary() {
-      const financialList = document.getElementById('financial-list');
-      financialList.innerHTML = '<div class="text-center text-gold">Cargando resumen financiero...</div>';
-      
-      try {
-        const snapshot = await db.collection('services')
-          .where('uidMensajero', '==', currentUser.uid)
-          .where('estado', '==', 'entregado')
-          .get();
-        
-        if (snapshot.empty) {
-          financialList.innerHTML = '<div class="text-center text-gold">No hay servicios entregados</div>';
-          return;
-        }
-        
-        const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // Calcular totales
-        let totalEarned = 0;
-        let totalPending = 0;
-        let totalPaid = 0;
-        
-        services.forEach(service => {
-          const amount = service.pagoMensajero || 0;
-          totalEarned += amount;
-          
-          if (service.pagado) {
-            totalPaid += amount;
-          } else {
-            totalPending += amount;
-          }
-        });
-        
-        document.getElementById('total-earned').textContent = `$${totalEarned.toLocaleString()}`;
-        document.getElementById('total-pending').textContent = `$${totalPending.toLocaleString()}`;
-        document.getElementById('total-paid').textContent = `$${totalPaid.toLocaleString()}`;
-        
-        // Agrupar por fecha
-        const servicesByDate = {};
-        
-        services.forEach(service => {
-          let date;
-          if (service.fechaEntrega && service.fechaEntrega.toDate) {
-            date = service.fechaEntrega.toDate().toLocaleDateString();
-          } else {
-            date = 'Fecha desconocida';
-          }
-          
-          if (!servicesByDate[date]) {
-            servicesByDate[date] = [];
-          }
-          
-          servicesByDate[date].push(service);
-        });
-        
-        financialList.innerHTML = '';
-        
-        Object.keys(servicesByDate).forEach(date => {
-          const dateSection = document.createElement('div');
-          dateSection.className = 'history-day';
-          
-          // Calcular total del día
-          let dayTotal = 0;
-          let dayPaid = 0;
-          let dayPending = 0;
-          
-          servicesByDate[date].forEach(service => {
-            const amount = service.pagoMensajero || 0;
-            dayTotal += amount;
-            
-            if (service.pagado) {
-              dayPaid += amount;
-            } else {
-              dayPending += amount;
-            }
-          });
-          
-          dateSection.innerHTML = `
-            <div class="history-date">
-              ${date} - Total: $${dayTotal.toLocaleString()} (Pagado: $${dayPaid.toLocaleString()}, Pendiente: $${dayPending.toLocaleString()})
-            </div>
-          `;
-          
-          servicesByDate[date].forEach(service => {
-            const serviceCard = document.createElement('div');
-            serviceCard.className = 'service-card';
-            
-            serviceCard.innerHTML = `
-              <div class="service-header">
-                <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-                <div class="service-status ${service.pagado ? 'status-entregado' : 'status-pendiente'}">
-                  ${service.pagado ? 'Pagado' : 'Pendiente'}
-                </div>
-              </div>
-              <div class="service-detail">
-                <i class="fas fa-map-marker-alt"></i>
-                <div class="service-detail-content">${service.entregar || 'No especificado'}</div>
-              </div>
-              <div class="service-detail">
-                <i class="fas fa-money-bill-wave"></i>
-                <div class="service-detail-content">$${service.pagoMensajero || 0}</div>
-              </div>
-              ${!service.pagado ? `
-                <div class="service-actions">
-                  <button class="btn-primary action-btn" onclick="markAsPaid('${service.id}')">Marcar como pagado</button>
-                </div>
-              ` : ''}
-            `;
-            
-            dateSection.appendChild(serviceCard);
-          });
-          
-          financialList.appendChild(dateSection);
-        });
-      } catch (error) {
-        console.error('Error cargando resumen financiero:', error);
-        financialList.innerHTML = '<div class="text-center text-red-500">Error cargando el resumen financiero</div>';
-      }
-    }
-
-    // Marcar como pagado
-    async function markAsPaid(serviceId) {
-      try {
-        await db.collection('services').doc(serviceId).update({
-          pagado: true,
-          fechaPago: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        alert('Servicio marcado como pagado');
-        renderFinancialSummary();
-      } catch (error) {
-        console.error('Error marcando como pagado:', error);
-        alert('Error al marcar como pagado');
-      }
-    }
-    window.markAsPaid = markAsPaid;
-
-    // Listar mensajeros pendientes
+    // Admin - List pending messengers
     async function listPendingMensajeros() {
+      if (userRole !== 'admin') return;
       showSection('pending');
-      
-      const pendingList = document.getElementById('pending-list');
-      pendingList.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
-      
-      try {
-        const snapshot = await db.collection('users')
-          .where('role', '==', 'pending_mensajero')
-          .get();
-        
-        if (snapshot.empty) {
-          pendingList.innerHTML = '<div class="text-center text-gold">No hay solicitudes pendientes</div>';
-          return;
-        }
-        
-        const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        pendingList.innerHTML = '';
-        
-        users.forEach(user => {
-          const userCard = document.createElement('div');
-          userCard.className = 'pending-card';
-          
-          userCard.innerHTML = `
-            <div class="service-header">
-              <div class="service-client">${user.displayName || user.email}</div>
-            </div>
-            <div class="service-detail">
-              <i class="fas fa-envelope"></i>
-              <div class="service-detail-content">${user.email}</div>
-            </div>
-            <div class="service-detail">
-              <i class="fas fa-calendar"></i>
-              <div class="service-detail-content">
-                Solicitado el: ${user.createdAt && user.createdAt.toDate ? user.createdAt.toDate().toLocaleDateString() : 'Fecha desconocida'}
-              </div>
-            </div>
-            <div class="pending-actions">
-              <button class="btn-primary action-btn" onclick="approveMensajero('${user.id}')">Aprobar</button>
-              <button class="btn-danger action-btn" onclick="rejectMensajero('${user.id}')">Rechazar</button>
-            </div>
-          `;
-          
-          pendingList.appendChild(userCard);
-        });
-      } catch (error) {
-        console.error('Error cargando solicitudes:', error);
-        pendingList.innerHTML = '<div class="text-center text-red-500">Error cargando las solicitudes</div>';
-      }
+
+      const pendingUsersRef = db.collection('users').where('role', '==', 'mensajero').where('status', '==', 'pending');
+      const snapshot = await pendingUsersRef.get();
+      const pendingUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      pendingListEl.innerHTML = pendingUsers.length > 0 ? pendingUsers.map(renderPendingCard).join('') : '<p class="text-center text-gray-400 mt-8">No hay solicitudes de mensajero pendientes.</p>';
     }
     window.listPendingMensajeros = listPendingMensajeros;
 
-    // Aprobar mensajero
+    function renderPendingCard(user) {
+      return `
+        <div class="pending-card">
+          <div class="service-header">
+            <div class="service-client">
+              <i class="fas fa-user-circle"></i> ${user.displayName}
+            </div>
+          </div>
+          <div class="service-detail">
+            <i class="fas fa-envelope"></i>
+            <div class="service-detail-content">
+              <span>Email:</span> ${user.email}
+            </div>
+          </div>
+          <div class="pending-actions">
+            <button class="action-btn btn-primary" onclick="approveMensajero('${user.id}')">Aprobar</button>
+            <button class="action-btn btn-danger" onclick="rejectMensajero('${user.id}')">Rechazar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Admin - Approve messenger
     async function approveMensajero(userId) {
       try {
         await db.collection('users').doc(userId).update({
-          role: 'mensajero'
+          status: 'active'
         });
-        
-        alert('Mensajero aprobado con éxito');
+        alert('Mensajero aprobado con éxito.');
         listPendingMensajeros();
       } catch (error) {
-        console.error('Error aprobando mensajero:', error);
-        alert('Error al aprobar el mensajero');
+        console.error("Error al aprobar mensajero:", error);
+        alert('Error al aprobar el mensajero.');
       }
     }
     window.approveMensajero = approveMensajero;
 
-    // Rechazar mensajero
+    // Admin - Reject messenger
     async function rejectMensajero(userId) {
       try {
         await db.collection('users').doc(userId).update({
-          role: 'cliente'
+          status: 'rejected'
         });
-        
-        alert('Solicitud rechazada');
+        alert('Mensajero rechazado.');
         listPendingMensajeros();
       } catch (error) {
-        console.error('Error rechazando mensajero:', error);
-        alert('Error al rechazar la solicitud');
+        console.error("Error al rechazar mensajero:", error);
+        alert('Error al rechazar el mensajero.');
       }
     }
     window.rejectMensajero = rejectMensajero;
 
-    // Renderizar costos
-    async function renderCostos() {
-      const costosBody = document.getElementById('costos-body');
-      costosBody.innerHTML = '<div class="text-center text-gold">Cargando costos...</div>';
-      
-      try {
-        const snapshot = await db.collection('services').get();
-        
-        if (snapshot.empty) {
-          costosBody.innerHTML = '<div class="text-center text-gold">No hay servicios registrados</div>';
-          return;
-        }
-        
-        const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // Agrupar por empresa y calcular costos
-        const costosPorEmpresa = {};
-        
-        services.forEach(service => {
-          const empresa = service.empresa || 'Sin especificar';
-          
-          if (!costosPorEmpresa[empresa]) {
-            costosPorEmpresa[empresa] = {
-              count: 0,
-              totalCosto: 0,
-              totalPagoMensajero: 0
-            };
-          }
-          
-          costosPorEmpresa[empresa].count++;
-          costosPorEmpresa[empresa].totalCosto += service.costo || 0;
-          costosPorEmpresa[empresa].totalPagoMensajero += service.pagoMensajero || 0;
-        });
-        
-        costosBody.innerHTML = '';
-        
-        Object.keys(costosPorEmpresa).forEach(empresa => {
-          const data = costosPorEmpresa[empresa];
-          const card = document.createElement('div');
-          card.className = 'financial-card';
-          
-          card.innerHTML = `
-            <div class="service-header">
-              <div class="service-client">${empresa</div>
-              <div class="service-status">${data.count} servicios</div>
-            </div>
-            <div class="financial-item">
-              <span>Total facturado:</span>
-              <span class="text-gold">$${data.totalCosto.toLocaleString()}</span>
-            </div>
-            <div class="financial-item">
-              <span>Total pagado a mensajeros:</span>
-              <span class="text-gold">$${data.totalPagoMensajero.toLocaleString()}</span>
-            </div>
-            <div class="financial-item">
-              <span>Ganancia neta:</span>
-              <span class="text-gold">$${(data.totalCosto - data.totalPagoMensajero).toLocaleString()}</span>
-            </div>
-          `;
-          
-          costosBody.appendChild(card);
-        });
-      } catch (error) {
-        console.error('Error cargando costos:', error);
-        costosBody.innerHTML = '<div class="text-center text-red-500">Error cargando los costos</div>';
-      }
-    }
+    // Admin - List and render 'costos'
+    async function showCostos() {
+      if (userRole !== 'admin') return;
+      showSection('costos');
 
-    // Renderizar cobros
-    async function renderCobros() {
-      const cobrosBody = document.getElementById('cobros-body');
-      cobrosBody.innerHTML = '<div class="text-center text-gold">Cargando cobros...</div>';
+      const servicesRef = db.collection('services').orderBy('createdAt', 'desc');
+      const snapshot = await servicesRef.get();
+      const services = snapshot.docs.map(doc => doc.data());
       
-      try {
-        const snapshot = await db.collection('services')
-          .where('cobrarProducto', '>', 0)
-          .get();
-        
-        if (snapshot.empty) {
-          cobrosBody.innerHTML = '<div class="text-center text-gold">No hay cobros pendientes</div>';
-          return;
+      const costos = {};
+      services.forEach(service => {
+        if (!costos[service.empresaCliente]) {
+          costos[service.empresaCliente] = 0;
         }
-        
-        const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        let totalCobros = 0;
-        
-        cobrosBody.innerHTML = '';
-        
-        services.forEach(service => {
-          totalCobros += service.cobrarProducto || 0;
-          
-          const card = document.createElement('div');
-          card.className = 'financial-card';
-          
-          card.innerHTML = `
-            <div class="service-header">
-              <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-              <div class="service-status">$${(service.cobrarProducto || 0).toLocaleString()}</div>
-            </div>
-            <div class="service-detail">
-              <i class="fas fa-map-marker-alt"></i>
-              <div class="service-detail-content">${service.entregar || 'No especificado'}</div>
-            </div>
-            <div class="service-detail">
-              <i class="fas fa-phone"></i>
-              <div class="service-detail-content">${service.telefono || 'No especificado'}</div>
-            </div>
-            <div class="service-detail">
-              <i class="fas fa-user"></i>
-              <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
-            </div>
-          `;
-          
-          cobrosBody.appendChild(card);
-        });
-        
-        const totalCard = document.createElement('div');
-        totalCard.className = 'financial-card';
-        totalCard.innerHTML = `
+        costos[service.empresaCliente] += service.costoCliente || 0;
+      });
+      
+      const costosHtml = Object.entries(costos).map(([empresa, totalCosto]) => `
+        <div class="financial-card">
           <div class="financial-item">
-            <span style="font-weight: bold;">TOTAL A COBRAR:</span>
-            <span class="text-gold" style="font-weight: bold;">$${totalCobros.toLocaleString()}</span>
+            <span>${empresa}</span>
+            <span class="text-gold">$${totalCosto.toLocaleString()}</span>
           </div>
-        `;
-        
-        cobrosBody.appendChild(totalCard);
-      } catch (error) {
-        console.error('Error cargando cobros:', error);
-        cobrosBody.innerHTML = '<div class="text-center text-red-500">Error cargando los cobros</div>';
+        </div>
+      `).join('');
+      
+      costosBody.innerHTML = costosHtml || '<p class="text-center text-gray-400 mt-8">No hay costos para mostrar.</p>';
+    }
+    window.showCostos = showCostos;
+
+    // Admin - List and render 'cobros'
+    async function showCobros() {
+      if (userRole !== 'admin') return;
+      showSection('cobros');
+
+      const servicesRef = db.collection('services').orderBy('createdAt', 'desc');
+      const snapshot = await servicesRef.get();
+      const services = snapshot.docs.map(doc => doc.data());
+      
+      const cobros = {};
+      services.forEach(service => {
+        if (!cobros[service.empresaCliente]) {
+          cobros[service.empresaCliente] = 0;
+        }
+        cobros[service.empresaCliente] += service.cobrarProducto || 0;
+      });
+      
+      const cobrosHtml = Object.entries(cobros).map(([empresa, totalCobro]) => `
+        <div class="financial-card">
+          <div class="financial-item">
+            <span>${empresa}</span>
+            <span class="text-gold">$${totalCobro.toLocaleString()}</span>
+          </div>
+        </div>
+      `).join('');
+
+      cobrosBody.innerHTML = cobrosHtml || '<p class="text-center text-gray-400 mt-8">No hay cobros para mostrar.</p>';
+    }
+    window.showCobros = showCobros;
+
+    // Update messenger list
+    async function updateMensajerosList() {
+      if (userRole !== 'admin') return;
+      const mensajerosRef = db.collection('users').where('role', '==', 'mensajero').where('status', '==', 'active');
+      const snapshot = await mensajerosRef.get();
+      const mensajeros = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      const selectElement = document.getElementById('field-mensajero');
+      selectElement.innerHTML = '<option value="">Seleccionar mensajero</option>';
+      mensajeros.forEach(mensajero => {
+        const option = document.createElement('option');
+        option.value = mensajero.id;
+        option.textContent = mensajero.displayName;
+        selectElement.appendChild(option);
+      });
+    }
+
+    // Handle view changes based on role
+    function handleRoleBasedView() {
+      if (userRole === 'admin') {
+        document.getElementById('field-costo-cliente-container').classList.remove('hidden');
+        document.getElementById('admin-fields').classList.remove('hidden');
+        updateMensajerosList();
       }
     }
 
-    // Abrir edición de perfil
+    // Modal de evidencia
+    const evidenceModal = document.getElementById('evidence-modal');
+    const videoElement = document.getElementById('videoElement');
+    const captureBtn = document.getElementById('capture-btn');
+    const canvasElement = document.getElementById('canvasElement');
+    const capturedImageContainer = document.getElementById('captured-image-container');
+    const capturedImage = document.getElementById('capturedImage');
+    const retakeBtn = document.getElementById('retake-btn');
+    const confirmDeliveryBtn = document.getElementById('confirm-delivery');
+    
+    let currentServiceId = null;
+    let imageFile = null;
+
+    async function openEvidenceModal(serviceId) {
+      currentServiceId = serviceId;
+      evidenceModal.classList.remove('hidden');
+      confirmDeliveryBtn.disabled = true;
+      capturedImageContainer.classList.add('hidden');
+      videoElement.classList.remove('hidden');
+      captureBtn.classList.remove('hidden');
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoElement.srcObject = stream;
+        videoElement.play();
+      } catch (err) {
+        console.error("Error al acceder a la cámara:", err);
+        alert("No se pudo acceder a la cámara. Asegúrate de dar los permisos necesarios.");
+      }
+    }
+    window.openEvidenceModal = openEvidenceModal;
+
+    function closeEvidenceModal() {
+      evidenceModal.classList.add('hidden');
+      const stream = videoElement.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+      videoElement.srcObject = null;
+    }
+    window.closeEvidenceModal = closeEvidenceModal;
+
+    captureBtn.addEventListener('click', () => {
+      canvasElement.width = videoElement.videoWidth;
+      canvasElement.height = videoElement.videoHeight;
+      const context = canvasElement.getContext('2d');
+      context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+      const imageDataUrl = canvasElement.toDataURL('image/jpeg');
+      
+      capturedImage.src = imageDataUrl;
+      capturedImageContainer.classList.remove('hidden');
+      videoElement.classList.add('hidden');
+      captureBtn.classList.add('hidden');
+      
+      confirmDeliveryBtn.disabled = false;
+      canvasElement.toBlob(blob => {
+        imageFile = blob;
+      }, 'image/jpeg');
+    });
+
+    retakeBtn.addEventListener('click', () => {
+      capturedImageContainer.classList.add('hidden');
+      videoElement.classList.remove('hidden');
+      captureBtn.classList.remove('hidden');
+      confirmDeliveryBtn.disabled = true;
+      imageFile = null;
+    });
+
+    confirmDeliveryBtn.addEventListener('click', async () => {
+      if (!currentServiceId || !imageFile) {
+        alert("Por favor, toma una foto de la evidencia.");
+        return;
+      }
+      
+      const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+      if (!selectedPaymentMethod) {
+        alert("Por favor, selecciona un método de pago.");
+        return;
+      }
+
+      const paymentMethod = selectedPaymentMethod.value;
+
+      try {
+        // Subir imagen a Firebase Storage
+        const storageRef = storage.ref();
+        const evidenceRef = storageRef.child(`evidence/${currentServiceId}_${Date.now()}.jpg`);
+        await evidenceRef.put(imageFile);
+        const imageUrl = await evidenceRef.getDownloadURL();
+        
+        // Actualizar el servicio en Firestore
+        await db.collection('services').doc(currentServiceId).update({
+          status: 'entregado',
+          evidenceUrl: imageUrl,
+          paymentMethod: paymentMethod,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        alert('Servicio marcado como entregado con éxito.');
+        closeEvidenceModal();
+      } catch (error) {
+        console.error("Error al confirmar entrega:", error);
+        alert('Error al confirmar la entrega.');
+      }
+    });
+
+    // Handle initial app state
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        checkUserRole(user);
+      } else {
+        showLoginView();
+      }
+    });
+
+    // Event listeners
+    btnGoogle.addEventListener('click', handleGoogleSignIn);
+    btnLogout.addEventListener('click', handleSignOut);
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarBackdrop.addEventListener('click', closeSidebar);
+    closeSidebarBtn.addEventListener('click', closeSidebar);
+    
+    // Edit Profile Modal
     function openEditProfile() {
-      const modal = document.getElementById('edit-profile-modal');
-      document.getElementById('profile-displayName').value = userNameEl.textContent;
-      modal.classList.remove('hidden');
+      if (!currentUser) return;
+      document.getElementById('profile-displayName').value = currentUser.displayName || '';
+      editProfileModal.classList.remove('hidden');
     }
     window.openEditProfile = openEditProfile;
 
-    // Cerrar edición de perfil
+    // Close edit profile
     function closeEditProfile() {
       document.getElementById('edit-profile-modal').classList.add('hidden');
     }
     window.closeEditProfile = closeEditProfile;
 
-    // Manejar actualización de perfil
+    // Handle profile update
     async function handleProfileUpdate(e) {
       e.preventDefault();
       
@@ -2469,16 +2061,19 @@
         alert('Error al actualizar el perfil');
       }
     }
+    document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
 
-    // Abrir mapas
+    // Open maps
     function openMaps(address) {
       const encodedAddress = encodeURIComponent(address);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+      window.open(`http://maps.google.com/?q=${encodedAddress}`, '_blank');
     }
     window.openMaps = openMaps;
 
-    // Inicializar la aplicación cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', initApp);
+    // Initialize the app when the DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      handleRoleBasedView();
+    });
   </script>
 </body>
 </html>
