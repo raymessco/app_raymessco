@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
@@ -1230,6 +1230,9 @@
     let selectedPaymentMethod = null;
     let mensajerosList = [];
     let deferredPrompt = null;
+    
+    // NUEVA VARIABLE PARA MANEJAR LISTENERS
+    let _servicesUnsubscribe = null;
 
     // Referencias a elementos UI
     const loginView = document.getElementById('login-view');
@@ -1352,10 +1355,8 @@
         appView.classList.add('hidden');
         loginView.classList.remove('hidden');
         
-        if (_userProfileUnsub) {
-          _userProfileUnsub();
-          _userProfileUnsub = null;
-        }
+        // LIMPIAR LISTENERS AL HACER LOGOUT
+        cleanupListeners();
         
         return;
       }
@@ -1403,6 +1404,19 @@
       setFilter('all');
     }
 
+    // NUEVA FUNCIÓN PARA LIMPIAR LISTENERS
+    function cleanupListeners() {
+      if (_userProfileUnsub) {
+        _userProfileUnsub();
+        _userProfileUnsub = null;
+      }
+      
+      if (_servicesUnsubscribe) {
+        _servicesUnsubscribe();
+        _servicesUnsubscribe = null;
+      }
+    }
+
     // Mostrar selección de rol para usuarios nuevos
     function showRoleSelection() {
       roleChoiceModal.classList.remove('hidden');
@@ -1422,6 +1436,7 @@
         roleChoiceModal.classList.add('hidden');
         updateUIByRole();
         subscribeToUserProfile(currentUser.uid);
+        subscribeServicesByRole(); // ✅ AGREGAR ESTA LÍNEA
       } catch (error) {
         console.error("Error guardando rol:", error);
         alert("Error al guardar la selección de rol. Intenta nuevamente.");
@@ -1639,25 +1654,21 @@
       }
     }
 
-    // Suscribirse a servicios según el rol - FUNCIÓN CORREGIDA
+    // ✅ FUNCIÓN CORREGIDA - SUSCRIBIRSE A SERVICIOS SEGÚN EL ROL
     function subscribeServicesByRole() {
       const servicesEl = document.getElementById('services-section');
       servicesEl.innerHTML = '<div class="text-center text-gold">Cargando servicios...</div>';
       
-      // Cancelar suscripciones anteriores si existen
-      if (window._unsubServices) {
-        window._unsubServices();
-        window._unsubServices = null;
+      // Limpiar listener anterior si existe
+      if (_servicesUnsubscribe) {
+        _servicesUnsubscribe();
+        _servicesUnsubscribe = null;
       }
       
-      if (window._unsubPendientes) {
-        window._unsubPendientes();
-        window._unsubPendientes = null;
-      }
-      
-      if (window._unsubAsignados) {
-        window._unsubAsignados();
-        window._unsubAsignados = null;
+      // Verificar que el usuario esté autenticado y tenga rol
+      if (!currentUser || !currentRole) {
+        servicesEl.innerHTML = '<div class="text-center text-gold">Esperando datos de usuario...</div>';
+        return;
       }
       
       let query;
@@ -1666,74 +1677,53 @@
         // Admin ve todos los servicios
         query = db.collection('services').orderBy('fechaCreacion', 'desc');
         
-        window._unsubServices = query.onSnapshot(snapshot => {
-          services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          renderServices();
-        }, error => {
-          console.error('Error cargando servicios (admin):', error);
-          servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios</div>';
-        });
-        
       } else if (currentRole === 'cliente') {
         // Cliente ve solo sus servicios
         query = db.collection('services')
           .where('uidCliente', '==', currentUser.uid)
           .orderBy('fechaCreacion', 'desc');
         
-        window._unsubServices = query.onSnapshot(snapshot => {
-          services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          renderServices();
-        }, error => {
-          console.error('Error cargando servicios (cliente):', error);
-          servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios</div>';
-        });
-        
       } else if (currentRole === 'mensajero') {
-        // Mensajero ve servicios pendientes Y los asignados a él
-        const queryPendientes = db.collection('services')
-          .where('estado', '==', 'pendiente')
-          .orderBy('fechaCreacion', 'desc');
+        // ✅ SOLUCIÓN: Mensajero ve TODOS los servicios pendientes + sus asignados
+        // Usamos una sola consulta que incluye ambos casos
+        query = db.collection('services').orderBy('fechaCreacion', 'desc');
         
-        const queryAsignados = db.collection('services')
-          .where('uidMensajero', '==', currentUser.uid)
-          .orderBy('fechaCreacion', 'desc');
-        
-        // Inicializar arrays para almacenar resultados
-        let serviciosPendientes = [];
-        let serviciosAsignados = [];
-        
-        // Función para combinar y renderizar
-        const combinarYRenderizar = () => {
-          // Combinar arrays y eliminar duplicados
-          const todosServicios = [...serviciosPendientes, ...serviciosAsignados];
-          const serviciosUnicos = todosServicios.filter((servicio, index, self) =>
-            index === self.findIndex(s => s.id === servicio.id)
-          );
-          
-          services = serviciosUnicos;
-          renderServices();
-        };
-        
-        // Escuchar servicios pendientes
-        window._unsubPendientes = queryPendientes.onSnapshot(snapshot => {
-          serviciosPendientes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          combinarYRenderizar();
-        }, error => {
-          console.error('Error cargando servicios pendientes:', error);
-        });
-        
-        // Escuchar servicios asignados
-        window._unsubAsignados = queryAsignados.onSnapshot(snapshot => {
-          serviciosAsignados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          combinarYRenderizar();
-        }, error => {
-          console.error('Error cargando servicios asignados:', error);
-        });
-        
+      } else if (currentRole === 'pending_mensajero') {
+        // Mensajeros pendientes no ven servicios
+        servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios aún.</div>';
+        return;
       } else {
-        // pending_mensajero
-        servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios.</div>';
+        servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
+        return;
       }
+      
+      // Crear el listener
+      _servicesUnsubscribe = query.onSnapshot(snapshot => {
+        console.log(`Servicios cargados: ${snapshot.docs.length} documentos`);
+        
+        let allServices = snapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data() 
+        }));
+        
+        // ✅ FILTRAR SERVICIOS SEGÚN EL ROL DESPUÉS DE CARGARLOS
+        if (currentRole === 'mensajero') {
+          // Mensajero ve: servicios pendientes + servicios asignados a él
+          services = allServices.filter(service => 
+            service.estado === 'pendiente' || 
+            service.uidMensajero === currentUser.uid
+          );
+        } else {
+          // Admin y cliente ven sus servicios según la consulta original
+          services = allServices;
+        }
+        
+        console.log(`Servicios filtrados para ${currentRole}: ${services.length}`);
+        renderServices();
+      }, error => {
+        console.error('Error cargando servicios:', error);
+        servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios</div>';
+      });
     }
 
     // Renderizar servicios
@@ -1749,6 +1739,11 @@
       
       if (currentFilter !== 'all') {
         filteredServices = services.filter(s => s.estado === currentFilter);
+      }
+      
+      if (filteredServices.length === 0) {
+        servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios con este filtro</div>';
+        return;
       }
       
       servicesEl.innerHTML = '';
@@ -1792,12 +1787,11 @@
             statusClass = 'status-en_ruta';
             if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
               actionsHTML = `
-                <select class="action-btn" onchange="changeEstado('${service.id}', this.value)">
-                  <option value="en_ruta" selected>En ruta</option>
-                  <option value="entregado">Entregado</option>
-                  <option value="cancelado">Cancelado</option>
-                </select>
                 <button class="btn-primary action-btn" onclick="openEvidenceModal('${service.id}')">Tomar evidencia</button>
+                <select class="action-btn" onchange="changeEstado('${service.id}', this.value)" style="background: rgba(239, 68, 68, 0.2); color: #FECACA; border: 1px solid rgba(239, 68, 68, 0.5);">
+                  <option value="en_ruta" selected>En ruta</option>
+                  <option value="cancelado">Cancelar</option>
+                </select>
               `;
             } else if (currentRole === 'admin') {
               actionsHTML = `
@@ -1852,13 +1846,23 @@
               <div class="service-detail-content">${service.observaciones}</div>
             </div>
           ` : ''}
+          ${(service.costo && service.costo > 0) ? `
+            <div class="service-detail">
+              <i class="fas fa-dollar-sign"></i>
+              <div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div>
+            </div>
+          ` : ''}
+          ${(service.cobrarProducto && service.cobrarProducto > 0) ? `
+            <div class="service-detail">
+              <i class="fas fa-cash-register"></i>
+              <div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div>
+            </div>
+          ` : ''}
           <div class="service-date">
             <i class="fas fa-calendar"></i> Creado: ${fechaCreacion}
           </div>
           ${fechaEntregaHTML}
-          <div class="service-actions">
-            ${actionsHTML}
-          </div>
+          ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
         `;
         
         servicesEl.appendChild(serviceCard);
@@ -1867,14 +1871,17 @@
 
     // Cambiar estado de servicio
     async function changeEstado(serviceId, newEstado) {
+      if (newEstado === 'en_ruta') {
+        return; // No hacer nada si selecciona "en_ruta" nuevamente
+      }
+      
       try {
         await db.collection('services').doc(serviceId).update({
           estado: newEstado
         });
         
-        if (newEstado === 'entregado') {
-          // Abrir modal de evidencia
-          openEvidenceModal(serviceId);
+        if (newEstado === 'cancelado') {
+          alert('Servicio cancelado');
         }
       } catch (error) {
         console.error('Error cambiando estado:', error);
@@ -1938,6 +1945,7 @@
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         const videoElement = document.getElementById('videoElement');
         videoElement.srcObject = stream;
+        videoElement.play();
       } catch (error) {
         console.error('Error accediendo a la cámara:', error);
         alert('No se pudo acceder a la cámara. Asegúrate de permitir el acceso.');
@@ -1951,14 +1959,6 @@
         videoElement.srcObject.getTracks().forEach(track => track.stop());
         videoElement.srcObject = null;
       }
-    }
-
-    // Reiniciar modal de evidencia
-    function resetEvidenceModal() {
-      document.getElementById('captured-image-container').classList.add('hidden');
-      document.getElementById('videoElement').classList.remove('hidden');
-      document.getElementById('capture-btn').class
-    videoElement.srcObject = null;
     }
 
     // Reiniciar modal de evidencia
@@ -2008,6 +2008,13 @@
     function selectPaymentMethod(method) {
       selectedPaymentMethod = method;
       document.getElementById('confirm-delivery').disabled = false;
+      
+      // Actualizar estilos visuales de selección
+      document.querySelectorAll('.payment-option').forEach(option => {
+        option.style.background = 'rgba(20, 20, 20, 0.8)';
+      });
+      
+      event.target.closest('.payment-option').style.background = 'rgba(207, 149, 36, 0.2)';
     }
     window.selectPaymentMethod = selectPaymentMethod;
 
@@ -2042,7 +2049,12 @@
         div.classList.add('hidden');
       });
       
-      document.getElementById(`${section}-section`).classList.remove('hidden');
+      const targetSection = document.getElementById(`${section}-section`);
+      if (targetSection) {
+        targetSection.classList.remove('hidden');
+      } else {
+        document.getElementById('services-section').classList.remove('hidden');
+      }
       
       if (section === 'services') {
         document.getElementById('filters').classList.remove('hidden');
@@ -2066,7 +2078,9 @@
         btn.classList.remove('active');
       });
       
-      event.target.classList.add('active');
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
       
       renderServices();
     }
@@ -2113,9 +2127,9 @@
           }
         });
         
-        document.getElementById('total-earned').textContent = `$${totalEarned.toLocaleString()}`;
-        document.getElementById('total-pending').textContent = `$${totalPending.toLocaleString()}`;
-        document.getElementById('total-paid').textContent = `$${totalPaid.toLocaleString()}`;
+        document.getElementById('total-earned').textContent = `${totalEarned.toLocaleString()}`;
+        document.getElementById('total-pending').textContent = `${totalPending.toLocaleString()}`;
+        document.getElementById('total-paid').textContent = `${totalPaid.toLocaleString()}`;
         
         // Agrupar por fecha
         const servicesByDate = {};
@@ -2159,7 +2173,7 @@
           
           dateSection.innerHTML = `
             <div class="history-date">
-              ${date} - Total: $${dayTotal.toLocaleString()} (Pagado: $${dayPaid.toLocaleString()}, Pendiente: $${dayPending.toLocaleString()})
+              ${date} - Total: ${dayTotal.toLocaleString()} (Pagado: ${dayPaid.toLocaleString()}, Pendiente: ${dayPending.toLocaleString()})
             </div>
           `;
           
@@ -2180,7 +2194,7 @@
               </div>
               <div class="service-detail">
                 <i class="fas fa-money-bill-wave"></i>
-                <div class="service-detail-content">$${service.pagoMensajero || 0}</div>
+                <div class="service-detail-content">${service.pagoMensajero || 0}</div>
               </div>
               ${!service.pagado ? `
                 <div class="service-actions">
@@ -2351,15 +2365,15 @@
             </div>
             <div class="financial-item">
               <span>Total facturado:</span>
-              <span class="text-gold">$${data.totalCosto.toLocaleString()}</span>
+              <span class="text-gold">${data.totalCosto.toLocaleString()}</span>
             </div>
             <div class="financial-item">
               <span>Total pagado a mensajeros:</span>
-              <span class="text-gold">$${data.totalPagoMensajero.toLocaleString()}</span>
+              <span class="text-gold">${data.totalPagoMensajero.toLocaleString()}</span>
             </div>
             <div class="financial-item">
               <span>Ganancia neta:</span>
-              <span class="text-gold">$${(data.totalCosto - data.totalPagoMensajero).toLocaleString()}</span>
+              <span class="text-gold">${(data.totalCosto - data.totalPagoMensajero).toLocaleString()}</span>
             </div>
           `;
           
@@ -2400,7 +2414,7 @@
           card.innerHTML = `
             <div class="service-header">
               <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-              <div class="service-status">$${(service.cobrarProducto || 0).toLocaleString()}</div>
+              <div class="service-status">${(service.cobrarProducto || 0).toLocaleString()}</div>
             </div>
             <div class="service-detail">
               <i class="fas fa-map-marker-alt"></i>
@@ -2424,7 +2438,7 @@
         totalCard.innerHTML = `
           <div class="financial-item">
             <span style="font-weight: bold;">TOTAL A COBRAR:</span>
-            <span class="text-gold" style="font-weight: bold;">$${totalCobros.toLocaleString()}</span>
+            <span class="text-gold" style="font-weight: bold;">${totalCobros.toLocaleString()}</span>
           </div>
         `;
         
