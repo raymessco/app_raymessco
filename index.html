@@ -11,7 +11,6 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
-  <link rel="apple-touch-icon" href="/icon-192.png">
   
   <link rel="manifest" href="/manifest.json">
   
@@ -435,16 +434,16 @@
         <div class="flex flex-col items-center gap-3">
           <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTIiIGZpbGw9IiNDRjk1MjQiLz4KPHBhdGggZD0iTTE1IDI1TDMwIDQwTDQ1IDE1IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=" class="login-logo" alt="Ray Mess Co Logo">
           <h1 class="text-2xl font-bold">Ray Mess Co</h1>
-          <p class="text-center text-sm text-[#d1b070]">Accede con tu cuenta de Google</p>
+          <p class="text-center text-sm text-[#d1b070]">Sistema de gestión de mensajería</p>
           
           <div id="auth-status" class="hidden text-center text-sm my-2 p-2 rounded"></div>
           
           <button id="btn-google" class="btn btn-primary w-full mt-4">
-            <span id="btn-text">Continuar con Google</span>
+            <span id="btn-text">Iniciar sesión</span>
             <div id="btn-loader" class="loader hidden"></div>
           </button>
           
-          <p class="text-xs text-gray-400 mt-2">Sistema de gestión de mensajería</p>
+          <p class="text-xs text-gray-400 mt-2">Acceso seguro mediante autenticación</p>
         </div>
       </div>
     </div>
@@ -745,14 +744,14 @@
       loadServices();
     }
     
-    // Google sign in
+    // Google sign in simulation (replace with actual implementation)
     function signInWithGoogle() {
       btnText.textContent = 'Iniciando sesión...';
       btnLoader.classList.remove('hidden');
       
-      // Simulate Google auth (replace with actual implementation)
+      // Simulate authentication (replace with actual implementation)
       setTimeout(() => {
-        // Mock user data - replace with actual auth implementation
+        // Mock user data - in a real app, this would come from your authentication system
         const mockUser = {
           id: 'user123',
           name: 'Juan Pérez',
@@ -765,7 +764,7 @@
         localStorage.setItem('user', JSON.stringify(mockUser));
         currentUser = mockUser;
         
-        btnText.textContent = 'Continuar con Google';
+        btnText.textContent = 'Iniciar sesión';
         btnLoader.classList.add('hidden');
         
         showApp();
