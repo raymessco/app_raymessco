@@ -12,10 +12,11 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
-  <link rel="apple-touch-icon" href="https://raymessco.github.io/app_raymessco/icon-192.png">
   
-  <!-- Manifest -->
+  <!-- Manifest con íconos optimizados -->
   <link rel="manifest" href="https://raymessco.github.io/app_raymessco/manifest.json">
+  <link rel="icon" href="https://raymessco.github.io/app_raymessco/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="https://raymessco.github.io/app_raymessco/icon-192.png">
   
   <!-- Font Awesome para iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -729,7 +730,7 @@
       text-align: center;
     }
     
-    /* PWA Install Button */
+    /* PWA Install Button - Mejorado */
     .install-btn {
       position: fixed;
       bottom: 20px;
@@ -746,6 +747,13 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .install-btn:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(207, 149, 36, 0.4);
     }
     
     /* Financial summary */
@@ -1178,9 +1186,9 @@
     </div>
   </div>
 
-  <!-- Botón de instalación PWA -->
+  <!-- Botón de instalación PWA - Mejorado -->
   <button id="install-button" class="install-btn hidden">
-    <i class="fas fa-download"></i> Instalar
+    <i class="fas fa-download"></i> Instalar App
   </button>
 
   <!-- Firebase (compat) -->
@@ -1644,22 +1652,63 @@
       let query;
       
       if (currentRole === 'admin') {
+        // Admin ve todos los servicios
         query = db.collection('services').orderBy('fechaCreacion', 'desc');
       } else if (currentRole === 'cliente') {
+        // Cliente ve solo sus servicios
         query = db.collection('services')
           .where('uidCliente', '==', currentUser.uid)
           .orderBy('fechaCreacion', 'desc');
       } else if (currentRole === 'mensajero') {
-        // Mensajeros ven servicios pendientes y los asignados a ellos
-        query = db.collection('services')
-          .where('uidMensajero', '==', currentUser.uid)
-          .orderBy('fechaCreacion', 'desc');
+        // Mensajero ve servicios pendientes Y los asignados a él
+        // Necesitamos hacer dos consultas y combinarlas
+        const queryPendientes = db.collection('services')
+          .where('estado', '==', 'pendiente');
+        
+        const queryAsignados = db.collection('services')
+          .where('uidMensajero', '==', currentUser.uid);
+        
+        // Inicializar arrays para almacenar resultados
+        let serviciosPendientes = [];
+        let serviciosAsignados = [];
+        
+        // Función para combinar y renderizar
+        const combinarYRenderizar = () => {
+          // Combinar arrays y eliminar duplicados
+          const todosServicios = [...serviciosPendientes, ...serviciosAsignados];
+          const serviciosUnicos = todosServicios.filter((servicio, index, self) =>
+            index === self.findIndex(s => s.id === servicio.id)
+          );
+          
+          services = serviciosUnicos;
+          renderServices();
+        };
+        
+        // Escuchar servicios pendientes
+        window._unsubPendientes = queryPendientes.onSnapshot(snapshot => {
+          serviciosPendientes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          combinarYRenderizar();
+        }, error => {
+          console.error('Error cargando servicios pendientes:', error);
+        });
+        
+        // Escuchar servicios asignados
+        window._unsubAsignados = queryAsignados.onSnapshot(snapshot => {
+          serviciosAsignados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          combinarYRenderizar();
+        }, error => {
+          console.error('Error cargando servicios asignados:', error);
+        });
+        
+        // Salir de la función ya que estamos manejando las suscripciones manualmente
+        return;
       } else {
         // pending_mensajero
         servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios.</div>';
         return;
       }
       
+      // Para admin y cliente, usar la consulta normal
       window._unsubServices = query.onSnapshot(snapshot => {
         services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderServices();
