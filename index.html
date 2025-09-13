@@ -1257,6 +1257,9 @@
 
     // Inicializar la aplicación
     function initApp() {
+      // Manejar resultado de redirect si existe
+      handleRedirectResult();
+      
       // Event listeners para la interfaz
       sidebarToggle.addEventListener('click', toggleSidebar);
       closeSidebarBtn.addEventListener('click', toggleSidebar);
