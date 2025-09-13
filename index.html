@@ -383,6 +383,10 @@
       .services-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+      
+      .user-name {
+        display: block;
+      }
     }
     
     @media (min-width: 1200px) {
@@ -693,10 +697,6 @@
     
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      .user-name {
-        display: none;
-      }
-      
       .role-options {
         flex-direction: column;
       }
@@ -737,16 +737,15 @@
       background: var(--gold);
       color: #000;
       border: none;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
+      border-radius: 30px;
+      padding: 12px 20px;
+      font-weight: 600;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       z-index: 100;
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 8px;
     }
     
     /* Financial summary */
@@ -799,6 +798,13 @@
       display: flex;
       gap: 10px;
       margin-top: 15px;
+    }
+    
+    /* Service date info */
+    .service-date {
+      font-size: 12px;
+      color: var(--text-gray);
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -874,11 +880,6 @@
           <span class="menu-item-text">Registrar servicio</span>
         </div>
         
-        <div id="menu-historial" class="menu-item" onclick="showHistory()">
-          <i class="fas fa-history"></i>
-          <span class="menu-item-text">Historial de servicios</span>
-        </div>
-        
         <div id="menu-finanzas-mensajero" class="menu-item hidden" onclick="showFinancialSummary()">
           <i class="fas fa-money-bill-wave"></i>
           <span class="menu-item-text">Mis finanzas</span>
@@ -924,12 +925,6 @@
 
       <!-- SERVICES LIST -->
       <div id="services-section" class="services-grid"></div>
-
-      <!-- History section -->
-      <div id="history-section" class="hidden">
-        <h2 class="section-title">Historial de servicios entregados</h2>
-        <div id="history-list"></div>
-      </div>
 
       <!-- Financial summary for messengers -->
       <div id="financial-section" class="hidden">
@@ -1185,7 +1180,7 @@
 
   <!-- Botón de instalación PWA -->
   <button id="install-button" class="install-btn hidden">
-    <i class="fas fa-download"></i>
+    <i class="fas fa-download"></i> Instalar
   </button>
 
   <!-- Firebase (compat) -->
@@ -1237,7 +1232,6 @@
     const menuCostos = document.getElementById('menu-costos');
     const menuCobros = document.getElementById('menu-cobros');
     const menuPendientes = document.getElementById('menu-pendientes');
-    const menuHistorial = document.getElementById('menu-historial');
     const menuFinanzasMensajero = document.getElementById('menu-finanzas-mensajero');
     const roleChoiceModal = document.getElementById('roleChoiceModal');
     const sidebarBackdrop = document.getElementById('sidebar-backdrop');
@@ -1395,6 +1389,10 @@
       if (currentRole === 'admin') {
         loadMensajerosList();
       }
+      
+      // Siempre mostrar la sección de servicios al iniciar sesión
+      showSection('services');
+      setFilter('all');
     }
 
     // Mostrar selección de rol para usuarios nuevos
@@ -1457,7 +1455,6 @@
       menuCostos.classList.add('hidden');
       menuCobros.classList.add('hidden');
       menuPendientes.classList.add('hidden');
-      menuHistorial.classList.add('hidden');
       menuFinanzasMensajero.classList.add('hidden');
       fieldCostoClienteContainer.classList.add('hidden');
       adminFields.classList.add('hidden');
@@ -1469,17 +1466,14 @@
         menuCostos.classList.remove('hidden');
         menuCobros.classList.remove('hidden');
         menuPendientes.classList.remove('hidden');
-        menuHistorial.classList.remove('hidden');
         adminFields.classList.remove('hidden');
       } else if (currentRole === 'mensajero') {
-        menuHistorial.classList.remove('hidden');
         menuFinanzasMensajero.classList.remove('hidden');
       } else if (currentRole === 'pending_mensajero') {
         document.getElementById('pending-banner').classList.remove('hidden');
       } else {
         // cliente
         menuRegistrar.classList.remove('hidden');
-        menuHistorial.classList.remove('hidden');
         fieldCostoClienteContainer.classList.remove('hidden');
       }
       
@@ -1657,14 +1651,6 @@
           .orderBy('fechaCreacion', 'desc');
       } else if (currentRole === 'mensajero') {
         // Mensajeros ven servicios pendientes y los asignados a ellos
-        const queryPendientes = db.collection('services')
-          .where('estado', '==', 'pendiente');
-        
-        const queryAsignados = db.collection('services')
-          .where('uidMensajero', '==', currentUser.uid);
-        
-        // Necesitaríamos combinar ambas consultas
-        // Por simplicidad, aquí solo mostramos los asignados
         query = db.collection('services')
           .where('uidMensajero', '==', currentUser.uid)
           .orderBy('fechaCreacion', 'desc');
@@ -1706,6 +1692,22 @@
         
         let actionsHTML = '';
         let statusClass = '';
+        
+        // Formatear fecha de creación
+        let fechaCreacion = 'Fecha no disponible';
+        if (service.fechaCreacion) {
+          const date = typeof service.fechaCreacion.toDate === 'function' ? 
+                       service.fechaCreacion.toDate() : new Date(service.fechaCreacion);
+          fechaCreacion = date.toLocaleString('es-CO');
+        }
+        
+        // Formatear fecha de entrega si existe
+        let fechaEntregaHTML = '';
+        if (service.fechaEntrega) {
+          const date = typeof service.fechaEntrega.toDate === 'function' ? 
+                       service.fechaEntrega.toDate() : new Date(service.fechaEntrega);
+          fechaEntregaHTML = `<div class="service-date"><i class="fas fa-calendar-check"></i> Entregado: ${date.toLocaleString('es-CO')}</div>`;
+        }
         
         switch (service.estado) {
           case 'pendiente':
@@ -1783,6 +1785,10 @@
               <div class="service-detail-content">${service.observaciones}</div>
             </div>
           ` : ''}
+          <div class="service-date">
+            <i class="fas fa-calendar"></i> Creado: ${fechaCreacion}
+          </div>
+          ${fechaEntregaHTML}
           <div class="service-actions">
             ${actionsHTML}
           </div>
@@ -1991,113 +1997,6 @@
     }
     window.setFilter = setFilter;
 
-    // Mostrar historial
-    function showHistory() {
-      showSection('history');
-      renderHistory();
-    }
-    window.showHistory = showHistory;
-
-    // Renderizar historial
-    async function renderHistory() {
-      const historyList = document.getElementById('history-list');
-      historyList.innerHTML = '<div class="text-center text-gold">Cargando historial...</div>';
-      
-      try {
-        let query;
-        
-        if (currentRole === 'admin') {
-          query = db.collection('services')
-            .where('estado', '==', 'entregado')
-            .orderBy('fechaEntrega', 'desc');
-        } else if (currentRole === 'cliente') {
-          query = db.collection('services')
-            .where('uidCliente', '==', currentUser.uid)
-            .where('estado', '==', 'entregado')
-            .orderBy('fechaEntrega', 'desc');
-        } else if (currentRole === 'mensajero') {
-          query = db.collection('services')
-            .where('uidMensajero', '==', currentUser.uid)
-            .where('estado', '==', 'entregado')
-            .orderBy('fechaEntrega', 'desc');
-        } else {
-          historyList.innerHTML = '<div class="text-center text-gold">No tienes permisos para ver el historial</div>';
-          return;
-        }
-        
-        const snapshot = await query.get();
-        
-        if (snapshot.empty) {
-          historyList.innerHTML = '<div class="text-center text-gold">No hay servicios en el historial</div>';
-          return;
-        }
-        
-        const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // Agrupar por fecha
-        const servicesByDate = {};
-        
-        services.forEach(service => {
-          let date;
-          if (service.fechaEntrega && service.fechaEntrega.toDate) {
-            date = service.fechaEntrega.toDate().toLocaleDateString();
-          } else {
-            date = 'Fecha desconocida';
-          }
-          
-          if (!servicesByDate[date]) {
-            servicesByDate[date] = [];
-          }
-          
-          servicesByDate[date].push(service);
-        });
-        
-        historyList.innerHTML = '';
-        
-        Object.keys(servicesByDate).forEach(date => {
-          const dateSection = document.createElement('div');
-          dateSection.className = 'history-day';
-          
-          dateSection.innerHTML = `<div class="history-date">${date}</div>`;
-          
-          servicesByDate[date].forEach(service => {
-            const serviceCard = document.createElement('div');
-            serviceCard.className = 'service-card';
-            
-            serviceCard.innerHTML = `
-              <div class="service-header">
-                <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-                <div class="service-status status-entregado">entregado</div>
-              </div>
-              <div class="service-detail">
-                <i class="fas fa-user"></i>
-                <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
-              </div>
-              <div class="service-detail">
-                <i class="fas fa-map-marker-alt"></i>
-                <div class="service-detail-content">
-                  <div><strong>Entregado en:</strong> ${service.entregar || 'No especificado'}</div>
-                </div>
-              </div>
-              ${service.metodoPago ? `
-                <div class="service-detail">
-                  <i class="fas fa-money-bill-wave"></i>
-                  <div class="service-detail-content">Método de pago: ${service.metodoPago}</div>
-                </div>
-              ` : ''}
-            `;
-            
-            dateSection.appendChild(serviceCard);
-          });
-          
-          historyList.appendChild(dateSection);
-        });
-      } catch (error) {
-        console.error('Error cargando historial:', error);
-        historyList.innerHTML = '<div class="text-center text-red-500">Error cargando el historial</div>';
-      }
-    }
-
     // Mostrar resumen financiero
     function showFinancialSummary() {
       showSection('financial');
@@ -2199,6 +2098,10 @@
                 <div class="service-status ${service.pagado ? 'status-entregado' : 'status-pendiente'}">
                   ${service.pagado ? 'Pagado' : 'Pendiente'}
                 </div>
+              </div>
+              <div class="service-detail">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="service-detail-content">${service.entregar || 'No especificado'}</div>
               </div>
               <div class="service-detail">
                 <i class="fas fa-money-bill-wave"></i>
