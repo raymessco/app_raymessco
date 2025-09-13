@@ -15,7 +15,6 @@
   
   <link rel="manifest" href="/manifest.json">
   
-  <link rel="stylesheet" href="/tailwind.css">
   <style>
     :root { 
       --gold: #CF9524; 
@@ -26,11 +25,15 @@
       --warning: #a16207;
       --danger: #b91c1c;
       --inactive: #6b7280;
+      --sidebar-bg: #111111;
+      --sidebar-hover: #1a1a1a;
     }
     
     * { 
       box-sizing: border-box; 
       -webkit-tap-highlight-color: transparent; 
+      margin: 0;
+      padding: 0;
     }
     
     body { 
@@ -38,8 +41,6 @@
       color: var(--gold); 
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; 
       touch-action: manipulation;
-      margin: 0;
-      padding: 0;
     }
     
     .hidden { 
@@ -72,8 +73,6 @@
       transform: translateY(-4px); 
       box-shadow: 0 8px 24px rgba(207,149,36,0.12); 
     }
-    
-    .available-service { border: 2px solid var(--gold); }
     
     .btn {
       padding: 0.5rem 1rem;
@@ -134,16 +133,13 @@
       background-color: rgba(207, 149, 36, 0.1);
     }
     
-    .rounded-2xl { border-radius: 1rem; }
-    
-    input::placeholder, textarea::placeholder { 
-      color: #000 !important; 
-      opacity: 1; 
+    .btn-logout {
+      background-color: var(--danger);
+      color: white;
     }
     
-    body.modal-open { 
-      height: 100vh; 
-      overflow: hidden; 
+    .btn-logout:hover {
+      background-color: #9a1616;
     }
     
     /* Layout improvements */
@@ -197,7 +193,7 @@
       left: 0;
       height: 100%;
       width: 280px;
-      background: var(--darker-bg);
+      background: var(--sidebar-bg);
       border-right: 1px solid var(--gold);
       color: var(--gold);
       transform: translateX(-100%);
@@ -236,28 +232,36 @@
       color: var(--gold);
       cursor: pointer;
       border-radius: 0.375rem;
+      transition: background 0.2s;
     }
     
     .sidebar-menu button:hover {
-      background: rgba(207, 149, 36, 0.1);
+      background: var(--sidebar-hover);
     }
     
-    /* Form improvements */
-    .form-group {
-      margin-bottom: 1rem;
+    /* Login screen */
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1rem;
     }
     
-    .form-input {
+    .login-card {
       width: 100%;
-      padding: 0.75rem;
-      background: var(--gold);
-      color: #000;
-      border: none;
-      border-radius: 0.375rem;
+      max-width: 400px;
+      background: var(--dark-bg);
+      border: 1px solid var(--gold);
+      border-radius: 1rem;
+      padding: 2rem;
+      text-align: center;
     }
     
-    .form-input::placeholder {
-      color: #000;
+    .login-logo {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 1rem;
     }
     
     /* Modal improvements */
@@ -319,6 +323,7 @@
       background: transparent;
       color: var(--gold);
       cursor: pointer;
+      transition: all 0.2s;
     }
     
     .filter-btn.active {
@@ -326,29 +331,22 @@
       color: #000;
     }
     
-    /* Login screen */
-    .login-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 1rem;
+    /* Form improvements */
+    .form-group {
+      margin-bottom: 1rem;
     }
     
-    .login-card {
+    .form-input {
       width: 100%;
-      max-width: 400px;
-      background: var(--dark-bg);
-      border: 1px solid var(--gold);
-      border-radius: 1rem;
-      padding: 2rem;
-      text-align: center;
+      padding: 0.75rem;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 0.375rem;
     }
     
-    .login-logo {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 1rem;
+    .form-input::placeholder {
+      color: #000;
     }
     
     /* PWA install button */
@@ -404,79 +402,6 @@
       }
     }
     
-    /* Camera styles */
-    .camera-container {
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    
-    #videoElement {
-      width: 100%;
-      border-radius: 8px;
-      border: 2px solid var(--gold);
-    }
-    
-    .capture-btn {
-      background-color: var(--gold);
-      color: black;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 50px;
-      font-weight: bold;
-      margin-top: 10px;
-      cursor: pointer;
-      width: 100%;
-    }
-    
-    /* Payment methods */
-    .payment-method {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 15px;
-    }
-    
-    .payment-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border: 1px solid var(--gold);
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    
-    .payment-option.selected {
-      background-color: rgba(207, 149, 36, 0.2);
-    }
-    
-    /* Financial summary */
-    .financial-summary {
-      background-color: rgba(207, 149, 36, 0.1);
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-    
-    .day-section {
-      margin-bottom: 25px;
-      border-bottom: 1px solid var(--gold);
-      padding-bottom: 15px;
-    }
-    
-    .day-header {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: var(--gold);
-    }
-    
-    .service-paid {
-      opacity: 0.7;
-      background-color: rgba(21, 128, 61, 0.1) !important;
-    }
-    
     /* Action buttons in service cards */
     .service-actions {
       display: flex;
@@ -508,7 +433,7 @@
     <div id="login-view" class="login-container">
       <div class="login-card">
         <div class="flex flex-col items-center gap-3">
-          <img src="/icon-192.png" class="login-logo" alt="logo">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTIiIGZpbGw9IiNDRjk1MjQiLz4KPHBhdGggZD0iTTE1IDI1TDMwIDQwTDQ1IDE1IiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=" class="login-logo" alt="Ray Mess Co Logo">
           <h1 class="text-2xl font-bold">Ray Mess Co</h1>
           <p class="text-center text-sm text-[#d1b070]">Accede con tu cuenta de Google</p>
           
@@ -519,7 +444,7 @@
             <div id="btn-loader" class="loader hidden"></div>
           </button>
           
-          <p class="text-xs text-gray-400 mt-2">Dominios autorizados: usa <span class="chip">http://localhost</span> o tu dominio</p>
+          <p class="text-xs text-gray-400 mt-2">Sistema de gestión de mensajería</p>
         </div>
       </div>
     </div>
@@ -531,13 +456,14 @@
         <div class="flex items-center gap-3">
           <button id="sidebar-toggle" class="text-2xl font-bold">☰</button>
           <h1 class="text-xl md:text-2xl font-bold flex items-center gap-3">
-            <img src="/icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iI0NGOTUyNCIvPgo8cGF0aCBkPSJNOCAxNkwxNiAyNEwyNCAxNiIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K" alt="Logo" class="w-8 h-8"> 
+            <span>Ray Mess Co</span>
             <span id="role-badge" class="chip"></span>
           </h1>
         </div>
         <div class="flex items-center gap-2">
           <span id="user-name" class="text-xs md:text-sm text-[#d1b070] hidden md:block"></span>
-          <button id="btn-logout" class="btn btn-secondary">Salir</button>
+          <button id="btn-logout" class="btn btn-logout">Salir</button>
         </div>
       </div>
 
@@ -593,7 +519,7 @@
           </div>
         </div>
 
-        <!-- Financial Summary Section -->
+        <!-- Other sections will be displayed here -->
         <div id="financial-summary-section" class="hidden">
           <h2 class="text-xl font-bold mb-4">Resumen Financiero</h2>
           <div id="financial-container">
@@ -601,7 +527,6 @@
           </div>
         </div>
 
-        <!-- Costos Section -->
         <div id="costos-section" class="hidden">
           <h2 class="text-xl font-bold mb-4">Costos por Empresa</h2>
           <div id="costos-container">
@@ -609,7 +534,6 @@
           </div>
         </div>
 
-        <!-- Cobros Section -->
         <div id="cobros-section" class="hidden">
           <h2 class="text-xl font-bold mb-4">Cobros Contra Entrega</h2>
           <div id="cobros-container">
@@ -617,7 +541,6 @@
           </div>
         </div>
 
-        <!-- Mensajeros Pendientes Section -->
         <div id="mensajeros-pendientes-section" class="hidden">
           <h2 class="text-xl font-bold mb-4">Solicitudes de Mensajeros</h2>
           <div id="mensajeros-pendientes-container">
@@ -684,68 +607,11 @@
             <label for="profile-phone">Teléfono</label>
             <input type="tel" id="profile-phone" class="form-input" required>
           </div>
-          <div class="form-group">
-            <label for="profile-vehicle">Vehículo (opcional)</label>
-            <input type="text" id="profile-vehicle" class="form-input" placeholder="Tipo de vehículo">
-          </div>
           <div class="modal-actions">
             <button type="button" onclick="closeProfileModal()" class="btn btn-secondary flex-1">Cancelar</button>
             <button type="submit" class="btn btn-primary flex-1">Guardar</button>
           </div>
         </form>
-      </div>
-    </div>
-
-    <!-- Camera Modal -->
-    <div id="camera-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title">Tomar foto de entrega</h2>
-          <p>Para el servicio: <span id="camera-service-id"></span></p>
-        </div>
-        <div class="camera-container">
-          <video id="videoElement" autoplay></video>
-          <button id="capture-btn" class="capture-btn">Capturar foto</button>
-          <canvas id="canvasElement" class="hidden"></canvas>
-        </div>
-        <div class="modal-actions">
-          <button type="button" onclick="closeCameraModal()" class="btn btn-secondary flex-1">Cancelar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Payment Modal -->
-    <div id="payment-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 class="modal-title">Registrar pago</h2>
-          <p>Para el servicio: <span id="payment-service-id"></span></p>
-        </div>
-        <div class="form-group">
-          <label for="payment-amount">Monto cobrado</label>
-          <input type="number" id="payment-amount" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>Método de pago</label>
-          <div class="payment-method">
-            <div class="payment-option" onclick="selectPaymentMethod('efectivo')">
-              <input type="radio" name="payment-method" id="efectivo" value="efectivo">
-              <label for="efectivo">Efectivo</label>
-            </div>
-            <div class="payment-option" onclick="selectPaymentMethod('transferencia')">
-              <input type="radio" name="payment-method" id="transferencia" value="transferencia">
-              <label for="transferencia">Transferencia</label>
-            </div>
-            <div class="payment-option" onclick="selectPaymentMethod('tarjeta')">
-              <input type="radio" name="payment-method" id="tarjeta" value="tarjeta">
-              <label for="tarjeta">Tarjeta</label>
-            </div>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" onclick="closePaymentModal()" class="btn btn-secondary flex-1">Cancelar</button>
-          <button type="button" onclick="registerPayment()" class="btn btn-primary flex-1">Registrar pago</button>
-        </div>
       </div>
     </div>
   </div>
@@ -784,8 +650,6 @@
     // Global variables
     let currentUser = null;
     let deferredPrompt = null;
-    let currentServiceId = null;
-    let selectedPaymentMethod = null;
     
     // Initialize the app
     function init() {
@@ -843,9 +707,6 @@
       
       // Profile form submission
       document.getElementById('profile-form').addEventListener('submit', handleProfileSubmit);
-      
-      // Camera capture
-      document.getElementById('capture-btn').addEventListener('click', capturePhoto);
     }
     
     // Close sidebar
@@ -935,6 +796,8 @@
       // Load section data if needed
       if (sectionId === 'services') {
         loadServices();
+      } else if (sectionId === 'history') {
+        showHistory();
       }
       
       closeSidebar();
@@ -1048,12 +911,6 @@
             ${currentUser.role === 'mensajero' && service.estado === 'pendiente' ? `
               <button onclick="takeService('${service.id}')" class="btn btn-take">Tomar servicio</button>
             ` : ''}
-            ${(currentUser.role === 'mensajero' || currentUser.id === service.mensajero) && service.estado === 'en_ruta' ? `
-              <button onclick="openCamera('${service.id}')" class="btn btn-primary">Registrar entrega</button>
-            ` : ''}
-            ${service.cobro > 0 && service.estado === 'entregado' && !service.pagado ? `
-              <button onclick="openPaymentModal('${service.id}')" class="btn btn-primary">Registrar pago</button>
-            ` : ''}
           </div>
         `;
         
@@ -1104,143 +961,8 @@
       }
     }
     
-    // Open camera
-    function openCamera(serviceId) {
-      currentServiceId = serviceId;
-      document.getElementById('camera-service-id').textContent = serviceId;
-      document.getElementById('camera-modal').classList.remove('hidden');
-      document.body.classList.add('modal-open');
-      
-      // Access camera
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(function(stream) {
-            const video = document.getElementById('videoElement');
-            video.srcObject = stream;
-            video.play();
-          })
-          .catch(function(error) {
-            console.error('Camera error: ', error);
-            alert('No se pudo acceder a la cámara');
-          });
-      }
-    }
-    
-    // Close camera modal
-    function closeCameraModal() {
-      document.getElementById('camera-modal').classList.add('hidden');
-      document.body.classList.remove('modal-open');
-      
-      // Stop camera
-      const video = document.getElementById('videoElement');
-      if (video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
-      }
-      
-      currentServiceId = null;
-    }
-    
-    // Capture photo
-    function capturePhoto() {
-      const video = document.getElementById('videoElement');
-      const canvas = document.getElementById('canvasElement');
-      const context = canvas.getContext('2d');
-      
-      // Set canvas dimensions to match video
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      // Draw video frame to canvas
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      // Get image data
-      const imageData = canvas.toDataURL('image/png');
-      
-      // Mark service as delivered
-      const services = JSON.parse(localStorage.getItem('services') || '[]');
-      const service = services.find(s => s.id === currentServiceId);
-      
-      if (service) {
-        service.estado = 'entregado';
-        service.fotoEntrega = imageData;
-        service.fechaEntrega = new Date().toISOString();
-        
-        localStorage.setItem('services', JSON.stringify(services));
-        
-        // Show success message
-        alert('Entrega registrada con éxito');
-        
-        // Close camera and reload services
-        closeCameraModal();
-        loadServices();
-      }
-    }
-    
-    // Open payment modal
-    function openPaymentModal(serviceId) {
-      currentServiceId = serviceId;
-      document.getElementById('payment-service-id').textContent = serviceId;
-      document.getElementById('payment-modal').classList.remove('hidden');
-      document.body.classList.add('modal-open');
-    }
-    
-    // Close payment modal
-    function closePaymentModal() {
-      document.getElementById('payment-modal').classList.add('hidden');
-      document.body.classList.remove('modal-open');
-      currentServiceId = null;
-      selectedPaymentMethod = null;
-    }
-    
-    // Select payment method
-    function selectPaymentMethod(method) {
-      selectedPaymentMethod = method;
-      
-      // Update UI
-      document.querySelectorAll('.payment-option').forEach(option => {
-        option.classList.remove('selected');
-      });
-      
-      document.querySelector(`.payment-option input[value="${method}"]`).parentElement.classList.add('selected');
-    }
-    
-    // Register payment
-    function registerPayment() {
-      if (!selectedPaymentMethod) {
-        alert('Selecciona un método de pago');
-        return;
-      }
-      
-      const amount = document.getElementById('payment-amount').value;
-      if (!amount || amount <= 0) {
-        alert('Ingresa un monto válido');
-        return;
-      }
-      
-      const services = JSON.parse(localStorage.getItem('services') || '[]');
-      const service = services.find(s => s.id === currentServiceId);
-      
-      if (service) {
-        service.pagado = true;
-        service.metodoPago = selectedPaymentMethod;
-        service.montoPagado = parseFloat(amount);
-        service.fechaPago = new Date().toISOString();
-        
-        localStorage.setItem('services', JSON.stringify(services));
-        
-        // Show success message
-        alert('Pago registrado con éxito');
-        
-        // Close modal and reload services
-        closePaymentModal();
-        loadServices();
-      }
-    }
-    
     // Show history
     function showHistory() {
-      showSection('history');
-      
       const services = JSON.parse(localStorage.getItem('services') || '[]');
       const container = document.getElementById('history-container');
       
@@ -1268,93 +990,31 @@
           </div>
           <p><strong>Destinatario:</strong> ${service.destinatario}</p>
           <p><strong>Dirección:</strong> ${service.direccion}</p>
-          <p><strong>Fecha entrega:</strong> ${new Date(service.fechaEntrega).toLocaleDateString()}</p>
-          ${service.cobro > 0 ? `
-            <p><strong>Cobro:</strong> $${service.cobro}</p>
-            <p><strong>Estado pago:</strong> ${service.pagado ? 'Pagado' : 'Pendiente'}</p>
-          ` : ''}
+          <p><strong>Fecha:</strong> ${new Date(service.fecha).toLocaleDateString()}</p>
+          ${service.cobro > 0 ? `<p><strong>Cobro:</strong> $${service.cobro}</p>` : ''}
         `;
         
         container.appendChild(serviceCard);
       });
-      
-      closeSidebar();
     }
     
     // Show financial summary
     function showFinancialSummary() {
       showSection('financial-summary');
       
-      const services = JSON.parse(localStorage.getItem('services') || '[]');
       const container = document.getElementById('financial-container');
-      
-      // Clear container
-      container.innerHTML = '';
-      
-      // Filter services delivered by current user
-      const userServices = services.filter(s => 
-        s.mensajero === currentUser.id && s.estado === 'entregado'
-      );
-      
-      if (userServices.length === 0) {
-        container.innerHTML = '<p class="text-center py-8">No hay servicios entregados</p>';
-        return;
-      }
-      
-      // Group services by date
-      const servicesByDate = {};
-      userServices.forEach(service => {
-        const date = new Date(service.fechaEntrega).toLocaleDateString();
-        if (!servicesByDate[date]) {
-          servicesByDate[date] = [];
-        }
-        servicesByDate[date].push(service);
-      });
-      
-      // Render financial summary
-      for (const date in servicesByDate) {
-        const daySection = document.createElement('div');
-        daySection.className = 'day-section';
-        
-        let dayTotal = 0;
-        let dayHTML = `
-          <div class="day-header">${date}</div>
-        `;
-        
-        servicesByDate[date].forEach(service => {
-          const serviceEarnings = service.cobro > 0 ? service.cobro * 0.8 : 50; // 80% of delivery fee or flat rate
-          dayTotal += serviceEarnings;
-          
-          dayHTML += `
-            <div class="service-card ${service.pagado ? 'service-paid' : ''}">
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="font-bold">${service.empresa}</h3>
-                <span>$${serviceEarnings.toFixed(2)}</span>
-              </div>
-              <p><strong>Destinatario:</strong> ${service.destinatario}</p>
-              <p><strong>Estado pago:</strong> ${service.pagado ? 'Pagado' : 'Pendiente'}</p>
-            </div>
-          `;
-        });
-        
-        dayHTML += `
-          <div class="text-right font-bold mt-2">
-            Total del día: $${dayTotal.toFixed(2)}
-          </div>
-        `;
-        
-        daySection.innerHTML = dayHTML;
-        container.appendChild(daySection);
-      }
-      
-      closeSidebar();
+      container.innerHTML = `
+        <div class="service-card">
+          <h3 class="font-bold text-lg mb-4">Resumen Financiero</h3>
+          <p>Función en desarrollo. Aquí se mostraría el resumen de ganancias y pagos.</p>
+        </div>
+      `;
     }
     
     // Open edit profile
     function openEditProfile() {
       document.getElementById('profile-name').value = currentUser.name;
       document.getElementById('profile-phone').value = currentUser.phone || '';
-      document.getElementById('profile-vehicle').value = currentUser.vehicle || '';
       
       document.getElementById('profile-modal').classList.remove('hidden');
       document.body.classList.add('modal-open');
@@ -1374,7 +1034,6 @@
       // Update user data
       currentUser.name = document.getElementById('profile-name').value;
       currentUser.phone = document.getElementById('profile-phone').value;
-      currentUser.vehicle = document.getElementById('profile-vehicle').value;
       
       // Save to localStorage
       localStorage.setItem('user', JSON.stringify(currentUser));
@@ -1441,12 +1100,6 @@
             ` : ''}
             ${currentUser.role === 'mensajero' && service.estado === 'pendiente' ? `
               <button onclick="takeService('${service.id}')" class="btn btn-take">Tomar servicio</button>
-            ` : ''}
-            ${(currentUser.role === 'mensajero' || currentUser.id === service.mensajero) && service.estado === 'en_ruta' ? `
-              <button onclick="openCamera('${service.id}')" class="btn btn-primary">Registrar entrega</button>
-            ` : ''}
-            ${service.cobro > 0 && service.estado === 'entregado' && !service.pagado ? `
-              <button onclick="openPaymentModal('${service.id}')" class="btn btn-primary">Registrar pago</button>
             ` : ''}
           </div>
         `;
