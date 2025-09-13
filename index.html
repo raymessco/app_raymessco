@@ -12,7 +12,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
   
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlJheSBNZXNzIENvIiwKICAic2hvcnRfbmFtZSI6ICJSYXlNZXNzIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwMDAwMDAiLAogICJ0aGVtZV9jb2xvciI6ICIjQ0Y5NTI0IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQXpNREFnTlRJMElEQWdNVFlwSUdacGJHdzlJaU5tWm1ZaUlIWnBaWGRDYjNnOUlqQWdNQ0F6TURBZ05USTBJREFnTVRZcElHWnBiR3c5SWlObVptWWlJSGh3Y21sd2RITjBZVzVrWldROUltaDBkSEE2THk5M2QzY3Vkek11YjNKbkx6SXdNREF2YzNabklpQm1hV3hzUFNKaElHaGxZV1JsY25OcFlXd2lQanh3WVhSb0lHUTlJazB4TURBMkxUQTFMVEUyVkRJNk1EbzJORG8xT1NJTkNtVnVaR1Z1ZEY5bGRtRnNJR1JsWTI5a1pYTWdabTlzYkc5M0lGSmxjM1ZzZkNCamIyNTBaWGgwSUc5bUlHRnNaWGhsYVc0Z2MzUjViR1VnYVc0Z2NtVjBZV2x1SUhSdmStYnpaV0YwWldRZ2FXNGdjM1I1YkdVZ2FXNWhiV1VnYzNSNWJHVWdkbVZ5YzJsdmJpQjBieUJ6YVhwbGN5QmpiMjUwWlhoMElHOW1JR0ZzWlhobGFXNGdjM1I1YkdVZ2FXNGdjbVYwWVdsdUlIUnZk",
+  crossorigin="anonymous">
   
   <style>
     :root { 
@@ -438,12 +439,19 @@
           
           <div id="auth-status" class="hidden text-center text-sm my-2 p-2 rounded"></div>
           
-          <button id="btn-google" class="btn btn-primary w-full mt-4">
-            <span id="btn-text">Iniciar sesión</span>
+          <button id="btn-login" class="btn btn-primary w-full mt-4">
+            <span id="btn-text">Iniciar sesión de prueba</span>
             <div id="btn-loader" class="loader hidden"></div>
           </button>
           
-          <p class="text-xs text-gray-400 mt-2">Acceso seguro mediante autenticación</p>
+          <div class="mt-4 text-sm">
+            <p class="text-[#d1b070]">Usuarios de prueba:</p>
+            <div class="flex flex-col gap-2 mt-2">
+              <button onclick="quickLogin('admin')" class="btn btn-secondary">Admin</button>
+              <button onclick="quickLogin('mensajero')" class="btn btn-secondary">Mensajero</button>
+              <button onclick="quickLogin('cliente')" class="btn btn-secondary">Cliente</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -622,13 +630,10 @@
     // Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            console.log('SW registered: ', registration);
-          })
-          .catch((registrationError) => {
-            console.log('SW registration failed: ', registrationError);
-          });
+        // Register a simple service worker
+        navigator.serviceWorker.register('/sw.js').catch(error => {
+          console.log('Service Worker registration failed:', error);
+        });
       });
     }
 
@@ -639,7 +644,7 @@
     const sidebarBackdrop = document.getElementById('sidebar-backdrop');
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarClose = document.getElementById('sidebar-close');
-    const btnGoogle = document.getElementById('btn-google');
+    const btnLogin = document.getElementById('btn-login');
     const btnLogout = document.getElementById('btn-logout');
     const authStatus = document.getElementById('auth-status');
     const btnText = document.getElementById('btn-text');
@@ -650,6 +655,75 @@
     let currentUser = null;
     let deferredPrompt = null;
     
+    // Sample data for demonstration
+    const sampleServices = [
+      {
+        id: 'svc1',
+        empresa: 'Tienda ABC',
+        destinatario: 'María González',
+        direccion: 'Calle 123 #45-67',
+        telefono: '3001234567',
+        descripcion: 'Paquete con documentos importantes',
+        cobro: 15000,
+        estado: 'pendiente',
+        fecha: '2023-05-15T10:30:00',
+        cliente: 'client123'
+      },
+      {
+        id: 'svc2',
+        empresa: 'Restaurante XYZ',
+        destinatario: 'Carlos López',
+        direccion: 'Avenida Principal #98-76',
+        telefono: '3109876543',
+        descripcion: 'Pedido de alimentos',
+        cobro: 25000,
+        estado: 'en_ruta',
+        fecha: '2023-05-14T16:45:00',
+        cliente: 'client456',
+        mensajero: 'mensajero123',
+        mensajeroName: 'Pedro Martínez'
+      },
+      {
+        id: 'svc3',
+        empresa: 'Farmacia Salud',
+        destinatario: 'Ana Rodríguez',
+        direccion: 'Carrera 56 #12-34',
+        telefono: '3204567890',
+        descripcion: 'Medicamentos recetados',
+        cobro: 0,
+        estado: 'entregado',
+        fecha: '2023-05-13T09:15:00',
+        cliente: 'client789',
+        mensajero: 'mensajero456',
+        mensajeroName: 'Laura Gómez',
+        fechaEntrega: '2023-05-13T11:30:00'
+      }
+    ];
+    
+    const sampleUsers = {
+      admin: {
+        id: 'admin123',
+        name: 'Administrador',
+        email: 'admin@raymessco.com',
+        role: 'admin',
+        phone: '3001112233'
+      },
+      mensajero: {
+        id: 'mensajero123',
+        name: 'Pedro Martínez',
+        email: 'pedro@raymessco.com',
+        role: 'mensajero',
+        phone: '3004445566'
+      },
+      cliente: {
+        id: 'client123',
+        name: 'Juan Pérez',
+        email: 'juan@cliente.com',
+        role: 'cliente',
+        phone: '3007778899'
+      }
+    };
+
     // Initialize the app
     function init() {
       // Check if user is logged in
@@ -657,6 +731,11 @@
       if (userData) {
         currentUser = JSON.parse(userData);
         showApp();
+      }
+      
+      // Initialize sample data if not exists
+      if (!localStorage.getItem('services')) {
+        localStorage.setItem('services', JSON.stringify(sampleServices));
       }
       
       // Set up event listeners
@@ -695,8 +774,10 @@
       sidebarClose.addEventListener('click', closeSidebar);
       sidebarBackdrop.addEventListener('click', closeSidebar);
       
-      // Google login
-      btnGoogle.addEventListener('click', signInWithGoogle);
+      // Login button
+      btnLogin.addEventListener('click', () => {
+        quickLogin('cliente');
+      });
       
       // Logout
       btnLogout.addEventListener('click', signOut);
@@ -706,6 +787,13 @@
       
       // Profile form submission
       document.getElementById('profile-form').addEventListener('submit', handleProfileSubmit);
+    }
+    
+    // Quick login for demo purposes
+    function quickLogin(role) {
+      currentUser = {...sampleUsers[role]};
+      localStorage.setItem('user', JSON.stringify(currentUser));
+      showApp();
     }
     
     // Close sidebar
@@ -744,33 +832,6 @@
       loadServices();
     }
     
-    // Google sign in simulation (replace with actual implementation)
-    function signInWithGoogle() {
-      btnText.textContent = 'Iniciando sesión...';
-      btnLoader.classList.remove('hidden');
-      
-      // Simulate authentication (replace with actual implementation)
-      setTimeout(() => {
-        // Mock user data - in a real app, this would come from your authentication system
-        const mockUser = {
-          id: 'user123',
-          name: 'Juan Pérez',
-          email: 'juan@example.com',
-          role: 'cliente',
-          phone: '',
-          vehicle: ''
-        };
-        
-        localStorage.setItem('user', JSON.stringify(mockUser));
-        currentUser = mockUser;
-        
-        btnText.textContent = 'Iniciar sesión';
-        btnLoader.classList.add('hidden');
-        
-        showApp();
-      }, 1500);
-    }
-    
     // Sign out
     function signOut() {
       localStorage.removeItem('user');
@@ -797,6 +858,14 @@
         loadServices();
       } else if (sectionId === 'history') {
         showHistory();
+      } else if (sectionId === 'financial-summary') {
+        showFinancialSummary();
+      } else if (sectionId === 'costos') {
+        showCostos();
+      } else if (sectionId === 'cobros') {
+        showCobros();
+      } else if (sectionId === 'mensajeros-pendientes') {
+        listPendingMensajeros();
       }
       
       closeSidebar();
@@ -835,7 +904,7 @@
         cliente: currentUser.id
       };
       
-      // Save service (simulate)
+      // Save service
       saveService(serviceData);
       
       // Close modal and reload services
@@ -886,6 +955,8 @@
       let filteredServices = services;
       if (currentUser.role === 'cliente') {
         filteredServices = services.filter(s => s.cliente === currentUser.id);
+      } else if (currentUser.role === 'mensajero') {
+        filteredServices = services.filter(s => s.mensajero === currentUser.id || s.estado === 'pendiente');
       }
       
       // Render services
@@ -909,6 +980,9 @@
             ` : ''}
             ${currentUser.role === 'mensajero' && service.estado === 'pendiente' ? `
               <button onclick="takeService('${service.id}')" class="btn btn-take">Tomar servicio</button>
+            ` : ''}
+            ${(currentUser.role === 'mensajero' || currentUser.id === service.mensajero) && service.estado === 'en_ruta' ? `
+              <button onclick="completeService('${service.id}')" class="btn btn-primary">Completar entrega</button>
             ` : ''}
           </div>
         `;
@@ -960,6 +1034,20 @@
       }
     }
     
+    // Complete service
+    function completeService(id) {
+      const services = JSON.parse(localStorage.getItem('services') || '[]');
+      const service = services.find(s => s.id === id);
+      
+      if (service) {
+        service.estado = 'entregado';
+        service.fechaEntrega = new Date().toISOString();
+        
+        localStorage.setItem('services', JSON.stringify(services));
+        loadServices();
+      }
+    }
+    
     // Show history
     function showHistory() {
       const services = JSON.parse(localStorage.getItem('services') || '[]');
@@ -991,6 +1079,7 @@
           <p><strong>Dirección:</strong> ${service.direccion}</p>
           <p><strong>Fecha:</strong> ${new Date(service.fecha).toLocaleDateString()}</p>
           ${service.cobro > 0 ? `<p><strong>Cobro:</strong> $${service.cobro}</p>` : ''}
+          ${service.fechaEntrega ? `<p><strong>Entregado:</strong> ${new Date(service.fechaEntrega).toLocaleDateString()}</p>` : ''}
         `;
         
         container.appendChild(serviceCard);
@@ -999,13 +1088,46 @@
     
     // Show financial summary
     function showFinancialSummary() {
-      showSection('financial-summary');
-      
+      const services = JSON.parse(localStorage.getItem('services') || '[]');
       const container = document.getElementById('financial-container');
+      
+      // Filter services delivered by current user
+      const userServices = services.filter(s => 
+        s.mensajero === currentUser.id && s.estado === 'entregado'
+      );
+      
+      // Calculate totals
+      const totalEarnings = userServices.reduce((sum, service) => sum + (service.cobro * 0.8), 0);
+      const totalServices = userServices.length;
+      
       container.innerHTML = `
         <div class="service-card">
           <h3 class="font-bold text-lg mb-4">Resumen Financiero</h3>
-          <p>Función en desarrollo. Aquí se mostraría el resumen de ganancias y pagos.</p>
+          <p><strong>Total de servicios entregados:</strong> ${totalServices}</p>
+          <p><strong>Ganancias totales:</strong> $${totalEarnings.toFixed(2)}</p>
+          <p class="mt-4 text-sm text-[#d1b070]">* Calculado como el 80% del valor de cobro de cada servicio</p>
+        </div>
+      `;
+    }
+    
+    // Show costos
+    function showCostos() {
+      const container = document.getElementById('costos-container');
+      container.innerHTML = `
+        <div class="service-card">
+          <h3 class="font-bold text-lg mb-4">Costos por Empresa</h3>
+          <p>Función en desarrollo. Aquí se mostrarían los costos asociados a cada empresa.</p>
+        </div>
+      `;
+    }
+    
+    // Show cobros
+    function showCobros() {
+      const container = document.getElementById('cobros-container');
+      container.innerHTML = `
+        <div class="service-card">
+          <h3 class="font-bold text-lg mb-4">Cobros Contra Entrega</h3>
+          <p>Función en desarrollo. Aquí se mostrarían los cobros pendientes por realizar.</p>
         </div>
       `;
     }
@@ -1067,6 +1189,8 @@
       let filteredServices = services;
       if (currentUser.role === 'cliente') {
         filteredServices = services.filter(s => s.cliente === currentUser.id);
+      } else if (currentUser.role === 'mensajero') {
+        filteredServices = services.filter(s => s.mensajero === currentUser.id || s.estado === 'pendiente');
       }
       
       if (state !== 'all') {
@@ -1100,6 +1224,9 @@
             ${currentUser.role === 'mensajero' && service.estado === 'pendiente' ? `
               <button onclick="takeService('${service.id}')" class="btn btn-take">Tomar servicio</button>
             ` : ''}
+            ${(currentUser.role === 'mensajero' || currentUser.id === service.mensajero) && service.estado === 'en_ruta' ? `
+              <button onclick="completeService('${service.id}')" class="btn btn-primary">Completar entrega</button>
+            ` : ''}
           </div>
         `;
         
@@ -1109,9 +1236,6 @@
     
     // List pending mensajeros (admin only)
     function listPendingMensajeros() {
-      showSection('mensajeros-pendientes');
-      
-      // This would normally come from your database
       const container = document.getElementById('mensajeros-pendientes-container');
       container.innerHTML = `
         <div class="service-card">
