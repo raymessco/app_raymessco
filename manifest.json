@@ -1,22 +1,23 @@
 {
   "name": "Ray Mess Co",
-  "short_name": "RayMess",
-  "start_url": "./?source=pwa",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#CF9524",
+  "short_name": "Ray Mess Co",
   "description": "Sistema de gestión de servicios de mensajería",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#CF9524",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
+      "src": "https://raymessco.github.io/app_raymessco/icon-192.png",
       "type": "image/png",
+      "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
-      "sizes": "512x512",
+      "src": "https://raymessco.github.io/app_raymessco/icon-512.png",
       "type": "image/png",
+      "sizes": "512x512",
       "purpose": "any maskable"
     }
   ]
