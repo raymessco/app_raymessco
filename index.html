@@ -23,14 +23,15 @@
   </div>
 
   <script>
-    // ✅ Configuración Firebase
+    // ✅ Configuración Firebase real
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_PROJECT.firebaseapp.com",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_PROJECT.appspot.com",
-      messagingSenderId: "XXX",
-      appId: "XXX"
+      apiKey: "AIzaSyCkjLdn1NYI5eApE4N5ylkGJnlYsmO5hq4",
+      authDomain: "raymessco-ce1c0.firebaseapp.com",
+      projectId: "raymessco-ce1c0",
+      storageBucket: "raymessco-ce1c0.appspot.com",
+      messagingSenderId: "829091900185",
+      appId: "1:829091900185:web:1c61887780ff2639a5f388",
+      measurementId: "G-38Q9K6CV7D"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -55,7 +56,7 @@
       auth.signOut();
     });
 
-    // ✅ Resultado del redirect (solo logs)
+    // ✅ Manejar resultado del redirect
     async function handleRedirectResult() {
       try {
         const result = await auth.getRedirectResult();
