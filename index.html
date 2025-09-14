@@ -1304,8 +1304,16 @@
       });
       
       // Observador de autenticación
-      auth.onAuthStateChanged(handleAuthStateChange);
-    }
+auth.onAuthStateChanged(user => {
+  if (user) {
+    console.log("Sesión activa:", user.email);
+    showAuthStatus("Sesión iniciada como " + user.email, false);
+    // Aquí cargas la UI protegida
+  } else {
+    console.log("No hay sesión, mostrar botón Google");
+    // Aquí muestras el botón de login
+  }
+});
 
    // Función para iniciar sesión con Google (usando redirect en lugar de popup)
 async function signInWithGoogle() {
@@ -1346,8 +1354,10 @@ async function handleRedirectResult() {
   try {
     const result = await auth.getRedirectResult();
     if (result.user) {
-      showAuthStatus("¡Autenticación exitosa!", false);
-      console.log("Usuario autenticado:", result.user);
+      console.log("Usuario autenticado con redirect:", result.user);
+      showAuthStatus("¡Autenticación exitosa con " + result.user.email + "!", false);
+    } else {
+      console.log("No hubo usuario en redirect, esperando onAuthStateChanged...");
     }
   } catch (error) {
     console.error("Error después del redirect:", error);
@@ -1355,46 +1365,52 @@ async function handleRedirectResult() {
   }
 }
 
-    // Manejar cambios en el estado de autenticación
-    async function handleAuthStateChange(user) {
-      if (!user) {
-        // Usuario no autenticado
-        currentUser = null;
-        currentRole = null;
-        services = [];
-        appView.classList.add('hidden');
-        loginView.classList.remove('hidden');
-        
-        // LIMPIAR LISTENERS AL HACER LOGOUT
-        cleanupListeners();
-        
-        return;
-      }
-      
-      // Usuario autenticado
-      loginView.classList.add('hidden');
-      appView.classList.remove('hidden');
-      currentUser = user;
-      
-      // Obtener información del perfil
-      try {
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          userNameEl.textContent = userData.displayName || user.displayName || user.email || '';
-          currentRole = userData.role || 'cliente';
-        } else {
-          // Usuario nuevo, mostrar selector de rol
-          userNameEl.textContent = user.displayName || user.email || '';
-          showRoleSelection();
-          return;
-        }
-      } catch (error) {
-        console.error("Error obteniendo datos de usuario:", error);
-        userNameEl.textContent = user.displayName || user.email || '';
-        currentRole = 'cliente';
-      }
-      
+// ✅ Manejar cambios en el estado de autenticación
+async function handleAuthStateChange(user) {
+  if (!user) {
+    // Usuario no autenticado
+    currentUser = null;
+    currentRole = null;
+    services = [];
+
+    appView.classList.add('hidden');
+    loginView.classList.remove('hidden');
+
+    // Limpiar listeners al hacer logout
+    cleanupListeners();
+
+    console.log("No hay sesión, mostrar botón Google");
+    showAuthStatus("Por favor, inicia sesión con Google", true);
+
+    return;
+  }
+
+  // Usuario autenticado
+  console.log("Sesión activa:", user.email);
+  loginView.classList.add('hidden');
+  appView.classList.remove('hidden');
+  currentUser = user;
+
+  // Obtener información del perfil
+  try {
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (userDoc.exists) {
+      const userData = userDoc.data();
+      userNameEl.textContent = userData.displayName || user.displayName || user.email || '';
+      currentRole = userData.role || 'cliente';
+    } else {
+      // Usuario nuevo → mostrar selector de rol
+      userNameEl.textContent = user.displayName || user.email || '';
+      showRoleSelection();
+      return;
+    }
+  } catch (error) {
+    console.error("Error obteniendo datos de usuario:", error);
+    userNameEl.textContent = user.displayName || user.email || '';
+    currentRole = 'cliente';
+  }
+}
+
       // Actualizar UI según el rol
       updateUIByRole();
       
