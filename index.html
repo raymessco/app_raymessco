@@ -1,27 +1,1132 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PWA Test Google Login</title>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Ray Mess Co — Dashboard</title>
+  <meta name="theme-color" content="#CF9524">
+  <meta name="description" content="Sistema de gestión de servicios de mensajería">
+  
+  <!-- Meta tags para iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
+  
+  <!-- Manifest con íconos optimizados -->
+  <link rel="manifest" href="https://raymessco.github.io/app_raymessco/manifest.json">
+  <link rel="icon" href="https://raymessco.github.io/app_raymessco/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="https://raymessco.github.io/app_raymessco/icon-192.png">
+  
+  <!-- Font Awesome para iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind -->
+  <link rel="stylesheet" href="https://raymessco.github.io/app_raymessco/tailwind.css">
+  
+  <style>
+    :root {
+      --gold: #CF9524;
+      --gold-light: #E5B858;
+      --gold-dark: #A67A1D;
+      --bg-dark: #0A0A0A;
+      --bg-darker: #050505;
+      --text-light: #F5F5F5;
+      --text-gray: #A3A3A3;
+    }
+    
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      background: var(--bg-darker);
+      color: var(--text-light);
+      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      touch-action: manipulation;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    /* Login Styles */
+    .login-container {
+      background: linear-gradient(to bottom, var(--bg-darker), var(--bg-dark));
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .login-card {
+      background: rgba(15, 15, 15, 0.95);
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      padding: 30px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 10px 30px rgba(207, 149, 36, 0.15);
+      backdrop-filter: blur(10px);
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 15px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .app-name {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 5px;
+    }
+    
+    .app-tagline {
+      color: var(--text-gray);
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+    
+    .google-btn {
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      width: 100%;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    
+    .google-btn:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(207, 149, 36, 0.3);
+    }
+    
+    .google-btn:active {
+      transform: translateY(0);
+    }
+    
+    .auth-status {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .auth-status.success {
+      background: rgba(34, 197, 94, 0.2);
+      color: #BBF7D0;
+    }
+    
+    .auth-status.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #FECACA;
+    }
+    
+    /* Main App Styles */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: var(--bg-darker);
+    }
+    
+    .app-header {
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--gold);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .menu-btn {
+      color: var(--gold);
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    
+    .menu-btn:hover {
+      background: rgba(207, 149, 36, 0.1);
+    }
+    
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .header-logo img {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+    }
+    
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    
+    .role-badge {
+      background: rgba(207, 149, 36, 0.15);
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .user-name {
+      color: var(--text-gray);
+      font-size: 14px;
+      display: none;
+    }
+    
+    .logout-btn {
+      background: rgba(239, 68, 68, 0.2);
+      color: #FECACA;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Sidebar Styles */
+    .sidebar-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 99;
+      display: none;
+    }
+    
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 280px;
+      background: var(--bg-dark);
+      border-right: 1px solid var(--gold);
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .sidebar-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    
+    .close-sidebar {
+      color: var(--gold);
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    
+    .close-sidebar:hover {
+      background: rgba(207, 149, 36, 0.1);
+    }
+    
+    .sidebar-menu {
+      padding: 20px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      color: var(--text-light);
+      text-decoration: none;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .menu-item:hover {
+      background: rgba(207, 149, 36, 0.1);
+      color: var(--gold);
+    }
+    
+    .menu-item i {
+      width: 24px;
+      text-align: center;
+      font-size: 18px;
+    }
+    
+    .menu-item-text {
+      font-weight: 500;
+    }
+    
+    /* Main Content Styles */
+    .main-content {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+    
+    .filters-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .filter-btn {
+      background: rgba(207, 149, 36, 0.1);
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--gold);
+      color: #000;
+    }
+    
+    .services-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    @media (min-width: 768px) {
+      .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .user-name {
+        display: block;
+      }
+    }
+    
+    @media (min-width: 1200px) {
+      .services-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    .service-card {
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid rgba(207, 149, 36, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(207, 149, 36, 0.15);
+      border-color: var(--gold);
+    }
+    
+    .service-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+    
+    .service-client {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text-light);
+    }
+    
+    .service-status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-pendiente {
+      background: rgba(185, 28, 28, 0.2);
+      color: #FECACA;
+    }
+    
+    .status-en_ruta {
+      background: rgba(161, 98, 7, 0.2);
+      color: #FDE68A;
+    }
+    
+    .status-entregado {
+      background: rgba(21, 128, 61, 0.2);
+      color: #BBF7D0;
+    }
+    
+    .status-cancelado {
+      background: rgba(107, 114, 128, 0.2);
+      color: #D1D5DB;
+    }
+    
+    .service-detail {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .service-detail i {
+      color: var(--gold);
+      margin-top: 3px;
+      min-width: 16px;
+    }
+    
+    .service-detail-content {
+      flex-grow: 1;
+      font-size: 14px;
+    }
+    
+    .service-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .action-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: var(--gold);
+      color: #000;
+    }
+    
+    .btn-primary:hover {
+      background: var(--gold-light);
+    }
+    
+    .btn-secondary {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93C5FD;
+      border: 1px solid rgba(59, 130, 246, 0.5);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #FECACA;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+    
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Modal Styles */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    
+    .modal-content {
+      background: var(--bg-dark);
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+      position: relative;
+    }
+    
+    .modal-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text-gray);
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    
+    .modal-close:hover {
+      color: var(--gold);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+    
+    .form-input {
+      width: 100%;
+      background: rgba(207, 149, 36, 0.1);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 12px 15px;
+      color: var(--text-light);
+      font-size: 16px;
+    }
+    
+    .form-input::placeholder {
+      color: rgba(207, 149, 36, 0.7);
+    }
+    
+    .form-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(207, 149, 36, 0.3);
+    }
+    
+    .form-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-checkbox input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--gold);
+    }
+    
+    .form-checkbox label {
+      color: var(--text-light);
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    .btn-submit {
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      transition: background 0.2s;
+    }
+    
+    .btn-submit:hover {
+      background: var(--gold-light);
+    }
+    
+    .btn-cancel {
+      background: rgba(239, 68, 68, 0.2);
+      color: #FECACA;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      transition: all 0.2s;
+    }
+    
+    .btn-cancel:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Role Selection Modal */
+    .role-modal {
+      text-align: center;
+    }
+    
+    .role-options {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    .role-option {
+      flex: 1;
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .role-option:hover {
+      background: rgba(207, 149, 36, 0.1);
+      transform: translateY(-3px);
+    }
+    
+    .role-icon {
+      font-size: 32px;
+      color: var(--gold);
+      margin-bottom: 15px;
+    }
+    
+    .role-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-light);
+    }
+    
+    .role-description {
+      font-size: 14px;
+      color: var(--text-gray);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .role-options {
+        flex-direction: column;
+      }
+      
+      .modal-content {
+        padding: 20px 15px;
+      }
+    }
+    
+    /* Utility classes */
+    .text-gold {
+      color: var(--gold);
+    }
+    
+    .clickable {
+      cursor: pointer;
+      color: #3b82f6;
+      text-decoration: underline;
+    }
+    
+    .mt-4 {
+      margin-top: 1rem;
+    }
+    
+    .mb-4 {
+      margin-bottom: 1rem;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    /* PWA Install Button - Mejorado */
+    .install-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 30px;
+      padding: 12px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .install-btn:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(207, 149, 36, 0.4);
+    }
+    
+    /* Financial summary */
+    .financial-card {
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .financial-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(207, 149, 36, 0.3);
+    }
+    
+    .financial-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    /* History section */
+    .history-day {
+      margin-bottom: 30px;
+    }
+    
+    .history-date {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 15px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--gold);
+    }
+    
+    /* Pending requests */
+    .pending-card {
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .pending-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    /* Service date info */
+    .service-date {
+      font-size: 12px;
+      color: var(--text-gray);
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Prueba Login con Google</h1>
-
-  <div id="login-view">
-    <button id="btn-google">Continuar con Google</button>
-    <p id="auth-status"></p>
+  <!-- LOGIN VIEW -->
+  <div id="login-view" class="login-container">
+    <div class="login-card">
+      <div class="logo-container">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" class="logo" alt="Ray Mess Co Logo">
+        <h1 class="app-name">Ray Mess Co</h1>
+        <p class="app-tagline">Sistema de gestión de servicios de mensajería</p>
+      </div>
+      
+      <div id="auth-status" class="auth-status hidden"></div>
+      
+      <button id="btn-google" class="google-btn">
+        <i class="fab fa-google"></i>
+        <span id="btn-text">Continuar con Google</span>
+        <div id="btn-loader" class="hidden">
+          <i class="fas fa-spinner fa-spin"></i>
+        </div>
+      </button>
+      
+      <p class="text-center mt-4 text-gold" style="font-size: 12px;">
+        <i class="fas fa-info-circle"></i> Selecciona tu cuenta de Google para continuar
+      </p>
+    </div>
   </div>
 
-  <div id="app-view" class="hidden">
-    <h2>Bienvenido, <span id="user-email"></span></h2>
-    <button id="logout">Cerrar sesión</button>
+  <!-- DASHBOARD -->
+  <div id="app" class="app-container hidden">
+    <!-- HEADER -->
+    <div class="app-header">
+      <div class="header-left">
+        <button id="sidebar-toggle" class="menu-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="header-logo">
+          <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo">
+          <span class="header-title">Ray Mess Co</span>
+        </div>
+        <span id="role-badge" class="role-badge">CLIENTE</span>
+      </div>
+      
+      <div class="header-right">
+        <span id="user-name" class="user-name"></span>
+        <button id="btn-logout" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Salir
+        </button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR BACKDROP -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">Menú</h2>
+        <button class="close-sidebar">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="sidebar-menu">
+        <div class="menu-item" onclick="showSection('services')">
+          <i class="fas fa-clipboard-list"></i>
+          <span class="menu-item-text">Servicios</span>
+        </div>
+        
+        <div id="menu-registrar" class="menu-item" onclick="openModal()">
+          <i class="fas fa-plus-circle"></i>
+          <span class="menu-item-text">Registrar servicio</span>
+        </div>
+        
+        <div id="menu-finanzas-mensajero" class="menu-item hidden" onclick="showFinancialSummary()">
+          <i class="fas fa-money-bill-wave"></i>
+          <span class="menu-item-text">Mis finanzas</span>
+        </div>
+        
+        <div id="menu-costos" class="menu-item hidden" onclick="showSection('costos')">
+          <i class="fas fa-dollar-sign"></i>
+          <span class="menu-item-text">Costos por empresa</span>
+        </div>
+        
+        <div id="menu-cobros" class="menu-item hidden" onclick="showSection('cobros')">
+          <i class="fas fa-cash-register"></i>
+          <span class="menu-item-text">Cobros contra entrega</span>
+        </div>
+        
+        <div id="menu-pendientes" class="menu-item hidden" onclick="listPendingMensajeros()">
+          <i class="fas fa-user-clock"></i>
+          <span class="menu-item-text">Solicitudes mensajero</span>
+        </div>
+        
+        <div class="menu-item" onclick="openEditProfile()">
+          <i class="fas fa-user-edit"></i>
+          <span class="menu-item-text">Editar perfil</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <!-- Pending banner -->
+      <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+        <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
+      </div>
+
+      <!-- FILTERS -->
+      <div id="filters" class="filters-container">
+        <button onclick="setFilter('all')" class="filter-btn active">Todos</button>
+        <button onclick="setFilter('pendiente')" class="filter-btn">Pendientes</button>
+        <button onclick="setFilter('en_ruta')" class="filter-btn">En ruta</button>
+        <button onclick="setFilter('entregado')" class="filter-btn">Entregados</button>
+        <button onclick="setFilter('cancelado')" class="filter-btn">Cancelados</button>
+      </div>
+
+      <!-- SERVICES LIST -->
+      <div id="services-section" class="services-grid"></div>
+
+      <!-- Financial summary for messengers -->
+      <div id="financial-section" class="hidden">
+        <h2 class="section-title">Resumen financiero</h2>
+        <div class="financial-card">
+          <div class="financial-item">
+            <span>Total ganado:</span>
+            <span id="total-earned" class="text-gold">$0</span>
+          </div>
+          <div class="financial-item">
+            <span>Total pendiente de pago:</span>
+            <span id="total-pending" class="text-gold">$0</span>
+          </div>
+          <div class="financial-item">
+            <span>Total pagado:</span>
+            <span id="total-paid" class="text-gold">$0</span>
+          </div>
+        </div>
+        <h3 class="section-title">Detalle de servicios por día</h3>
+        <div id="financial-list"></div>
+      </div>
+
+      <!-- Pending container for admin -->
+      <div id="pending-container" class="hidden">
+        <h2 class="section-title">Solicitudes de mensajero</h2>
+        <div id="pending-list"></div>
+      </div>
+
+      <!-- COSTOS (ADMIN) -->
+      <div id="costos-section" class="hidden">
+        <h2 class="section-title">Costos por empresa</h2>
+        <div id="costos-body"></div>
+      </div>
+
+      <!-- COBROS (ADMIN) -->
+      <div id="cobros-section" class="hidden">
+        <h2 class="section-title">Cobros contra entrega</h2>
+        <div id="cobros-body"></div>
+      </div>
+    </div>
   </div>
+
+  <!-- MODAL: registrar servicio -->
+  <div id="modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="modal-header">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" style="width: 60px; height: 60px; margin-bottom: 15px;">
+        <h2 class="modal-title">Registrar servicio</h2>
+      </div>
+
+      <form id="service-form">
+        <div class="form-group">
+          <label class="form-label">Empresa o cliente</label>
+          <input type="text" name="empresaCliente" class="form-input" placeholder="Nombre de la empresa or cliente" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Nombre de contacto receptor</label>
+          <input type="text" name="contacto" class="form-input" placeholder="Persona que recibirá" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Teléfono de contacto</label>
+          <input type="tel" name="telefono" class="form-input" placeholder="Número de teléfono">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Dirección de recogida</label>
+          <input type="text" name="recoger" class="form-input" placeholder="Donde se recogerá el paquete" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Dirección de entrega</label>
+          <input type="text" name="entregar" class="form-input" placeholder="Donde se entregará el paquete" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Volumen (cantidad/medidas)</label>
+          <input type="text" name="volumen" class="form-input" placeholder="Descripción del volumen">
+        </div>
+        
+        <div id="field-costo-cliente-container" class="form-group hidden">
+          <label class="form-label">Costo de mensajería</label>
+          <input type="number" name="costoCliente" class="form-input" placeholder="Costo del servicio" min="0">
+        </div>
+        
+        <div id="admin-fields" class="hidden">
+          <div class="form-group">
+            <label class="form-label">Asignar mensajero</label>
+            <select name="uidMensajero" class="form-input" id="field-mensajero">
+              <option value="">Seleccionar mensajero</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Pago al mensajero</label>
+            <input type="number" name="pagoMensajero" class="form-input" placeholder="Pago al mensajero" min="0" id="field-pago">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Observaciones</label>
+          <textarea name="observaciones" class="form-input" placeholder="Observaciones adicionales" rows="3"></textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">
+            <i class="fas fa-check"></i> Registrar
+          </button>
+          <button type="button" onclick="closeModal()" class="btn-cancel">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Editar perfil -->
+  <div id="edit-profile-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeEditProfile()">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="modal-header">
+        <h2 class="modal-title">Editar perfil</h2>
+      </div>
+      
+      <form id="profile-form">
+        <div class="form-group">
+          <label class="form-label">Nombre para mostrar</label>
+          <input type="text" id="profile-displayName" class="form-input" placeholder="Tu nombre" required>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">
+            <i class="fas fa-save"></i> Guardar
+          </button>
+          <button type="button" onclick="closeEditProfile()" class="btn-cancel">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ROLE CHOICE MODAL (first time) -->
+  <div id="roleChoiceModal" class="modal-backdrop hidden">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">Bienvenido a Ray Mess Co 👋</h2>
+        <p style="color: var(--text-gray);">Selecciona tu rol en la aplicación:</p>
+      </div>
+      
+      <div class="role-options">
+        <div class="role-option" onclick="selectRole('cliente')">
+          <div class="role-icon">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="role-title">Soy Cliente</div>
+          <div class="role-description">Solicitar servicios de mensajería</div>
+        </div>
+        
+        <div class="role-option" onclick="selectRole('mensajero')">
+          <div class="role-icon">
+            <i class="fas fa-motorcycle"></i>
+          </div>
+          <div class="role-title">Soy Mensajero</div>
+          <div class="role-description">Entregar servicios de mensajería</div>
+        </div>
+      </div>
+      
+      <p style="text-align: center; color: var(--text-gray); margin-top: 20px; font-size: 14px;">
+        <i class="fas fa-info-circle"></i> Un administrador revisará las solicitudes de mensajero.
+      </p>
+    </div>
+  </div>
+
+  <!-- Botón de instalación PWA - Mejorado -->
+  <button id="install-button" class="install-btn hidden">
+    <i class="fas fa-download"></i> Instalar
+  </button>
+
+  <!-- Firebase SDK v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <script>
-    // ✅ Firebase Config CORREGIDO
+    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCkjLdn1NYI5eApE4N5ylkGJnlYsmO5hq4",
       authDomain: "raymessco-ce1c0.firebaseapp.com",
@@ -31,57 +1136,205 @@
       appId: "1:829091900185:web:1c61887780ff2639a5f388",
       measurementId: "G-38Q9K6CV7D"
     };
+
+    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
+    // Estado global
+    let currentUser = null;
+    let currentRole = null;
+    let deferredPrompt = null;
+
+    // Referencias a elementos UI
     const loginView = document.getElementById('login-view');
-    const appView = document.getElementById('app-view');
-    const userEmailEl = document.getElementById('user-email');
-    const statusEl = document.getElementById('auth-status');
+    const appView = document.getElementById('app');
+    const userNameEl = document.getElementById('user-name');
+    const installButton = document.getElementById('install-button');
+    const authStatus = document.getElementById('auth-status');
+    const btnGoogle = document.getElementById('btn-google');
+    const btnText = document.getElementById('btn-text');
+    const btnLoader = document.getElementById('btn-loader');
 
-    async function signInWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.addScope('email');
-      provider.setCustomParameters({ prompt: 'select_account' });
-      await auth.signInWithRedirect(provider);
-    }
-
-    document.getElementById('btn-google').addEventListener('click', signInWithGoogle);
-
-    document.getElementById('logout').addEventListener('click', () => {
-      auth.signOut();
-    });
-
-    async function handleRedirectResult() {
-      try {
-        const result = await auth.getRedirectResult();
-        if (result.user) {
-          console.log("Usuario autenticado tras redirect:", result.user.email);
+    // Inicializar la aplicación
+    function initApp() {
+      // Manejar resultado de redirect si existe
+      handleRedirectResult();
+      
+      // Configurar botón de Google
+      btnGoogle.addEventListener('click', signInWithGoogle);
+      
+      // Configurar botón de logout
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        auth.signOut();
+      });
+      
+      // Configurar PWA installation
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installButton.classList.remove('hidden');
+      });
+      
+      installButton.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          installButton.classList.add('hidden');
         }
-      } catch (err) {
-        console.error("Error redirect:", err);
-        statusEl.textContent = "Error: " + err.message;
+        
+        deferredPrompt = null;
+      });
+      
+      // Observador de autenticación
+      auth.onAuthStateChanged(handleAuthStateChange);
+      
+      // Registrar Service Worker para PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('https://raymessco.github.io/app_raymessco/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
       }
     }
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        console.log("Sesión activa:", user.email);
-        loginView.classList.add('hidden');
-        appView.classList.remove('hidden');
-        userEmailEl.textContent = user.email;
-      } else {
-        console.log("No hay sesión");
-        loginView.classList.remove('hidden');
-        appView.classList.add('hidden');
+    // Manejar resultado de redirect de autenticación
+    function handleRedirectResult() {
+      auth.getRedirectResult()
+        .then((result) => {
+          if (result.user) {
+            console.log('Usuario autenticado via redirect:', result.user.email);
+            showAuthStatus("¡Autenticación exitosa!", false);
+          }
+        })
+        .catch((error) => {
+          console.error("Error en redirect result:", error);
+          showAuthStatus("Error de autenticación", true);
+        });
+    }
+
+    // Función para iniciar sesión con Google usando REDIRECT
+    function signInWithGoogle() {
+      try {
+        btnText.textContent = 'Redirigiendo...';
+        btnLoader.classList.remove('hidden');
+        
+        showAuthStatus("Redirigiendo a Google...", false);
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        
+        // Usar signInWithRedirect
+        auth.signInWithRedirect(provider);
+        
+      } catch (error) {
+        console.error("Error en autenticación:", error);
+        
+        let errorMessage = "Error de autenticación";
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage = "El popup fue bloqueado. Permite popups para este sitio.";
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = "Error de red. Verifica tu conexión a Internet.";
+        } else if (error.code) {
+          errorMessage = `Error: ${error.code}`;
+        }
+        
+        showAuthStatus(errorMessage, true);
+        btnText.textContent = 'Continuar con Google';
+        btnLoader.classList.add('hidden');
       }
-    });
+    }
 
-    handleRedirectResult();
+    // Manejar cambios en el estado de autenticación
+    function handleAuthStateChange(user) {
+      if (!user) {
+        // Usuario no autenticado
+        currentUser = null;
+        currentRole = null;
+        appView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+        return;
+      }
+      
+      // Usuario autenticado
+      loginView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      currentUser = user;
+      
+      // Mostrar el email del usuario
+      userNameEl.textContent = user.email;
+      
+      // Verificar si es usuario nuevo
+      checkIfNewUser(user.uid);
+    }
+
+    // Verificar si es usuario nuevo
+    function checkIfNewUser(uid) {
+      db.collection('users').doc(uid).get()
+        .then((doc) => {
+          if (!doc.exists) {
+            // Usuario nuevo, mostrar selector de rol
+            showRoleSelection();
+          } else {
+            // Usuario existente, obtener su rol
+            currentRole = doc.data().role || 'cliente';
+            document.getElementById('role-badge').textContent = currentRole.toUpperCase();
+          }
+        })
+        .catch((error) => {
+          console.error("Error obteniendo datos de usuario:", error);
+        });
+    }
+
+    // Mostrar selección de rol para usuarios nuevos
+    function showRoleSelection() {
+      document.getElementById('roleChoiceModal').classList.remove('hidden');
+    }
+
+    // Seleccionar rol (cliente o mensajero)
+    function selectRole(role) {
+      const userData = {
+        role: role === 'mensajero' ? 'pending_mensajero' : 'cliente',
+        email: currentUser.email,
+        displayName: currentUser.displayName || '',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      
+      db.collection('users').doc(currentUser.uid).set(userData)
+        .then(() => {
+          currentRole = userData.role;
+          document.getElementById('role-badge').textContent = currentRole.toUpperCase();
+          document.getElementById('roleChoiceModal').classList.add('hidden');
+        })
+        .catch((error) => {
+          console.error("Error guardando rol:", error);
+          alert("Error al guardar la selección de rol. Intenta nuevamente.");
+        });
+    }
+    window.selectRole = selectRole;
+
+    // Mostrar mensaje de estado de autenticación
+    function showAuthStatus(message, isError = false) {
+      authStatus.textContent = message;
+      authStatus.classList.remove('hidden', 'success', 'error');
+      authStatus.classList.add(isError ? 'error' : 'success');
+      
+      setTimeout(() => {
+        authStatus.classList.add('hidden');
+      }, 5000);
+    }
+
+    // Inicializar la aplicación cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', initApp);
   </script>
-
-  <style>
-    .hidden { display: none; }
-  </style>
 </body>
 </html>
