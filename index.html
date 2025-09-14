@@ -1303,63 +1303,53 @@
         deferredPrompt = null;
       });
       
-
-// Observador de autenticación
-auth.onAuthStateChanged(user => {
-  handleAuthStateChange(user); // 👈 ahora usa tu función completa
-});
-
-
-   // Función para iniciar sesión con Google (usando redirect en lugar de popup)
-async function signInWithGoogle() {
-  const btnText = document.getElementById('btn-text');
-  const btnLoader = document.getElementById('btn-loader');
-
-  try {
-    btnText.textContent = 'Conectando...';
-    btnLoader.classList.remove('hidden');
-    showAuthStatus("Conectando con Google...", false);
-
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.addScope('email');
-    provider.setCustomParameters({ prompt: 'select_account' });
-
-    // ✅ Usamos redirect en lugar de popup
-    await auth.signInWithRedirect(provider);
-
-  } catch (error) {
-    console.error("Error en autenticación:", error);
-
-    let errorMessage = "Error de autenticación";
-    if (error.code === 'auth/network-request-failed') {
-      errorMessage = "Error de red. Verifica tu conexión a Internet.";
-    } else if (error.code) {
-      errorMessage = `Error: ${error.code}`;
+      // Observador de autenticación
+      auth.onAuthStateChanged(handleAuthStateChange);
     }
 
-    showAuthStatus(errorMessage, true);
-  } finally {
-    btnText.textContent = 'Continuar con Google';
-    btnLoader.classList.add('hidden');
-  }
-}
-
-// ✅ Manejar el resultado del redirect después de volver de Google
-async function handleRedirectResult() {
-  try {
-    const result = await auth.getRedirectResult();
-    if (result.user) {
-      console.log("Usuario autenticado con redirect:", result.user);
-      showAuthStatus("¡Autenticación exitosa con " + result.user.email + "!", false);
-    } else {
-      console.log("No hubo usuario en redirect, esperando onAuthStateChanged...");
+    // Función para iniciar sesión con Google
+    async function signInWithGoogle() {
+      const btnText = document.getElementById('btn-text');
+      const btnLoader = document.getElementById('btn-loader');
+      
+      try {
+        btnText.textContent = 'Conectando...';
+        btnLoader.classList.remove('hidden');
+        
+        showAuthStatus("Conectando con Google...", false);
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
+        await auth.signInWithPopup(provider);
+        showAuthStatus("¡Autenticación exitosa!", false);
+        
+      } catch (error) {
+        console.error("Error en autenticación:", error);
+        
+        let errorMessage = "Error de autenticación";
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage = "El popup fue bloqueado. Permite popups para este sitio.";
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = "El popup de autenticación fue cerrado. Intenta nuevamente.";
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = "Error de red. Verifica tu conexión a Internet.";
+        } else if (error.code) {
+          errorMessage = `Error: ${error.code}`;
+        }
+        
+        showAuthStatus(errorMessage, true);
+      } finally {
+        btnText.textContent = 'Continuar con Google';
+        btnLoader.classList.add('hidden');
+      }
     }
-  } catch (error) {
-    console.error("Error después del redirect:", error);
-    showAuthStatus("Error después de redirigir: " + error.message, true);
-  }
-}
 
+    // Manejar cambios en el estado de autenticación
+    async 
 // ✅ Manejar cambios en el estado de autenticación
 async function handleAuthStateChange(user) {
   if (!user) {
@@ -1404,26 +1394,21 @@ async function handleAuthStateChange(user) {
     userNameEl.textContent = user.displayName || user.email || '';
     currentRole = 'cliente';
   }
+
+  // ✅ AHORA sí: inicializar UI y listeners después del login correcto
+  updateUIByRole();
+  subscribeToUserProfile(user.uid);
+  subscribeServicesByRole();
+
+  if (currentRole === 'admin') {
+    loadMensajerosList();
+  }
+
+  // Mostrar sección de servicios al iniciar
+  showSection('services');
+  setFilter('all');
 }
 
-      // Actualizar UI según el rol
-      updateUIByRole();
-      
-      // Suscribirse a cambios en el perfil
-      subscribeToUserProfile(user.uid);
-      
-      // Cargar servicios según el rol
-      subscribeServicesByRole();
-      
-      // Cargar lista de mensajeros si es admin
-      if (currentRole === 'admin') {
-        loadMensajerosList();
-      }
-      
-      // Siempre mostrar la sección de servicios al iniciar sesión
-      showSection('services');
-      setFilter('all');
-    }
 
     // NUEVA FUNCIÓN PARA LIMPIAR LISTENERS
     function cleanupListeners() {
@@ -2522,20 +2507,6 @@ async function handleAuthStateChange(user) {
 
     // Inicializar la aplicación cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', initApp);
-    
-
-// ✅ Registrar Service Worker para PWA en GitHub Pages
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js")
-      .then(reg => {
-        console.log("SW registrado correctamente:", reg.scope);
-      })
-      .catch(err => {
-        console.error("Error registrando el SW:", err);
-      });
-  });
-}
-</script>
+  </script>
 </body>
 </html>
