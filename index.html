@@ -1303,17 +1303,12 @@
         deferredPrompt = null;
       });
       
-      // Observador de autenticación
+
+// Observador de autenticación
 auth.onAuthStateChanged(user => {
-  if (user) {
-    console.log("Sesión activa:", user.email);
-    showAuthStatus("Sesión iniciada como " + user.email, false);
-    // Aquí cargas la UI protegida
-  } else {
-    console.log("No hay sesión, mostrar botón Google");
-    // Aquí muestras el botón de login
-  }
+  handleAuthStateChange(user); // 👈 ahora usa tu función completa
 });
+
 
    // Función para iniciar sesión con Google (usando redirect en lugar de popup)
 async function signInWithGoogle() {
