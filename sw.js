@@ -1,37 +1,37 @@
-// Definimos el nombre y la versión de nuestro caché
-const CACHE_NAME = 'raymessco-v1';
+// Nombre de la caché
+const CACHE_NAME = "raymessco-cache-v1";
 
-// Listamos los archivos que queremos cachear (el "App Shell")
+// Archivos que se cachearán (ajusta las rutas según tu estructura)
 const urlsToCache = [
-  '/',
-  '/index.html',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://raymessco.github.io/app_raymessco/icon-192.png'
-  // Puedes añadir más recursos estáticos aquí (CSS, imágenes, etc.)
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png",
+  "/tailwind.css"
 ];
 
-// Evento 'install': se dispara cuando el service worker se instala.
-// Aquí es donde guardamos nuestros archivos en el caché.
-self.addEventListener('install', event => {
+// Instalar Service Worker y guardar en caché
+self.addEventListener("install", event => {
+  console.log("[ServiceWorker] Instalando...");
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Cache abierto');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      console.log("[ServiceWorker] Cacheando archivos iniciales");
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
-// Evento 'activate': se dispara cuando el service worker se activa.
-// Aquí limpiamos los cachés antiguos que ya no se usan.
-self.addEventListener('activate', event => {
+// Activar Service Worker y limpiar cachés antiguas
+self.addEventListener("activate", event => {
+  console.log("[ServiceWorker] Activado");
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then(keys => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Borrando caché antiguo:', cacheName);
-            return caches.delete(cacheName);
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log("[ServiceWorker] Eliminando caché antigua:", key);
+            return caches.delete(key);
           }
         })
       );
@@ -39,24 +39,12 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Evento 'fetch': se dispara cada vez que la aplicación hace una petición de red.
-// Interceptamos la petición y respondemos con el caché si es posible.
-self.addEventListener('fetch', event => {
-  // Excluimos las peticiones a Firebase para no interferir con su manejo de conexión.
-  if (event.request.url.includes('firestore.googleapis.com')) {
-    return;
-  }
-
+// Interceptar peticiones y responder desde la caché o red
+self.addEventListener("fetch", event => {
   event.respondWith(
-    // 1. Buscamos en el caché si tenemos una respuesta para esta petición.
-    caches.match(event.request)
-      .then(response => {
-        // Si hay una respuesta en el caché, la devolvemos.
-        if (response) {
-          return response;
-        }
-        // Si no, hacemos la petición a la red.
-        return fetch(event.request);
-      })
+    caches.match(event.request).then(response => {
+      // Si existe en caché, lo devuelve; si no, va a la red
+      return response || fetch(event.request);
+    })
   );
 });
