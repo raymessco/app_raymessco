@@ -1288,19 +1288,28 @@
       }
     }
 
-    // Función para iniciar sesión con Google (usando Redirect)
-    function signInWithGoogle() {
-      const btnText = document.getElementById('btn-text');
-      const btnLoader = document.getElementById('btn-loader');
-      
-      btnText.textContent = 'Redirigiendo...';
-      btnLoader.classList.remove('hidden');
-      
-      showAuthStatus("Conectando con Google...", false);
-      
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithRedirect(provider);
-    }
+
+    // Función para iniciar sesión con Google (Popup con fallback a Redirect)
+async function signInWithGoogle() {
+  const btnText = document.getElementById('btn-text');
+  const btnLoader = document.getElementById('btn-loader');
+
+  btnText.textContent = 'Conectando...';
+  btnLoader.classList.remove('hidden');
+  showAuthStatus("Conectando con Google...", false);
+
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  try {
+    // Primero intenta con popup (más fluido en la mayoría de navegadores)
+    await auth.signInWithPopup(provider);
+    console.log("Login exitoso con popup");
+  } catch (error) {
+    console.warn("Popup falló, usando redirect:", error);
+    auth.signInWithRedirect(provider);
+  }
+}
+
 
     // Manejar cambios en el estado de autenticación
     async function handleAuthStateChange(user) {
@@ -2087,6 +2096,11 @@
     
     // Inicializar la aplicación cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', initApp);
+    // Ejecutar initApp() cuando cargue la ventana
+window.onload = () => {
+  initApp();
+};
+
   </script>
 </body>
 </html>
