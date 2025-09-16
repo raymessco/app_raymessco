@@ -11,12 +11,7 @@ const urlsToCache = [
   "/app_raymessco/tailwind.css"
 ];
 
-// --- Estrategias de caché ---
-// 1. Cache First para recursos estáticos (iconos, CSS, etc.)
-// 2. Network First para peticiones a Firebase / APIs
-// 3. Stale-While-Revalidate para imágenes dinámicas
-
-// Instalar Service Worker y cachear archivos base
+// ====== EVENTO INSTALL ======
 self.addEventListener("install", event => {
   console.log("[ServiceWorker] Instalando...");
   event.waitUntil(
@@ -28,7 +23,7 @@ self.addEventListener("install", event => {
   self.skipWaiting();
 });
 
-// Activar y limpiar cachés antiguas
+// ====== EVENTO ACTIVATE ======
 self.addEventListener("activate", event => {
   console.log("[ServiceWorker] Activado");
   event.waitUntil(
@@ -46,10 +41,15 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// Interceptar peticiones
+// ====== EVENTO FETCH ======
 self.addEventListener("fetch", event => {
   const req = event.request;
   const url = new URL(req.url);
+
+  // 🚫 NO cachear POST, PUT, DELETE, etc.
+  if (req.method !== "GET") {
+    return; // dejamos pasar directo a la red
+  }
 
   // Estrategia 1: Cache First para archivos estáticos en /app_raymessco/
   if (
@@ -88,30 +88,36 @@ self.addEventListener("fetch", event => {
   event.respondWith(networkFirst(req));
 });
 
-// --- Funciones de estrategia ---
+// ====== FUNCIONES DE ESTRATEGIAS ======
+
+// Cache First: Primero cache, luego red
 async function cacheFirst(req) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(req);
   return cached || fetch(req);
 }
 
+// Network First: Primero red, si falla usar cache
 async function networkFirst(req) {
   const cache = await caches.open(CACHE_NAME);
   try {
     const fresh = await fetch(req);
-    cache.put(req, fresh.clone());
+    cache.put(req, fresh.clone()); // <- Aquí ya no habrá POST porque lo filtramos arriba
     return fresh;
   } catch (e) {
     return await cache.match(req);
   }
 }
 
+// Stale While Revalidate: Primero cache, actualiza en segundo plano
 async function staleWhileRevalidate(req) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(req);
+
   const networkFetch = fetch(req).then(fresh => {
     cache.put(req, fresh.clone());
     return fresh;
   });
+
   return cached || networkFetch;
 }
