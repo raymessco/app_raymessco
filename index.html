@@ -1598,64 +1598,64 @@ async function signInWithGoogle() {
       }
     }
 
-    function subscribeServicesByRole() {
-      const servicesEl = document.getElementById('services-section');
-      servicesEl.innerHTML = '<div class="text-center text-gold">Cargando servicios...</div>';
-      
-      if (_servicesUnsubscribe) {
-        _servicesUnsubscribe();
-        _servicesUnsubscribe = null;
-      }
-      
-      if (!currentUser || !currentRole) {
-        servicesEl.innerHTML = '<div class="text-center text-gold">Esperando datos de usuario...</div>';
-        return;
-      }
-      
-      let query;
-      
-      if (currentRole === 'admin') {
-        query = db.collection('services').orderBy('fechaCreacion', 'desc');
-      } else if (currentRole === 'cliente') {
-        query = db.collection('services')
-          .where('uidCliente', '==', currentUser.uid)
-          .orderBy('fechaCreacion', 'desc');
-      } else if (currentRole === 'mensajero') {
-        query = db.collection('services').orderBy('fechaCreacion', 'desc');
-      } else if (currentRole === 'pending_mensajero') {
-        servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios aún.</div>';
-        return;
-      } else {
-        servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
-        return;
-      }
-      
-     _servicesUnsubscribe = query.onSnapshot(snapshot => {
-  let allServices = snapshot.docs.map(doc => ({ 
-    id: doc.id, 
-    ...doc.data() 
-  }));
-  
-  if (currentRole === 'mensajero') {
-    // Muestra pendientes y los que el mensajero ya tomó
-    services = allServices.filter(service => 
-      service.estado === 'pendiente' || 
-      service.uidMensajero === currentUser.uid
-    );
-  } else if (currentRole === 'cliente') {
-    // Muestra todos los pedidos del cliente actual
-    services = allServices.filter(service => 
-      service.uidCliente === currentUser.uid
-    );
-  } else {
-    // Admin o cualquier otro rol: ve todo
-    services = allServices;
+      function subscribeServicesByRole() {
+  const servicesEl = document.getElementById('services-section');
+  servicesEl.innerHTML = '<div class="text-center text-gold">Cargando servicios...</div>';
+
+  if (_servicesUnsubscribe) {
+    _servicesUnsubscribe();
+    _servicesUnsubscribe = null;
   }
 
-  // Aquí llamas a tu función de renderizado
-  renderServices(services);
-});
+  if (!currentUser || !currentRole) {
+    servicesEl.innerHTML = '<div class="text-center text-gold">Esperando datos de usuario...</div>';
+    return;
+  }
+
+  let query;
+
+  if (currentRole === 'admin') {
+    query = db.collection('services').orderBy('fechaCreacion', 'desc');
+  } else if (currentRole === 'cliente') {
+    query = db.collection('services')
+      .where('uidCliente', '==', currentUser.uid)
+      .orderBy('fechaCreacion', 'desc');
+  } else if (currentRole === 'mensajero') {
+    query = db.collection('services').orderBy('fechaCreacion', 'desc');
+  } else if (currentRole === 'pending_mensajero') {
+    servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios aún.</div>';
+    return;
+  } else {
+    servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
+    return;
+  }
+
+  _servicesUnsubscribe = query.onSnapshot(snapshot => {
+    let allServices = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    if (currentRole === 'mensajero') {
+      // Pendientes + los que ya tomó el mensajero
+      services = allServices.filter(service =>
+        service.estado === 'pendiente' ||
+        service.uidMensajero === currentUser.uid
+      );
+    } else if (currentRole === 'cliente') {
+      // Solo los pedidos del cliente actual
+      services = allServices.filter(service =>
+        service.uidCliente === currentUser.uid
+      );
+    } else {
+      // Admin u otros
+      services = allServices;
     }
+
+    renderServices(services);
+  });
+}
+
 
     function renderServices() {
       const servicesEl = document.getElementById('services-section');
