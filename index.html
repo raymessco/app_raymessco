@@ -1536,17 +1536,18 @@ async function signInWithGoogle() {
       const docId = form.dataset.editId || null;
       
       const payload = {
-        empresa: data.empresaCliente || "",
-        cliente: "",
-        contacto: data.contacto || "",
-        recoger: data.recoger || "",
-        entregar: data.entregar || "",
-        telefono: data.telefono || "",
-        volumen: data.volumen || "",
-        observaciones: data.observaciones || "",
-        cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-        uidCliente: currentUser.uid,
-      };
+  empresa: data.empresaCliente || "",
+  cliente: currentUser.displayName || currentUser.email || "Sin nombre", // ✅ Guardar el nombre
+  contacto: data.contacto || "",
+  recoger: data.recoger || "",
+  entregar: data.entregar || "",
+  telefono: data.telefono || "",
+  volumen: data.volumen || "",
+  observaciones: data.observaciones || "",
+  cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+  uidCliente: currentUser.uid, // ✅ Guardar UID del cliente
+  emailCliente: currentUser.email || "", // ✅ Extra: email para identificar
+};
       
       if (currentRole === 'admin') {
         payload.uidMensajero = data.uidMensajero || "";
