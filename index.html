@@ -2020,19 +2020,20 @@ function renderServices(data) {
     btn.classList.remove('active');
   });
 
-  // Validar si element existe antes de usarlo
+  // Agregar la clase 'active' SOLO al botón que se clickeó
   if (element) {
     element.classList.add('active');
   } else {
-    console.warn("setFilter fue llamado sin pasar el botón como parámetro.");
+    console.warn("⚠️ setFilter fue llamado sin 'element'");
   }
 
   // Actualizar la lista según el filtro seleccionado
-renderServices(allServices);
+  renderServices();
 }
 
 // Hacer que setFilter esté disponible globalmente
 window.setFilter = setFilter;
+
 
 
 
