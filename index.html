@@ -1617,10 +1617,14 @@ async function signInWithGoogle() {
   if (currentRole === 'admin') {
     query = db.collection('services').orderBy('fechaCreacion', 'desc');
   } else if (currentRole === 'cliente') {
-    query = db.collection('services')
-      .where('uidCliente', '==', currentUser.uid)
-      .orderBy('fechaCreacion', 'desc');
-  } else if (currentRole === 'mensajero') {
+  console.log("UID del usuario actual:", currentUser.uid);
+  console.log("UID del documento:", allServices.map(s => s.uidCliente));
+  
+  services = allServices.filter(service =>
+    service.uidCliente === currentUser.uid
+  );
+}
+ else if (currentRole === 'mensajero') {
     query = db.collection('services').orderBy('fechaCreacion', 'desc');
   } else if (currentRole === 'pending_mensajero') {
     servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios aún.</div>';
