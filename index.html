@@ -1584,7 +1584,7 @@ async function signInWithGoogle() {
         mensajerosSnapshot.forEach(doc => {
           const data = doc.data();
           mensajerosList.push({
-            uid: doc.id,
+            id: doc.id,
             displayName: data.displayName || data.email || doc.id
           });
           
