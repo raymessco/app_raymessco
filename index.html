@@ -7,1174 +7,413 @@
   <meta name="theme-color" content="#CF9524">
   <meta name="description" content="Sistema de gestión de servicios de mensajería">
   
+  <!-- Meta tags para iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ray Mess Co">
-  
-  <link rel="manifest" href="https://raymessco.github.io/app_raymessco/manifest.json">
-  <link rel="icon" href="https://raymessco.github.io/app_raymessco/icon-192.png" sizes="192x192">
   <link rel="apple-touch-icon" href="https://raymessco.github.io/app_raymessco/icon-192.png">
   
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Manifest -->
+  <link rel="manifest" href="https://raymessco.github.io/app_raymessco/manifest.json">
   
+  <!-- Tailwind -->
   <link rel="stylesheet" href="https://raymessco.github.io/app_raymessco/tailwind.css">
-  
   <style>
-    :root {
-      --gold: #CF9524;
-      --gold-light: #E5B858;
-      --gold-dark: #A67A1D;
-      --bg-dark: #0A0A0A;
-      --bg-darker: #050505;
-      --text-light: #F5F5F5;
-      --text-gray: #A3A3A3;
-    }
+    :root { --gold:#CF9524; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background:#000; color:#CF9524; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; touch-action: manipulation; }
+    .hidden { display:none; }
+    .chip { border:1px solid var(--gold); padding:.15rem .5rem; border-radius:.5rem; font-size:.75rem; }
+    .state-pendiente{ color:#b91c1c }
+    .state-en_ruta{ color:#a16207 }
+    .state-entregado{ color:#15803d }
+    .state-cancelado{ color:#6b7280 }
+    .service-card { transition: all 0.2s ease; }
+    .service-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(207,149,36,0.12); }
+    .available-service { border: 2px solid #CF9524; }
+    .btn-take { background-color: #15803d; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: bold; }
+    .btn-take:hover { background-color: #166534; }
+    a.underline { text-decoration: underline; }
+    .rounded-2xl { border-radius: 1rem; }
+    input::placeholder, textarea::placeholder { color:#000 !important; opacity:1; }
+    body.modal-open { height:100vh; overflow:hidden; }
     
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+    /* Mejoras para móviles */
+    @media (max-width: 768px) {
+      .mobile-text-lg { font-size: 1.125rem; }
+      .mobile-p-3 { padding: 0.75rem; }
+      .mobile-mt-2 { margin-top: 0.5rem; }
+      .mobile-mb-2 { margin-bottom: 0.5rem; }
+      .mobile-btn { min-height: 44px; display: flex; align-items: center; justify-content: center; }
+      input, textarea, select { font-size: 16px !important; }
     }
+    /* Botón activo en los filtros */
+.mobile-btn.active {
+  background-color: var(--gold); /* Usa el color dorado definido en tu tema */
+  color: #000; /* Texto en negro para buen contraste */
+  font-weight: bold;
+  border-color: var(--gold);
+}
     
-    body {
-      background: var(--bg-darker);
-      color: var(--text-light);
-      font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      touch-action: manipulation;
-      margin: 0;
-      padding: 0;
-    }
-    
-    .hidden {
-      display: none !important;
-    }
-    
-    /* Login Styles */
-    .login-container {
-      background: linear-gradient(to bottom, var(--bg-darker), var(--bg-dark));
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .login-card {
-      background: rgba(15, 15, 15, 0.95);
-      border: 1px solid var(--gold);
-      border-radius: 16px;
-      padding: 30px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 10px 30px rgba(207, 149, 36, 0.15);
-      backdrop-filter: blur(10px);
-    }
-    
-    .logo-container {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    
-    .logo {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 15px;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .app-name {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--gold);
-      margin-bottom: 5px;
-    }
-    
-    .app-tagline {
-      color: var(--text-gray);
-      font-size: 14px;
-      margin-bottom: 25px;
-    }
-    
-    .google-btn {
-      background: var(--gold);
-      color: #000;
-      border: none;
-      border-radius: 12px;
-      padding: 16px;
-      width: 100%;
-      font-weight: 600;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-    
-    .google-btn:hover {
-      background: var(--gold-light);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(207, 149, 36, 0.3);
-    }
-    
-    .google-btn:active {
-      transform: translateY(0);
-    }
-    
-    .auth-status {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 14px;
-    }
-    
-    .auth-status.success {
-      background: rgba(34, 197, 94, 0.2);
-      color: #BBF7D0;
-    }
-    
-    .auth-status.error {
-      background: rgba(239, 68, 68, 0.2);
-      color: #FECACA;
-    }
-    
-    /* Main App Styles */
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      background: var(--bg-darker);
-    }
-    
-    .app-header {
-      background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--gold);
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 50;
-    }
-    
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    
-    .menu-btn {
-      color: var(--gold);
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 8px;
-      transition: background 0.2s;
-    }
-    
-    .menu-btn:hover {
-      background: rgba(207, 149, 36, 0.1);
-    }
-    
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .header-logo img {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-    }
-    
-    .header-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--gold);
-    }
-    
-    .role-badge {
-      background: rgba(207, 149, 36, 0.15);
-      color: var(--gold);
-      border: 1px solid var(--gold);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    
-    .user-name {
-      color: var(--text-gray);
-      font-size: 14px;
-      display: none;
-    }
-    
-    .logout-btn {
-      background: rgba(239, 68, 68, 0.2);
-      color: #FECACA;
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .logout-btn:hover {
-      background: rgba(239, 68, 68, 0.3);
-    }
-    
-    /* Sidebar Styles */
+    /* Mejoras de UI para móviles */
     .sidebar-backdrop {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 99;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 30;
       display: none;
     }
     
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 280px;
-      background: var(--bg-dark);
-      border-right: 1px solid var(--gold);
-      z-index: 100;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
+    /* Nuevos estilos para las mejoras */
+    .camera-container {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    #videoElement {
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid var(--gold);
+    }
+    
+    .capture-btn {
+      background-color: var(--gold);
+      color: black;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    
+    .payment-method {
       display: flex;
       flex-direction: column;
-    }
-    
-    .sidebar.open {
-      transform: translateX(0);
-    }
-    
-    .sidebar-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--gold);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .sidebar-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--gold);
-    }
-    
-    .close-sidebar {
-      color: var(--gold);
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-    
-    .close-sidebar:hover {
-      background: rgba(207, 149, 36, 0.1);
-    }
-    
-    .sidebar-menu {
-      padding: 20px;
-      flex-grow: 1;
-      overflow-y: auto;
-    }
-    
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 15px;
-      color: var(--text-light);
-      text-decoration: none;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    
-    .menu-item:hover {
-      background: rgba(207, 149, 36, 0.1);
-      color: var(--gold);
-    }
-    
-    .menu-item i {
-      width: 24px;
-      text-align: center;
-      font-size: 18px;
-    }
-    
-    .menu-item-text {
-      font-weight: 500;
-    }
-    
-    /* Main Content Styles */
-    .main-content {
-      flex-grow: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    
-    .section-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--gold);
-      margin-bottom: 20px;
-    }
-    
-    .filters-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .filter-btn {
-      background: rgba(207, 149, 36, 0.1);
-      color: var(--gold);
-      border: 1px solid var(--gold);
-      border-radius: 20px;
-      padding: 8px 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .filter-btn:hover, .filter-btn.active {
-      background: var(--gold);
-      color: #000;
-    }
-    
-    .services-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    
-    @media (min-width: 768px) {
-      .services-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      .user-name {
-        display: block;
-      }
-    }
-    
-    @media (min-width: 1200px) {
-      .services-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    
-    .service-card {
-      background: rgba(20, 20, 20, 0.8);
-      border: 1px solid rgba(207, 149, 36, 0.3);
-      border-radius: 16px;
-      padding: 20px;
-      transition: all 0.3s ease;
-    }
-    
-    .service-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(207, 149, 36, 0.15);
-      border-color: var(--gold);
-    }
-    
-    .service-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 15px;
-    }
-    
-    .service-client {
-      font-weight: 700;
-      font-size: 18px;
-      color: var(--text-light);
-    }
-    
-    .service-status {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    
-    .status-pendiente {
-      background: rgba(185, 28, 28, 0.2);
-      color: #FECACA;
-    }
-    
-    .status-en_ruta {
-      background: rgba(161, 98, 7, 0.2);
-      color: #FDE68A;
-    }
-    
-    .status-entregado {
-      background: rgba(21, 128, 61, 0.2);
-      color: #BBF7D0;
-    }
-    
-    .status-cancelado {
-      background: rgba(107, 114, 128, 0.2);
-      color: #D1D5DB;
-    }
-    
-    .service-detail {
-      margin-bottom: 10px;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-    }
-    
-    .service-detail i {
-      color: var(--gold);
-      margin-top: 3px;
-      min-width: 16px;
-    }
-    
-    .service-detail-content {
-      flex-grow: 1;
-      font-size: 14px;
-    }
-    
-    .service-actions {
-      display: flex;
       gap: 10px;
       margin-top: 15px;
     }
     
-    .action-btn {
-      flex: 1;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-    }
-    
-    .btn-primary {
-      background: var(--gold);
-      color: #000;
-    }
-    
-    .btn-primary:hover {
-      background: var(--gold-light);
-    }
-    
-    .btn-secondary {
-      background: rgba(59, 130, 246, 0.2);
-      color: #93C5FD;
-      border: 1px solid rgba(59, 130, 246, 0.5);
-    }
-    
-    .btn-secondary:hover {
-      background: rgba(59, 130, 246, 0.3);
-    }
-    
-    .btn-danger {
-      background: rgba(239, 68, 68, 0.2);
-      color: #FECACA;
-      border: 1px solid rgba(239, 68, 68, 0.5);
-    }
-    
-    .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.3);
-    }
-    
-    /* Modal Styles */
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 20px;
-    }
-    
-    .modal-content {
-      background: var(--bg-dark);
-      border: 1px solid var(--gold);
-      border-radius: 16px;
-      width: 100%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 25px;
-      position: relative;
-    }
-    
-    .modal-header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    
-    .modal-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--gold);
-      margin-bottom: 10px;
-    }
-    
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: none;
-      border: none;
-      color: var(--text-gray);
-      font-size: 24px;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    
-    .modal-close:hover {
-      color: var(--gold);
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-label {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--text-light);
-      font-weight: 500;
-    }
-    
-    .form-input {
-      width: 100%;
-      background: rgba(207, 149, 36, 0.1);
-      border: 1px solid var(--gold);
-      border-radius: 8px;
-      padding: 12px 15px;
-      color: var(--text-light);
-      font-size: 16px;
-    }
-    
-    .form-input::placeholder {
-      color: rgba(207, 149, 36, 0.7);
-    }
-    
-    .form-input:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(207, 149, 36, 0.3);
-    }
-    
-    .form-checkbox {
+    .payment-option {
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-    
-    .form-checkbox input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--gold);
-    }
-    
-    .form-checkbox label {
-      color: var(--text-light);
-    }
-    
-    .form-actions {
-      display: flex;
-      gap: 15px;
-      margin-top: 25px;
-    }
-    
-    .btn-submit {
-      background: var(--gold);
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-weight: 600;
-      cursor: pointer;
-      flex: 1;
-      transition: background 0.2s;
-    }
-    
-    .btn-submit:hover {
-      background: var(--gold-light);
-    }
-    
-    .btn-cancel {
-      background: rgba(239, 68, 68, 0.2);
-      color: #FECACA;
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-weight: 600;
-      cursor: pointer;
-      flex: 1;
-      transition: all 0.2s;
-    }
-    
-    .btn-cancel:hover {
-      background: rgba(239, 68, 68, 0.3);
-    }
-    
-    /* Role Selection Modal */
-    .role-modal {
-      text-align: center;
-    }
-    
-    .role-options {
-      display: flex;
-      gap: 15px;
-      margin-top: 25px;
-    }
-    
-    .role-option {
-      flex: 1;
-      background: rgba(20, 20, 20, 0.8);
+      padding: 10px;
       border: 1px solid var(--gold);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s;
     }
     
-    .role-option:hover {
-      background: rgba(207, 149, 36, 0.1);
-      transform: translateY(-3px);
+    .payment-option.selected {
+      background-color: rgba(207, 149, 36, 0.2);
     }
     
-    .role-icon {
-      font-size: 32px;
-      color: var(--gold);
-      margin-bottom: 15px;
+    .history-section {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
     }
     
-    .role-title {
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: var(--text-light);
-    }
-    
-    .role-description {
-      font-size: 14px;
-      color: var(--text-gray);
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .role-options {
-        flex-direction: column;
-      }
-      
-      .modal-content {
-        padding: 20px 15px;
-      }
-    }
-    
-    /* Utility classes */
-    .text-gold {
-      color: var(--gold);
+    .financial-summary {
+      background-color: rgba(207, 149, 36, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
     }
     
     .clickable {
-      cursor: pointer;
       color: #3b82f6;
       text-decoration: underline;
-    }
-    
-    .mt-4 {
-      margin-top: 1rem;
-    }
-    
-    .mb-4 {
-      margin-bottom: 1rem;
-    }
-    
-    .text-center {
-      text-align: center;
-    }
-    
-    /* PWA Install Button - Mejorado */
-    .install-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--gold);
-      color: #000;
-      border: none;
-      border-radius: 30px;
-      padding: 12px 20px;
-      font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
     }
     
-    .install-btn:hover {
-      background: var(--gold-light);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(207, 149, 36, 0.4);
-    }
-    
-    /* Financial summary */
-    .financial-card {
-      background: rgba(20, 20, 20, 0.8);
-      border: 1px solid var(--gold);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    
-    .financial-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(207, 149, 36, 0.3);
-    }
-    
-    .financial-item:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-    
-    /* History section */
-    .history-day {
-      margin-bottom: 30px;
-    }
-    
-    .history-date {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--gold);
-      margin-bottom: 15px;
-      padding-bottom: 5px;
+    .day-section {
+      margin-bottom: 25px;
       border-bottom: 1px solid var(--gold);
+      padding-bottom: 15px;
     }
     
-    /* Pending requests */
-    .pending-card {
-      background: rgba(20, 20, 20, 0.8);
-      border: 1px solid var(--gold);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
+    .day-header {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: var(--gold);
     }
     
-    .pending-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-    
-    /* Service date info */
-    .service-date {
-      font-size: 12px;
-      color: var(--text-gray);
-      margin-top: 10px;
+    .service-paid {
+      opacity: 0.7;
+      background-color: rgba(21, 128, 61, 0.1) !important;
     }
   </style>
 </head>
-<body>
-  <div id="login-view" class="login-container">
-    <div class="login-card">
-      <div class="logo-container">
-        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" class="logo" alt="Ray Mess Co Logo">
-        <h1 class="app-name">Ray Mess Co</h1>
-        <p class="app-tagline">Sistema de gestión de servicios de mensajería</p>
+<body class="min-h-screen flex flex-col">
+
+  <!-- LOGIN VIEW -->
+  <div id="login-view" class="flex-1 flex items-center justify-center p-6">
+    <div class="w-full max-w-md bg-[#0a0a0a] border border-[var(--gold)] rounded-2xl p-6 shadow-xl">
+      <div class="flex flex-col items-center gap-3">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" class="w-20 h-20" alt="logo">
+        <h1 class="text-2xl font-bold text-[var(--gold)]">Ray Mess Co</h1>
+        <p class="text-center text-sm text-[#d1b070]">Accede con tu cuenta de Google</p>
+        
+        <!-- Mensaje de estado para autenticación -->
+        <div id="auth-status" class="hidden text-center text-sm my-2 p-2 rounded"></div>
+        
+        <button id="btn-google" class="w-full mt-4 bg-[var(--gold)] text-black font-bold py-3 rounded-xl hover:opacity-90 transition mobile-btn flex items-center justify-center">
+          <span id="btn-text">Continuar con Google</span>
+          <div id="btn-loader" class="loader hidden"></div>
+        </button>
+        
+        <p class="text-xs text-gray-400 mt-2">Dominios autorizados: usa <span class="chip">http://localhost</span> o tu dominio</p>
       </div>
-      
-      <div id="auth-status" class="auth-status hidden"></div>
-      
-      <button id="btn-google" class="google-btn">
-        <i class="fab fa-google"></i>
-        <span id="btn-text">Continuar con Google</span>
-        <div id="btn-loader" class="hidden">
-          <i class="fas fa-spinner fa-spin"></i>
-        </div>
-      </button>
-      
-      <p class="text-center mt-4 text-gold" style="font-size: 12px;">
-        <i class="fas fa-info-circle"></i> Selecciona tu cuenta de Google para continuar
-      </p>
     </div>
   </div>
 
-  <div id="app" class="app-container hidden">
-    <div class="app-header">
-      <div class="header-left">
-        <button id="sidebar-toggle" class="menu-btn">
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="header-logo">
-          <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo">
-          <span class="header-title">Ray Mess Co</span>
-        </div>
-        <span id="role-badge" class="role-badge">CLIENTE</span>
+  <!-- DASHBOARD -->
+  <div id="app" class="hidden flex-1 flex flex-col w-full h-screen">
+
+    <!-- HEADER -->
+    <div class="sticky top-0 bg-black/90 backdrop-blur border-b border-[var(--gold)] p-3 z-20 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="text-[var(--gold)] text-2xl font-bold mobile-btn">☰</button>
+        <h1 class="text-xl md:text-2xl font-bold flex items-center gap-3 text-[var(--gold)] mobile-text-lg">
+          <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" class="w-8 h-8"> Ray Mess Co
+          <span id="role-badge" class="chip"></span>
+        </h1>
       </div>
-      
-      <div class="header-right">
-        <span id="user-name" class="user-name"></span>
-        <button id="btn-logout" class="logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Salir
-        </button>
+      <div class="flex items-center gap-2">
+        <span id="user-name" class="text-xs md:text-sm text-[#d1b070] hidden md:block"></span>
+        <button id="btn-logout" class="bg-red-600 text-white px-3 py-1.5 rounded-lg font-semibold mobile-btn">Salir</button>
       </div>
     </div>
 
-    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+    <!-- Backdrop para sidebar en móviles -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
 
-    <div id="sidebar" class="sidebar">
-      <div class="sidebar-header">
-        <h2 class="sidebar-title">Menú</h2>
-        <button class="close-sidebar">
-          <i class="fas fa-times"></i>
-        </button>
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-[#0b0b0b] border-r border-[var(--gold)] text-[var(--gold)] transform -translate-x-full transition-transform duration-300 z-40">
+      <div class="p-4 border-b border-[var(--gold)] font-bold text-xl flex justify-between items-center">
+        <span>Menú</span>
+        <button onclick="toggleSidebar()" class="text-[var(--gold)] text-2xl">✕</button>
       </div>
-      
-      <div class="sidebar-menu">
-        <div class="menu-item" onclick="showSection('services')">
-          <i class="fas fa-clipboard-list"></i>
-          <span class="menu-item-text">Servicios</span>
-        </div>
-        
-        <div id="menu-registrar" class="menu-item" onclick="openModal()">
-          <i class="fas fa-plus-circle"></i>
-          <span class="menu-item-text">Registrar servicio</span>
-        </div>
-        
-        <div id="menu-finanzas-mensajero" class="menu-item hidden" onclick="showFinancialSummary()">
-          <i class="fas fa-money-bill-wave"></i>
-          <span class="menu-item-text">Mis finanzas</span>
-        </div>
-        
-        <div id="menu-costos" class="menu-item hidden" onclick="showSection('costos')">
-          <i class="fas fa-dollar-sign"></i>
-          <span class="menu-item-text">Costos por empresa</span>
-        </div>
-        
-        <div id="menu-cobros" class="menu-item hidden" onclick="showSection('cobros')">
-          <i class="fas fa-cash-register"></i>
-          <span class="menu-item-text">Cobros contra entrega</span>
-        </div>
-        
-        <div id="menu-pendientes" class="menu-item hidden" onclick="listPendingMensajeros()">
-          <i class="fas fa-user-clock"></i>
-          <span class="menu-item-text">Solicitudes mensajero</span>
-        </div>
-        
-        <div class="menu-item" onclick="openEditProfile()">
-          <i class="fas fa-user-edit"></i>
-          <span class="menu-item-text">Editar perfil</span>
-        </div>
-      </div>
+      <div class="sidebar-swipe-close" onclick="toggleSidebar()"></div>
+      <ul class="flex flex-col p-4 gap-3">
+        <li><button onclick="showSection('services')" class="w-full text-left py-3 mobile-btn">📋 Servicios</button></li>
+        <li id="menu-registrar"><button onclick="openModal()" class="w-full text-left py-3 mobile-btn">➕ Registrar servicio</button></li>
+        <li id="menu-historial"><button onclick="showHistory()" class="w-full text-left py-3 mobile-btn">📋 Historial de servicios</button></li>
+        <li id="menu-finanzas-mensajero" class="hidden"><button onclick="showFinancialSummary()" class="w-full text-left py-3 mobile-btn">💰 Mis finanzas</button></li>
+        <li id="menu-costos" class="hidden"><button onclick="showSection('costos')" class="w-full text-left py-3 mobile-btn">💰 Costos por empresa</button></li>
+        <li id="menu-cobros" class="hidden"><button onclick="showSection('cobros')" class="w-full text-left py-3 mobile-btn">💵 Cobros contra entrega</button></li>
+        <li id="menu-pendientes" class="hidden"><button onclick="listPendingMensajeros()" class="w-full text-left py-3 mobile-btn">📝 Solicitudes mensajero</button></li>
+        <li><button onclick="openEditProfile()" class="w-full text-left py-3 mobile-btn">👤 Editar perfil</button></li>
+      </ul>
     </div>
 
-    <div class="main-content">
-      <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
-        <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
+    <!-- CONTENT -->
+    <div class="flex-1 overflow-auto p-4 space-y-4">
+
+      <!-- pending banner -->
+      <div id="pending-banner" class="hidden bg-yellow-900 text-black p-3 rounded-md text-center font-semibold">
+        Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
       </div>
 
-      <div id="filters" class="filters-container">
-        <button onclick="setFilter('all')" class="filter-btn active">Todos</button>
-        <button onclick="setFilter('pendiente')" class="filter-btn">Pendientes</button>
-        <button onclick="setFilter('en_ruta')" class="filter-btn">En ruta</button>
-        <button onclick="setFilter('entregado')" class="filter-btn">Entregados</button>
-        <button onclick="setFilter('cancelado')" class="filter-btn">Cancelados</button>
+     <!-- FILTERS -->
+<div id="filters" class="flex flex-wrap gap-2">
+  <button onclick="setFilter('all', this)" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Todos</button>
+  <button onclick="setFilter('pendiente', this)" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Pendientes</button>
+  <button onclick="setFilter('en_ruta', this)" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">En ruta</button>
+  <button onclick="setFilter('entregado', this)" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Entregados</button>
+  <button onclick="setFilter('cancelado', this)" class="px-3 py-2 border border-[var(--gold)] rounded mobile-btn">Cancelados</button>
+</div>
+
+
+      <!-- SERVICES LIST -->
+      <div id="services-section" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+
+      <!-- History section -->
+      <div id="history-section" class="hidden">
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-4">Historial de servicios entregados</h2>
+        <div id="history-list"></div>
       </div>
 
-      <div id="services-section" class="services-grid"></div>
-
+      <!-- Financial summary for messengers -->
       <div id="financial-section" class="hidden">
-        <h2 class="section-title">Resumen financiero</h2>
-        <div class="financial-card">
-          <div class="financial-item">
-            <span>Total ganado:</span>
-            <span id="total-earned" class="text-gold">$0</span>
-          </div>
-          <div class="financial-item">
-            <span>Total pendiente de pago:</span>
-            <span id="total-pending" class="text-gold">$0</span>
-          </div>
-          <div class="financial-item">
-            <span>Total pagado:</span>
-            <span id="total-paid" class="text-gold">$0</span>
-          </div>
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-4">Resumen financiero</h2>
+        <div class="financial-summary">
+          <p class="text-lg">Total ganado: <span id="total-earned" class="font-bold">$0</span></p>
+          <p class="text-lg">Total pendiente de pago: <span id="total-pending" class="font-bold">$0</span></p>
+          <p class="text-lg">Total pagado: <span id="total-paid" class="font-bold">$0</span></p>
         </div>
-        <h3 class="section-title">Detalle de servicios por día</h3>
+        <h3 class="text-lg font-bold text-[var(--gold)] mt-6 mb-4">Detalle de servicios por día</h3>
         <div id="financial-list"></div>
       </div>
 
-      <div id="pending-container" class="hidden">
-        <h2 class="section-title">Solicitudes de mensajero</h2>
-        <div id="pending-list"></div>
-      </div>
+      <!-- Pending container for admin -->
+      <div id="pending-container" class="hidden p-4"></div>
 
+      <!-- COSTOS (ADMIN) -->
       <div id="costos-section" class="hidden">
-        <h2 class="section-title">Costos por empresa</h2>
-        <div id="costos-body"></div>
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-2">Costos por empresa</h2>
+        <div id="costos-body" class="space-y-4"></div>
       </div>
 
+      <!-- COBROS (ADMIN) -->
       <div id="cobros-section" class="hidden">
-        <h2 class="section-title">Cobros contra entrega</h2>
-        <div id="cobros-body"></div>
+        <h2 class="text-xl font-bold text-[var(--gold)] mb-2">Cobros contra entrega</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-[var(--gold)] border border-[var(--gold)] min-w-max">
+            <thead class="bg-[#151515]">
+              <tr>
+                <th class="border border-[var(--gold)] p-2">Dirección de entrega</th>
+                <th class="border border-[var(--gold)] p-2">Valor</th>
+              </tr>
+            </thead>
+            <tbody id="cobros-body"></tbody>
+            <tfoot>
+              <tr>
+                <td class="border border-[var(--gold)] p-2 font-bold">TOTAL</td>
+                <td id="cobros-total" class="border border-[var(--gold)] p-2 font-bold"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
+
     </div>
   </div>
 
-  <div id="modal" class="modal-backdrop hidden">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeModal()">
-        <i class="fas fa-times"></i>
-      </button>
-      
-      <div class="modal-header">
-        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" style="width: 60px; height: 60px; margin-bottom: 15px;">
-        <h2 class="modal-title">Registrar servicio</h2>
+  <!-- MODAL: registrar servicio -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-center">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" class="w-16 h-16 mb-2">
       </div>
+      <h2 class="text-xl font-bold mb-4 text-center">Registrar servicio</h2>
 
-      <form id="service-form">
-        <div class="form-group">
-          <label class="form-label">Empresa o cliente</label>
-          <input type="text" name="empresaCliente" class="form-input" placeholder="Nombre de la empresa or cliente" required>
+      <form id="service-form" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input name="empresaCliente" placeholder="Empresa o cliente" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded md:col-span-2 mobile-btn" required>
+        <input name="contacto" placeholder="Nombre de contacto receptor" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="telefono" placeholder="Teléfono" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" inputmode="tel">
+        <input name="recoger" placeholder="Dirección de recogida" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="entregar" placeholder="Dirección de entrega" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
+        <input name="volumen" placeholder="Volumen (cantidad/medidas)" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn">
+
+        <!-- Costo para cliente -->
+        <input type="number" name="costoCliente" id="field-costo-cliente" placeholder="Costo de mensajería" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" min="0">
+
+        <!-- Solo ADMIN: asignar mensajero y costos -->
+        <div class="md:col-span-2">
+          <label for="field-mensajero" class="text-sm text-[#d1b070]">Asignar mensajero (solo admin):</label>
+          <select name="uidMensajero" id="field-mensajero" class="p-3 bg-[var(--gold)] text-black rounded mobile-btn w-full hidden">
+            <option value="">Seleccionar mensajero</option>
+          </select>
         </div>
         
-        <div class="form-group">
-          <label class="form-label">Nombre de contacto receptor</label>
-          <input type="text" name="contacto" class="form-input" placeholder="Persona que recibirá" required>
+        <input type="number" name="pagoMensajero" id="field-pago" placeholder="Pago al mensajero" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn hidden" min="0">
+
+        <!-- Cobro contra entrega -->
+        <div class="col-span-1 md:col-span-2 flex items-center gap-2 mobile-p-3">
+          <input type="checkbox" id="cobrar-check" name="cobrarCheck" class="w-5 h-5 accent-[var(--gold)]">
+          <label for="cobrar-check">¿Cobrar producto a la entrega?</label>
         </div>
-        
-        <div class="form-group">
-          <label class="form-label">Teléfono de contacto</label>
-          <input type="tel" name="telefono" class="form-input" placeholder="Número de teléfono">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Dirección de recogida</label>
-          <input type="text" name="recoger" class="form-input" placeholder="Donde se recogerá el paquete" required>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Dirección de entrega</label>
-          <input type="text" name="entregar" class="form-input" placeholder="Donde se entregará el paquete" required>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Volumen (cantidad/medidas)</label>
-          <input type="text" name="volumen" class="form-input" placeholder="Descripción del volumen">
-        </div>
-        
-        <div id="field-costo-cliente-container" class="form-group hidden">
-          <label class="form-label">Costo de mensajería</label>
-          <input type="number" name="costoCliente" class="form-input" placeholder="Costo del servicio" min="0">
-        </div>
-        
-        <div id="admin-fields" class="hidden">
-          <div class="form-group">
-            <label class="form-label">Asignar mensajero</label>
-            <select name="uidMensajero" class="form-input" id="field-mensajero">
-              <option value="">Seleccionar mensajero</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Pago al mensajero</label>
-            <input type="number" name="pagoMensajero" class="form-input" placeholder="Pago al mensajero" min="0" id="field-pago">
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <div class="form-checkbox">
-            <input type="checkbox" id="cobrar-check" name="cobrarCheck">
-            <label for="cobrar-check">¿Cobrar producto a la entrega?</label>
-          </div>
-        </div>
-        
-        <div id="cobrar-field-container" class="form-group hidden">
-          <label class="form-label">Valor a cobrar (producto)</label>
-          <input type="number" name="cobrarProducto" class="form-input" placeholder="Valor a cobrar" min="0">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Observaciones</label>
-          <textarea name="observaciones" class="form-input" placeholder="Observaciones adicionales" rows="3"></textarea>
-        </div>
-        
-        <div class="form-actions">
-          <button type="submit" class="btn-submit">
-            <i class="fas fa-check"></i> Registrar
-          </button>
-          <button type="button" onclick="closeModal()" class="btn-cancel">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
+        <input type="number" name="cobrarProducto" id="cobrar-field" placeholder="Valor a cobrar (producto)" class="hidden p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" min="0">
+
+        <!-- Observaciones -->
+        <textarea name="observaciones" placeholder="Observaciones" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded overflow-y-scroll resize-y md:col-span-2 mobile-btn" style="height:120px; min-height:60px;"></textarea>
+
+        <div class="md:col-span-2 flex gap-2 mt-2">
+          <button type="submit" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn">Registrar</button>
+          <button type="button" onclick="closeModal()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div id="evidence-modal" class="modal-backdrop hidden">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeEvidenceModal()">
-        <i class="fas fa-times"></i>
-      </button>
+  <!-- MODAL: tomar evidencia y marcar como entregado -->
+  <div id="evidence-modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4 text-center">Evidencia de entrega</h2>
       
-      <div class="modal-header">
-        <h2 class="modal-title">Evidencia de entrega</h2>
-      </div>
-      
-      <div style="text-align: center; margin-bottom: 20px;">
-        <video id="videoElement" style="width: 100%; max-width: 400px; border-radius: 8px; border: 2px solid var(--gold);"></video>
-        <button id="capture-btn" style="background: var(--gold); color: black; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%; max-width: 400px;">
-          <i class="fas fa-camera"></i> Tomar foto
-        </button>
+      <div class="camera-container">
+        <video id="videoElement" autoplay></video>
+        <button id="capture-btn" class="capture-btn w-full">Tomar foto</button>
         <canvas id="canvasElement" class="hidden"></canvas>
       </div>
       
-      <div id="captured-image-container" class="hidden" style="text-align: center;">
-        <img id="capturedImage" style="width: 100%; max-width: 400px; border-radius: 8px; border: 2px solid var(--gold);">
-        <button id="retake-btn" style="background: var(--gold); color: black; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%; max-width: 400px;">
-          <i class="fas fa-redo"></i> Volver a tomar
-        </button>
+      <div id="captured-image-container" class="hidden mt-4">
+        <img id="capturedImage" class="w-full rounded-lg border border-[var(--gold)]">
+        <button id="retake-btn" class="capture-btn w-full mt-2">Volver a tomar</button>
       </div>
       
-      <div style="margin-top: 20px;">
-        <h3 style="color: var(--gold); margin-bottom: 15px;">Método de pago:</h3>
-        <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
-          <div class="payment-option" onclick="selectPaymentMethod('efectivo')" style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--gold); border-radius: 8px; cursor: pointer;">
-            <input type="radio" id="efectivo" name="paymentMethod" value="efectivo">
-            <label for="efectivo" style="cursor: pointer;">Efectivo</label>
-          </div>
-          <div class="payment-option" onclick="selectPaymentMethod('davivienda')" style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--gold); border-radius: 8px; cursor: pointer;">
-            <input type="radio" id="davivienda" name="paymentMethod" value="davivienda">
-            <label for="davivienda" style="cursor: pointer;">Transferencia Davivienda</label>
-          </div>
-          <div class="payment-option" onclick="selectPaymentMethod('bancolombia')" style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--gold); border-radius: 8px; cursor: pointer;">
-            <input type="radio" id="bancolombia" name="paymentMethod" value="bancolombia">
-            <label for="bancolombia" style="cursor: pointer;">Transferencia Bancolombia</label>
-          </div>
-          <div class="payment-option" onclick="selectPaymentMethod('nequi')" style="display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--gold); border-radius: 8px; cursor: pointer;">
-            <input type="radio" id="nequi" name="paymentMethod" value="nequi">
-            <label for="nequi" style="cursor: pointer;">Nequi</label>
-          </div>
+      <div class="payment-method mt-4">
+        <h3 class="font-bold">Método de pago:</h3>
+        <div class="payment-option" onclick="selectPaymentMethod('efectivo')">
+          <input type="radio" id="efectivo" name="paymentMethod" value="efectivo">
+          <label for="efectivo">Efectivo</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('davivienda')">
+          <input type="radio" id="davivienda" name="paymentMethod" value="davivienda">
+          <label for="davivienda">Transferencia Davivienda</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('bancolombia')">
+          <input type="radio" id="bancolombia" name="paymentMethod" value="bancolombia">
+          <label for="bancolombia">Transferencia Bancolombia</label>
+        </div>
+        <div class="payment-option" onclick="selectPaymentMethod('nequi')">
+          <input type="radio" id="nequi" name="paymentMethod" value="nequi">
+          <label for="nequi">Nequi</label>
         </div>
       </div>
       
-      <div class="form-actions" style="margin-top: 25px;">
-        <button id="confirm-delivery" class="btn-submit" disabled>
-          <i class="fas fa-check-circle"></i> Confirmar entrega
-        </button>
-        <button onclick="closeEvidenceModal()" class="btn-cancel">
-          <i class="fas fa-times"></i> Cancelar
-        </button>
+      <div class="flex gap-2 mt-4">
+        <button id="confirm-delivery" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn" disabled>Confirmar entrega</button>
+        <button onclick="closeEvidenceModal()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
       </div>
     </div>
   </div>
 
-  <div id="edit-profile-modal" class="modal-backdrop hidden">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeEditProfile()">
-        <i class="fas fa-times"></i>
-      </button>
+  <!-- MODAL: Editar perfil -->
+  <div id="edit-profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-start justify-center overflow-y-auto z-50 p-2">
+    <div class="bg-black border border-[var(--gold)] p-4 rounded-2xl w-full max-w-xl text-[var(--gold)] mt-10 mb-10 max-h-[90vh] overflow-y-auto">
+      <h2 class="text-xl font-bold mb-4 text-center">Editar perfil</h2>
       
-      <div class="modal-header">
-        <h2 class="modal-title">Editar perfil</h2>
-      </div>
-      
-      <form id="profile-form">
-        <div class="form-group">
-          <label class="form-label">Nombre para mostrar</label>
-          <input type="text" id="profile-displayName" class="form-input" placeholder="Tu nombre" required>
-        </div>
+      <form id="profile-form" class="grid grid-cols-1 gap-3">
+        <input type="text" id="profile-displayName" placeholder="Nombre para mostrar" class="p-3 bg-[var(--gold)] text-black placeholder-black rounded mobile-btn" required>
         
-        <div class="form-actions">
-          <button type="submit" class="btn-submit">
-            <i class="fas fa-save"></i> Guardar
-          </button>
-          <button type="button" onclick="closeEditProfile()" class="btn-cancel">
-            <i class="fas fa-times"></i> Cancelar
-          </button>
+        <div class="flex gap-2 mt-2">
+          <button type="submit" class="flex-1 bg-green-500 text-black font-bold py-3 rounded mobile-btn">Guardar</button>
+          <button type="button" onclick="closeEditProfile()" class="flex-1 bg-red-600 text-white font-bold py-3 rounded mobile-btn">Cancelar</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div id="roleChoiceModal" class="modal-backdrop hidden">
-    <div class="modal-content" style="max-width: 500px;">
-      <div class="modal-header">
-        <h2 class="modal-title">Bienvenido a Ray Mess Co 👋</h2>
-        <p style="color: var(--text-gray);">Selecciona tu rol en la aplicación:</p>
+  <!-- ROLE CHOICE MODAL (first time) -->
+  <div id="roleChoiceModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-60 p-4">
+    <div class="bg-[#111] border border-[var(--gold)] p-6 rounded-xl w-full max-w-sm text-[var(--gold)]">
+      <h3 class="text-xl font-bold mb-4 text-center">Bienvenido 👋</h3>
+      <p class="text-sm text-gray-300 mb-4 text-center">Selecciona tu rol en la aplicación:</p>
+      <div class="flex gap-3">
+        <button id="choose-cliente" class="flex-1 bg-[var(--gold)] text-black py-3 rounded font-bold mobile-btn">Soy cliente</button>
+        <button id="choose-mensajero" class="flex-1 bg-black border border-[var(--gold)] text-[var(--gold)] py-3 rounded font-bold mobile-btn">Soy mensajero</button>
       </div>
-      
-      <div class="role-options">
-        <div class="role-option" onclick="selectRole('cliente')">
-          <div class="role-icon">
-            <i class="fas fa-user"></i>
-          </div>
-          <div class="role-title">Soy Cliente</div>
-          <div class="role-description">Solicitar servicios de mensajería</div>
-        </div>
-        
-        <div class="role-option" onclick="selectRole('mensajero')">
-          <div class="role-icon">
-            <i class="fas fa-motorcycle"></i>
-          </div>
-          <div class="role-title">Soy Mensajero</div>
-          <div class="role-description">Entregar servicios de mensajería</div>
-        </div>
-      </div>
-      
-      <p style="text-align: center; color: var(--text-gray); margin-top: 20px; font-size: 14px;">
-        <i class="fas fa-info-circle"></i> Un administrador revisará las solicitudes de mensajero.
-      </p>
+      <p class="text-xs text-gray-500 mt-3">Un administrador revisará las solicitudes de mensajero.</p>
     </div>
   </div>
 
-  <button id="install-button" class="install-btn hidden">
-    <i class="fas fa-download"></i> Instalar
-  </button>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-    // Configuración de Firebase
+    /***** CONFIGURA TU FIREBASE AQUI *****/
     const firebaseConfig = {
       apiKey: "AIzaSyCkjLdn1NYI5eApE4N5ylkGJnlYsmO5hq4",
       authDomain: "raymessco-ce1c0.firebaseapp.com",
@@ -1184,14 +423,21 @@
       appId: "1:829091900185:web:1c61887780ff2639a5f388",
       measurementId: "G-38Q9K6CV7D"
     };
+    /****************************************/
 
     // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    console.log("Firebase v8 inicializado correctamente");
+    let app, auth, db;
+    
+    try {
+      app = firebase.initializeApp(firebaseConfig);
+      auth = app.auth();
+      db = app.firestore();
+      console.log("Firebase inicializado correctamente");
+    } catch (error) {
+      console.error("Error inicializando Firebase:", error);
+    }
 
-    // Estado global
+    // estado global
     let currentUser = null;
     let currentRole = null;
     let services = [];
@@ -1200,69 +446,33 @@
     let currentServiceIdForEvidence = null;
     let selectedPaymentMethod = null;
     let mensajerosList = [];
-    let deferredPrompt = null;
-    let _servicesUnsubscribe = null;
 
-    // Referencias a elementos UI
-    const loginView = document.getElementById('login-view');
-    const appView = document.getElementById('app');
-    const roleBadge = document.getElementById('role-badge');
-    const userNameEl = document.getElementById('user-name');
+    // UI refs
+    const loginView   = document.getElementById('login-view');
+    const appView     = document.getElementById('app');
+    const roleBadge   = document.getElementById('role-badge');
+    const userNameEl  = document.getElementById('user-name');
     const menuRegistrar = document.getElementById('menu-registrar');
-    const menuCostos = document.getElementById('menu-costos');
-    const menuCobros = document.getElementById('menu-cobros');
-    const menuPendientes = document.getElementById('menu-pendientes');
+    const menuCostos    = document.getElementById('menu-costos');
+    const menuCobros    = document.getElementById('menu-cobros');
+    const menuPendientes= document.getElementById('menu-pendientes');
+    const menuHistorial = document.getElementById('menu-historial');
     const menuFinanzasMensajero = document.getElementById('menu-finanzas-mensajero');
     const roleChoiceModal = document.getElementById('roleChoiceModal');
-    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const closeSidebarBtn = document.querySelector('.close-sidebar');
-    const fieldCostoClienteContainer = document.getElementById('field-costo-cliente-container');
-    const adminFields = document.getElementById('admin-fields');
-    const cobrarFieldContainer = document.getElementById('cobrar-field-container');
     const installButton = document.getElementById('install-button');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
     const mensajeroSelect = document.getElementById('field-mensajero');
 
-    // Inicializar la aplicación
-    function initApp() {
-      // Manejar el resultado de la autenticación después de la redirección
-      auth.getRedirectResult()
-        .then((result) => {
-          if (result.user) {
-            console.log("Autenticación exitosa tras redirección:", result.user.email);
-            showAuthStatus("¡Autenticación exitosa!", false);
-          }
-        }).catch((error) => {
-          console.error("Error en getRedirectResult:", error);
-          let errorMessage = "Error de autenticación";
-          if (error.code) {
-             errorMessage = `Error: ${error.message}`;
-          }
-          showAuthStatus(errorMessage, true);
-        });
+    // ===== PWA Installation =====
+    let deferredPrompt;
 
-      // Event listeners para la interfaz
-      sidebarToggle.addEventListener('click', toggleSidebar);
-      closeSidebarBtn.addEventListener('click', toggleSidebar);
-      sidebarBackdrop.addEventListener('click', toggleSidebar);
-      
-      document.getElementById('cobrar-check').addEventListener('change', (e) => {
-        cobrarFieldContainer.classList.toggle('hidden', !e.target.checked);
-      });
-      
-      document.getElementById('service-form').addEventListener('submit', handleServiceSubmit);
-      document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
-      document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
-      document.getElementById('btn-google').addEventListener('click', signInWithGoogle);
-      
-      // Lógica para instalación PWA
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installButton.classList.remove('hidden');
-      });
-      
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installButton) installButton.classList.remove('hidden');
+    });
+
+    if (installButton) {
       installButton.addEventListener('click', async () => {
         if (!deferredPrompt) return;
         
@@ -1272,311 +482,244 @@
         if (outcome === 'accepted') {
           installButton.classList.add('hidden');
         }
+        
         deferredPrompt = null;
       });
-      
-      // Observador de autenticación (central)
-      auth.onAuthStateChanged(handleAuthStateChange);
-
-     // Registrar Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(registration => console.log('SW registrado:', registration))
-      .catch(err => console.error('Error registrando SW:', err));
-  });
-}
-
     }
 
-
-    // Función para iniciar sesión con Google (Popup con fallback a Redirect)
-async function signInWithGoogle() {
-  const btnText = document.getElementById('btn-text');
-  const btnLoader = document.getElementById('btn-loader');
-
-  btnText.textContent = 'Conectando...';
-  btnLoader.classList.remove('hidden');
-  showAuthStatus("Conectando con Google...", false);
-
-  const provider = new firebase.auth.GoogleAuthProvider();
-
-  try {
-    // Primero intenta con popup (más fluido en la mayoría de navegadores)
-    await auth.signInWithPopup(provider);
-    console.log("Login exitoso con popup");
-  } catch (error) {
-    console.warn("Popup falló, usando redirect:", error);
-    auth.signInWithRedirect(provider);
-  }
-}
-
-
-    // Manejar cambios en el estado de autenticación
-    async function handleAuthStateChange(user) {
-      if (!user) {
-        // Usuario no autenticado
-        currentUser = null;
-        currentRole = null;
-        services = [];
-        appView.classList.add('hidden');
-        loginView.classList.remove('hidden');
-        
-        cleanupListeners();
-        
-        // Ocultar loader del botón por si quedó visible
-        document.getElementById('btn-text').textContent = 'Continuar con Google';
-        document.getElementById('btn-loader').classList.add('hidden');
-
-        return;
-      }
-      
-      // Usuario autenticado
-      loginView.classList.add('hidden');
-      appView.classList.remove('hidden');
-      currentUser = user;
-      
-      // Obtener información del perfil
-      try {
-        const userDoc = await db.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          userNameEl.textContent = userData.displayName || user.displayName || user.email || '';
-          currentRole = userData.role || 'cliente';
-        } else {
-          // Usuario nuevo, mostrar selector de rol
-          userNameEl.textContent = user.displayName || user.email || '';
-          showRoleSelection();
-          return;
-        }
-      } catch (error) {
-        console.error("Error obteniendo datos de usuario:", error);
-        userNameEl.textContent = user.displayName || user.email || '';
-        currentRole = 'cliente';
-      }
-      
-      updateUIByRole();
-      subscribeToUserProfile(user.uid);
-      subscribeServicesByRole();
-      
-      if (currentRole === 'admin') {
-        loadMensajerosList();
-      }
-      
-      showSection('services');
-      setFilter('all');
-    }
-
-    // --- El resto de tu lógica de la aplicación se mantiene sin cambios ---
-
-    function cleanupListeners() {
-      if (_userProfileUnsub) {
-        _userProfileUnsub();
-        _userProfileUnsub = null;
-      }
-      
-      if (_servicesUnsubscribe) {
-        _servicesUnsubscribe();
-        _servicesUnsubscribe = null;
-      }
-    }
-
-    function showRoleSelection() {
-      roleChoiceModal.classList.remove('hidden');
-    }
-
-    async function selectRole(role) {
-      try {
-        await db.collection('users').doc(currentUser.uid).set({
-          role: role === 'mensajero' ? 'pending_mensajero' : 'cliente',
-          email: currentUser.email || '',
-          displayName: currentUser.displayName || '',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        currentRole = role === 'mensajero' ? 'pending_mensajero' : 'cliente';
-        roleChoiceModal.classList.add('hidden');
-        updateUIByRole();
-        subscribeToUserProfile(currentUser.uid);
-        subscribeServicesByRole();
-      } catch (error) {
-        console.error("Error guardando rol:", error);
-        alert("Error al guardar la selección de rol. Intenta nuevamente.");
-      }
-    }
-    window.selectRole = selectRole;
-
-    function subscribeToUserProfile(uid) {
-      if (_userProfileUnsub) {
-        _userProfileUnsub();
-        _userProfileUnsub = null;
-      }
-      
-      const ref = db.collection('users').doc(uid);
-      _userProfileUnsub = ref.onSnapshot(doc => {
-        if (!doc.exists) return;
-        
-        const userData = doc.data();
-        const newRole = userData.role;
-        
-        if (newRole && newRole !== currentRole) {
-          currentRole = newRole;
-          roleBadge.textContent = currentRole.toUpperCase();
-          updateUIByRole();
-          subscribeServicesByRole();
-        }
-        
-        if (userData.displayName) {
-          userNameEl.textContent = userData.displayName;
-        }
-      }, err => console.error('Error en listener de perfil:', err));
-    }
-
-    function updateUIByRole() {
-      menuRegistrar.classList.add('hidden');
-      menuCostos.classList.add('hidden');
-      menuCobros.classList.add('hidden');
-      menuPendientes.classList.add('hidden');
-      menuFinanzasMensajero.classList.add('hidden');
-      fieldCostoClienteContainer.classList.add('hidden');
-      adminFields.classList.add('hidden');
-      document.getElementById('pending-banner').classList.add('hidden');
-      
-      if (currentRole === 'admin') {
-        menuRegistrar.classList.remove('hidden');
-        menuCostos.classList.remove('hidden');
-        menuCobros.classList.remove('hidden');
-        menuPendientes.classList.remove('hidden');
-        adminFields.classList.remove('hidden');
-      } else if (currentRole === 'mensajero') {
-        menuFinanzasMensajero.classList.remove('hidden');
-      } else if (currentRole === 'pending_mensajero') {
-        document.getElementById('pending-banner').classList.remove('hidden');
-      } else {
-        menuRegistrar.classList.remove('hidden');
-        fieldCostoClienteContainer.classList.remove('hidden');
-      }
-      
-      roleBadge.textContent = currentRole.toUpperCase().replace('_', ' ');
-    }
-
+    // ===== Mejoras para móviles =====
     function toggleSidebar() {
-      sidebar.classList.toggle('open');
-      sidebarBackdrop.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('-translate-x-full');
+      sidebarBackdrop.style.display = sidebar.classList.contains('-translate-x-full') ? 'none' : 'block';
+      
+      if (!sidebar.classList.contains('-translate-x-full')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'auto';
+      }
     }
-    window.toggleSidebar = toggleSidebar;
+    
+    function closeSidebarOnClick() {
+      if (window.innerWidth < 768) {
+        toggleSidebar();
+      }
+    }
 
+    // ===== helpers UI =====
+    function showRoleChoiceModal() {
+      roleChoiceModal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+    
+    function hideRoleChoiceModal() {
+      roleChoiceModal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    }
+
+    // ===== Mostrar mensaje de estado =====
     function showAuthStatus(message, isError = false) {
       const statusEl = document.getElementById('auth-status');
       statusEl.textContent = message;
-      statusEl.classList.remove('hidden', 'success', 'error');
-      statusEl.classList.add(isError ? 'error' : 'success');
+      statusEl.classList.remove('hidden', 'bg-green-800', 'bg-red-800');
+      statusEl.classList.add(isError ? 'bg-red-800' : 'bg-green-800');
       
       setTimeout(() => {
         statusEl.classList.add('hidden');
       }, 5000);
     }
 
-    function openModal(editId = null) {
-      const modal = document.getElementById('modal');
-      const form = document.getElementById('service-form');
-      form.reset();
-      form.dataset.editId = editId || '';
+    // ===== Botón de Google =====
+    document.getElementById('btn-google').addEventListener('click', async () => {
+      const btnText = document.getElementById('btn-text');
+      const btnLoader = document.getElementById('btn-loader');
       
-      if (currentRole === 'mensajero' || currentRole === 'pending_mensajero') return;
-      
-      if (editId) {
-        const service = services.find(x => x.id === editId);
-        if (service) {
-          form.empresaCliente.value = service.empresa || service.cliente || '';
-          form.contacto.value = service.contacto || '';
-          form.telefono.value = service.telefono || '';
-          form.recoger.value = service.recoger || '';
-          form.entregar.value = service.entregar || '';
-          form.volumen.value = service.volumen || '';
-          
-          if (currentRole === 'admin') {
-            form.uidMensajero.value = service.uidMensajero || '';
-            form.pagoMensajero.value = service.pagoMensajero || 0;
-          } else {
-            form.costoCliente.value = service.costo || 0;
-          }
-          
-          if (service.cobrarProducto && service.cobrarProducto > 0) {
-            document.getElementById('cobrar-check').checked = true;
-            cobrarFieldContainer.classList.remove('hidden');
-            form.cobrarProducto.value = service.cobrarProducto;
-          } else {
-            document.getElementById('cobrar-check').checked = false;
-            cobrarFieldContainer.classList.add('hidden');
-          }
+      try {
+        btnText.textContent = 'Conectando...';
+        btnLoader.classList.remove('hidden');
+        
+        showAuthStatus("Conectando con Google...", false);
+        
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
+        const result = await auth.signInWithPopup(provider);
+        showAuthStatus("¡Autenticación exitosa!", false);
+        
+      } catch (error) {
+        console.error("Error en autenticación:", error);
+        
+        let errorMessage = "Error de autenticación";
+        if (error.code === 'auth/popup-blocked') {
+          errorMessage = "El popup fue bloqueado. Permite popups para este sitio.";
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          errorMessage = "El popup de autenticación fue cerrado. Intenta nuevamente.";
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = "Error de red. Verifica tu conexión a Internet.";
+        } else if (error.code) {
+          errorMessage = `Error: ${error.code}`;
         }
+        
+        showAuthStatus(errorMessage, true);
+      } finally {
+        btnText.textContent = 'Continuar con Google';
+        btnLoader.classList.add('hidden');
       }
-      
-      modal.classList.remove('hidden');
-    }
-    window.openModal = openModal;
+    });
 
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-    }
-    window.closeModal = closeModal;
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      if (_userProfileUnsub) { _userProfileUnsub(); _userProfileUnsub = null; }
+      if (window._unsub) { window._unsub(); window._unsub = null; }
+      if (window._unsub2) { window._unsub2(); window._unsub2 = null; }
+      auth.signOut();
+    });
 
-    async function handleServiceSubmit(e) {
-      e.preventDefault();
-      
-      if (!(currentRole === 'admin' || currentRole === 'cliente')) {
-        alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+    // ===== ensure user profile and role selection =====
+    async function ensureUserProfile(user) {
+      try {
+        const tokenResult = await user.getIdTokenResult(true);
+        if (tokenResult.claims && tokenResult.claims.role === 'admin') {
+          const refAdmin = db.collection('users').doc(user.uid);
+          const snap = await refAdmin.get();
+          if (!snap.exists) {
+            await refAdmin.set({
+              role: 'admin',
+              email: user.email || '',
+              displayName: user.displayName || '',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
+          return 'admin';
+        }
+      } catch (e) {
+        console.warn('No se pudo leer custom claims:', e);
+      }
+
+      const userRef = db.collection('users').doc(user.uid);
+      const doc = await userRef.get();
+      if (doc.exists) {
+        return doc.data().role || 'cliente';
+      }
+
+      return await promptAndSaveRole(userRef, user);
+    }
+
+    function promptAndSaveRole(userRef, user) {
+      return new Promise((resolve, reject) => {
+        showRoleChoiceModal();
+        const btnCliente = document.getElementById('choose-cliente');
+        const btnMensajero = document.getElementById('choose-mensajero');
+
+        const cleanup = () => {
+          btnCliente.removeEventListener('click', onCliente);
+          btnMensajero.removeEventListener('click', onMensajero);
+        };
+
+        const onCliente = async () => {
+          try {
+            await userRef.set({
+              role: 'cliente',
+              email: user.email || '',
+              displayName: user.displayName || '',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            hideRoleChoiceModal();
+            cleanup();
+            resolve('cliente');
+          } catch (e) { cleanup(); reject(e); }
+        };
+
+        const onMensajero = async () => {
+          try {
+            await userRef.set({
+              role: 'pending_mensajero',
+              email: user.email || '',
+              displayName: user.displayName || '',
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            hideRoleChoiceModal();
+            cleanup();
+            resolve('pending_mensajero');
+          } catch (e) { cleanup(); reject(e); }
+        };
+
+        btnCliente.addEventListener('click', onCliente);
+        btnMensajero.addEventListener('click', onMensajero);
+      });
+    }
+
+    // ===== subscribe to user profile so role changes propagate live =====
+    function subscribeToUserProfile(uid) {
+      if (_userProfileUnsub) { _userProfileUnsub(); _userProfileUnsub = null; }
+      const ref = db.collection('users').doc(uid);
+      _userProfileUnsub = ref.onSnapshot(doc => {
+        if (!doc.exists) return;
+        const newRole = doc.data().role;
+        if (newRole && newRole !== currentRole) {
+          console.log('Role actualizado en backend:', newRole);
+          currentRole = newRole;
+          roleBadge.textContent = currentRole.toUpperCase();
+          applyRoleUI();
+          subscribeServicesByRole();
+        }
+      }, err => console.error('profile listener err', err));
+    }
+
+    // ===== Auth state =====
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        currentUser = null;
+        currentRole = null;
+        services = [];
+        appView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+        if (_userProfileUnsub) { _userProfileUnsub(); _userProfileUnsub = null; }
+        if (window._unsub) { window._unsub(); window._unsub = null; }
+        if (window._unsub2) { window._unsub2(); window._unsub2 = null; }
         return;
       }
-      
-      const form = e.target;
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      const docId = form.dataset.editId || null;
-      
-      const payload = {
-  empresa: data.empresaCliente || "",
-  cliente: currentUser.displayName || currentUser.email || "Sin nombre",
-  contacto: data.contacto || "",
-  recoger: data.recoger || "",
-  entregar: data.entregar || "",
-  telefono: data.telefono || "",
-  volumen: data.volumen || "",
-  observaciones: data.observaciones || "",
-  cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-  uidCliente: currentUser.uid,
-  emailCliente: currentUser.email || "",
-  estado: "pendiente",
-  fechaCreacion: firebase.firestore.FieldValue.serverTimestamp() // ✅ Importante
-};
 
+      // user logged in
+      loginView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      currentUser = user;
       
-      if (currentRole === 'admin') {
-        payload.uidMensajero = data.uidMensajero || "";
-        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
-        payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
-      } else {
-        payload.costo = parseFloat(data.costoCliente || 0) || 0;
-        payload.pagoMensajero = 0;
+      // Mostrar displayName en lugar de email
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          userNameEl.textContent = userData.displayName || user.displayName || user.email || '';
+        } else {
+          userNameEl.textContent = user.displayName || user.email || '';
+        }
+      } catch (error) {
+        console.error("Error obteniendo datos de usuario:", error);
+        userNameEl.textContent = user.displayName || user.email || '';
       }
       
       try {
-        if (docId) {
-          await db.collection('services').doc(docId).update(payload);
-        } else {
-          payload.estado = "pendiente";
-          payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
-          await db.collection('services').add(payload);
-        }
-        closeModal();
-        form.reset();
+        currentRole = await ensureUserProfile(user);
       } catch (e) {
-        console.error('Error guardando servicio:', e);
-        alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
+        console.error('Error en perfil usuario:', e);
+        currentRole = 'cliente';
       }
-    }
 
+      roleBadge.textContent = (currentRole || 'cliente').toUpperCase();
+      subscribeToUserProfile(user.uid);
+      applyRoleUI();
+      subscribeServicesByRole();
+      
+      // Cargar lista de mensajeros si es admin
+      if (currentRole === 'admin') {
+        loadMensajerosList();
+      }
+    });
+
+    // Cargar lista de mensajeros para el select
     async function loadMensajerosList() {
       try {
         const mensajerosSnapshot = await db.collection('users')
@@ -1603,326 +746,428 @@ async function signInWithGoogle() {
       }
     }
 
+    // apply UI visibility based on role
+    function applyRoleUI() {
+      // default hide
+      menuRegistrar.classList.add('hidden');
+      menuCostos.classList.add('hidden');
+      menuCobros.classList.add('hidden');
+      menuPendientes.classList.add('hidden');
+      menuHistorial.classList.add('hidden');
+      menuFinanzasMensajero.classList.add('hidden');
+      document.getElementById('field-mensajero').classList.add('hidden');
+      document.getElementById('field-pago').classList.add('hidden');
+      document.getElementById('pending-banner').classList.add('hidden');
+
+      // Mostrar campo de costo para cliente
+      document.getElementById('field-costo-cliente').classList.add('hidden');
+
+      if (currentRole === 'admin') {
+        menuRegistrar.classList.remove('hidden');
+        menuCostos.classList.remove('hidden');
+        menuCobros.classList.remove('hidden');
+        menuPendientes.classList.remove('hidden');
+        menuHistorial.classList.remove('hidden');
+        document.getElementById('field-mensajero').classList.remove('hidden');
+        document.getElementById('field-pago').classList.remove('hidden');
+      } else if (currentRole === 'mensajero') {
+        menuRegistrar.classList.add('hidden');
+        menuCostos.classList.add('hidden');
+        menuCobros.classList.add('hidden');
+        menuHistorial.classList.remove('hidden');
+        menuFinanzasMensajero.classList.remove('hidden');
+        document.getElementById('field-mensajero').classList.add('hidden');
+      } else if (currentRole === 'pending_mensajero') {
+        menuRegistrar.classList.add('hidden');
+        menuCostos.classList.add('hidden');
+        menuCobros.classList.add('hidden');
+        document.getElementById('field-mensajero').classList.add('hidden');
+        document.getElementById('pending-banner').classList.remove('hidden');
+      } else {
+        // cliente
+        menuRegistrar.classList.remove('hidden');
+        menuHistorial.classList.remove('hidden');
+        menuCostos.classList.add('hidden');
+        menuCobros.classList.add('hidden');
+        document.getElementById('field-mensajero').classList.add('hidden');
+        document.getElementById('field-costo-cliente').classList.remove('hidden');
+      }
+    }
+
+    // ===== Subscribe services by role =====
+    function safeTimestampToMillis(t) {
+      if (!t) return 0;
+      if (typeof t.toMillis === 'function') return t.toMillis();
+      if (t.seconds) return t.seconds * 1000 + (t.nanoseconds || 0)/1e6;
+      return Number(t) || 0;
+    }
+
     function subscribeServicesByRole() {
-  const servicesEl = document.getElementById('services-section');
-  servicesEl.innerHTML = '<div class="text-center text-gold">Cargando servicios...</div>';
-
-  // Cancelar cualquier suscripción anterior
-  if (_servicesUnsubscribe) {
-    try { _servicesUnsubscribe(); } catch (e) { console.warn("Error al cancelar suscripción anterior:", e); }
-    _servicesUnsubscribe = null;
-  }
-
-  if (!currentUser || !currentRole) {
-    servicesEl.innerHTML = '<div class="text-center text-gold">Esperando datos de usuario...</div>';
-    return;
-  }
-
-  // ===== ADMIN =====
-  if (currentRole === 'admin') {
-    const query = db.collection('services').orderBy('fechaCreacion', 'desc');
-
-    _servicesUnsubscribe = query.onSnapshot(snapshot => {
-      const allServices = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      console.log("Servicios obtenidos (admin):", allServices);
-      renderServices(allServices);
-    }, err => {
-      console.error("Error snapshot admin:", err);
-      servicesEl.innerHTML = '<div class="text-center text-gold">Error cargando servicios.</div>';
-    });
-    return;
-  }
-
-  // ===== CLIENTE =====
-  if (currentRole === 'cliente') {
-    console.log("UID actual del cliente:", currentUser.uid);
-
-    const query = db.collection('services')
-                    .where('uidCliente', '==', currentUser.uid)
-                    .orderBy('fechaCreacion', 'desc');
-
-    _servicesUnsubscribe = query.onSnapshot(snapshot => {
-      const allServices = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      console.log("Servicios obtenidos (cliente):", allServices);
-      renderServices(allServices);
-    }, err => {
-      console.error("Error snapshot cliente:", err);
-      servicesEl.innerHTML = '<div class="text-center text-gold">Error cargando tus pedidos.</div>';
-    });
-    return;
-  }
-
-  // ===== MENSAJERO =====
-  if (currentRole === 'mensajero') {
-    const pendientesQuery = db.collection('services').where('estado', '==', 'pendiente');
-    const propiosQuery = db.collection('services').where('uidMensajero', '==', currentUser.uid);
-
-    let pendientesCache = [];
-    let propiosCache = [];
-
-    function combineAndRender() {
-      const combined = [
-        ...pendientesCache,
-        ...propiosCache.filter(p => !pendientesCache.find(pd => pd.id === p.id))
-      ];
-
-      combined.sort((a, b) => {
-        const at = a.fechaCreacion?.seconds || 0;
-        const bt = b.fechaCreacion?.seconds || 0;
-        return bt - at;
-      });
-
-      console.log("Servicios combinados para mensajero:", combined);
-      renderServices(combined);
-    }
-
-    const unsubPendientes = pendientesQuery.onSnapshot(snapshot => {
-      pendientesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      combineAndRender();
-    }, err => {
-      console.error("Error snapshot pendientes:", err);
-    });
-
-    const unsubPropios = propiosQuery.onSnapshot(snapshot => {
-      propiosCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      combineAndRender();
-    }, err => {
-      console.error("Error snapshot propios:", err);
-    });
-
-    // Guardar función que cancela ambos listeners
-    _servicesUnsubscribe = () => {
-      try { unsubPendientes(); } catch (e) {}
-      try { unsubPropios(); } catch (e) {}
-    };
-
-    return;
-  }
-
-  // ===== MENSAJERO EN REVISIÓN =====
-  if (currentRole === 'pending_mensajero') {
-    servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios aún.</div>';
-    return;
-  }
-
-  // ===== ROL DESCONOCIDO =====
-  servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
-}
-
-
-
-    function renderServices() {
       const servicesEl = document.getElementById('services-section');
+      servicesEl.innerHTML = '<div class="text-center text-[#d1b070]">Cargando servicios…</div>';
+      if (window._unsub) { 
+        try { window._unsub(); } catch(e){} 
+        window._unsub = null; 
+      }
+      if (window._unsub2) { 
+        try { window._unsub2(); } catch(e){} 
+        window._unsub2 = null; 
+      }
+
+      const ref = db.collection('services');
+
+      if (currentRole === 'admin') {
+        window._unsub = ref.orderBy('fechaCreacion', 'desc').onSnapshot(
+          (snap) => {
+            services = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            renderServices();
+          },
+          (err) => {
+            console.error('Error escuchando servicios (admin):', err);
+            servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios: ' + err.message + '</div>';
+          }
+        );
+        return;
+      }
+
+      if (currentRole === 'cliente') {
+        const q = ref.where('uidCliente', '==', currentUser.uid);
+        window._unsub = q.onSnapshot(
+          (snap) => {
+            services = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+            services.sort((a,b) => safeTimestampToMillis(b.fechaCreacion) - safeTimestampToMillis(a.fechaCreacion));
+            renderServices();
+          },
+          (err) => {
+            console.error('Error escuchando servicios (cliente):', err);
+            servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando tus servicios: ' + err.message + '</div>';
+          }
+        );
+        return;
+      }
+
+      if (currentRole === 'mensajero') {
+        const qPendientes = ref.where('estado', '==', 'pendiente');
+        const qAsignados  = ref.where('uidMensajero', '==', currentUser.uid);
+
+        let docsPend = [];
+        let docsAsig = [];
+
+        function updateCombined() {
+          const map = {};
+          [...docsPend, ...docsAsig].forEach(d => { map[d.id] = d; });
+          services = Object.values(map);
+          services.sort((a,b) => safeTimestampToMillis(b.fechaCreacion) - safeTimestampToMillis(a.fechaCreacion));
+          renderServices();
+        }
+
+        window._unsub = qPendientes.onSnapshot(
+          (snap) => { docsPend = snap.docs.map(d => ({ id: d.id, ...d.data() })); updateCombined(); },
+          (err) => {
+            console.error('Error escuchando pendientes:', err);
+            servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios pendientes</div>';
+          }
+        );
+
+        window._unsub2 = qAsignados.onSnapshot(
+          (snap) => { docsAsig = snap.docs.map(d => ({ id: d.id, ...d.data() })); updateCombined(); },
+          (err) => {
+            console.error('Error escuchando asignados:', err);
+            servicesEl.innerHTML = '<div class="text-center text-red-500">Error cargando servicios asignados</div>';
+          }
+        );
+
+        return;
+      }
+
+      // pending_mensajero o roles desconocidos: vaciar lista
+      services = [];
+      renderServices();
+    }
+
+    // ===== UI sections =====
+    function showSection(section) {
+      document.getElementById("services-section").classList.add("hidden");
+      document.getElementById("filters").classList.add("hidden");
+      document.getElementById("costos-section").classList.add("hidden");
+      document.getElementById("cobros-section").classList.add("hidden");
+      document.getElementById("pending-container").classList.add("hidden");
+      document.getElementById("history-section").classList.add("hidden");
+      document.getElementById("financial-section").classList.add("hidden");
+
+      if (section === "services") {
+        document.getElementById("filters").classList.remove("hidden");
+        document.getElementById("services-section").classList.remove("hidden");
+      } else if (section === "costos") {
+        if (currentRole !== 'admin') return;
+        document.getElementById("costos-section").classList.remove("hidden");
+        renderCostos();
+      } else if (section === "cobros") {
+        if (currentRole !== 'admin') return;
+        document.getElementById("cobros-section").classList.remove("hidden");
+        renderCobros();
+      }
+      closeSidebarOnClick();
+    }
+
+    function setFilter(f) { 
+      currentFilter = f; 
+      renderServices(); 
+    }
+
+    // ===== Modal open/edit =====
+    function openModal(editId = null) {
+      const modal = document.getElementById('modal');
+      const form  = document.getElementById('service-form');
+      form.reset();
+      form.dataset.editId = editId || '';
       
-      if (services.length === 0) {
-        servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
+      // Mensajero pending or mensajero cannot open modal
+      if (currentRole === 'mensajero' || currentRole === 'pending_mensajero') return;
+
+      if (editId) {
+        if (currentRole !== 'admin' && currentRole !== 'cliente') return;
+        const s = services.find(x => x.id === editId);
+        if (s) {
+          form.empresaCliente.value = s.empresa || s.cliente || '';
+          form.contacto.value = s.contacto || '';
+          form.telefono.value = s.telefono || '';
+          form.recoger.value = s.recoger || '';
+          form.entregar.value = s.entregar || '';
+          form.volumen.value = s.volumen || '';
+          
+          // Para admin
+          if (currentRole === 'admin') {
+            form.uidMensajero.value = s.uidMensajero || '';
+            form.pagoMensajero.value = s.pagoMensajero || 0;
+          } else {
+            // Para cliente
+            form.costoCliente.value = s.costo || 0;
+          }
+          
+          if (s.cobrarProducto && s.cobrarProducto > 0) {
+            document.getElementById('cobrar-check').checked = true;
+            document.getElementById('cobrar-field').classList.remove('hidden');
+            form.cobrarProducto.value = s.cobrarProducto;
+          } else {
+            document.getElementById('cobrar-check').checked = false;
+            document.getElementById('cobrar-field').classList.add('hidden');
+          }
+        }
+      } else {
+        document.getElementById('cobrar-check').checked = false;
+        document.getElementById('cobrar-field').classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+    
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    }
+
+    // Toggle cobrar field
+    document.getElementById('cobrar-check').addEventListener('change', (e) => {
+      document.getElementById('cobrar-field').classList.toggle('hidden', !e.target.checked);
+    });
+
+    // Helpers
+    function fmt(n) { return new Intl.NumberFormat('es-CO').format(n || 0); }
+    function escapeHtml(text) {
+      if (!text && text !== 0) return '';
+      return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+    }
+
+    // ===== Render services =====
+    function renderServices() {
+      const list = document.getElementById('services-section');
+      list.innerHTML = "";
+      
+      if (currentRole === 'pending_mensajero') {
+        list.innerHTML = '<div class="text-center text-[#d1b070] w-full">Tu cuenta está en revisión. No puedes ver ni crear pedidos hasta que seas aprobado.</div>';
         return;
       }
       
-      let filteredServices = services;
+      // Filtrar servicios según el rol
+      let filtered = services;
+      filtered = filtered.filter(s => currentFilter === 'all' ? true : (s.estado || 'pendiente') === currentFilter);
       
-      if (currentFilter !== 'all') {
-        filteredServices = services.filter(s => s.estado === currentFilter);
+      // Para mensajeros, no mostrar servicios entregados en la vista principal
+      if (currentRole === 'mensajero') {
+        filtered = filtered.filter(s => (s.estado || 'pendiente') !== 'entregado');
       }
       
-      if (filteredServices.length === 0) {
-        servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con el filtro '${currentFilter}'</div>`;
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="text-center text-[#d1b070] w-full">No hay servicios para mostrar.</div>';
         return;
       }
       
-      servicesEl.innerHTML = '';
-      
-      filteredServices.forEach(service => {
-        const serviceCard = document.createElement('div');
-        serviceCard.className = 'service-card';
+      filtered.forEach(s => {
+        const card = document.createElement('div');
+        const estado = s.estado || 'pendiente';
+        const isAvailable = estado === 'pendiente' && currentRole === 'mensajero';
         
-        let actionsHTML = '';
-        let statusClass = `status-${service.estado.replace('_', '')}`;
+        card.className = `service-card bg-[var(--gold)] text-black p-4 rounded-xl shadow flex flex-col ${isAvailable ? 'available-service' : ''}`;
         
-        let fechaCreacion = 'Fecha no disponible';
-        if (service.fechaCreacion && typeof service.fechaCreacion.toDate === 'function') {
-          fechaCreacion = service.fechaCreacion.toDate().toLocaleString('es-CO');
+        let actionButtons = '';
+        let mensajeroInfo = '';
+        
+        // Hacer direcciones y teléfonos clickeables
+        const direccionRecoger = s.recoger ? `<p class="text-sm mt-1">📍 Recoger: <span class="clickable" onclick="openMaps('${s.recoger}')">${escapeHtml(s.recoger)}</span></p>` : '';
+        const direccionEntregar = s.entregar ? `<p class="text-sm">📍 Entregar: <span class="clickable" onclick="openMaps('${s.entregar}')">${escapeHtml(s.entregar)}</span></p>` : '';
+        const telefono = s.telefono ? `<p class="text-sm">📞 <a href="tel:${encodeURIComponent(s.telefono)}" class="clickable">${escapeHtml(s.telefono)}</a></p>` : '';
+        
+        if (currentRole === 'admin') {
+          actionButtons = `
+            <button onclick="openModal('${s.id}')" class="flex-1 bg-blue-600 text-white px-2 py-2 rounded mobile-btn">✏️ Editar</button>
+            <button onclick="deleteService('${s.id}')" class="flex-1 bg-red-600 text-white px-2 py-2 rounded mobile-btn">🗑️ Eliminar</button>
+          `;
+        } else if (currentRole === 'cliente') {
+          if (estado === 'pendiente') {
+            actionButtons = `
+              <button onclick="openModal('${s.id}')" class="flex-1 bg-blue-600 text-white px-2 py-2 rounded mobile-btn">✏️ Editar</button>
+              <button onclick="deleteService('${s.id}')" class="flex-1 bg-red-600 text-white px-2 py-2 rounded mobile-btn">🗑️ Eliminar</button>
+            `;
+          }
+        } else if (currentRole === 'mensajero') {
+          if (estado === 'pendiente') {
+            actionButtons = `
+              <button onclick="takeService('${s.id}')" class="btn-take mobile-btn">🚚 Tomar servicio</button>
+            `;
+          } else if (s.uidMensajero === currentUser.uid) {
+            actionButtons = `
+              <select onchange="changeEstado('${s.id}', this.value)" class="flex-1 bg-black text-[var(--gold)] px-2 py-2 rounded mobile-btn">
+                <option value="en_ruta" ${estado==='en_ruta'?'selected':''}>En ruta</option>
+                <option value="entregado" ${estado==='entregado'?'selected':''}>Entregado</option>
+                <option value="cancelado" ${estado==='cancelado'?'selected':''}>Cancelado</option>
+              </select>
+              ${estado === 'en_ruta' ? `<button onclick="openEvidenceModal('${s.id}')" class="flex-1 bg-blue-500 text-white px-2 py-2 rounded mobile-btn">📸 Tomar evidencia</button>` : ''}
+            `;
+          }
+          
+          if (s.uidMensajero) {
+            const mensajeroName = mensajerosList.find(m => m.uid === s.uidMensajero)?.displayName || s.uidMensajero;
+            mensajeroInfo = `<p class="text-sm mt-1"><strong>Asignado a:</strong> ${s.uidMensajero === currentUser.uid ? 'TÚ' : escapeHtml(mensajeroName)}</p>`;
+          }
         }
         
-        let fechaEntregaHTML = '';
-        if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
-          fechaEntregaHTML = `<div class="service-date"><i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}</div>`;
-        }
-        
-        switch (service.estado) {
-          case 'pendiente':
-            if (currentRole === 'mensajero') {
-              actionsHTML = `<button class="btn-primary action-btn" onclick="takeService('${service.id}')">Tomar servicio</button>`;
-            } else if (currentRole === 'admin' || currentRole === 'cliente') {
-              actionsHTML = `
-                <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
-                <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
-              `;
-            }
-            break;
-          case 'en_ruta':
-  if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-    actionsHTML = `
-      <button class="btn-primary action-btn" onclick="openEvidenceModal('${service.id}')">Tomar evidencia</button>
-      <button class="btn-success action-btn" onclick="changeEstado('${service.id}', 'entregado')">Marcar como entregado</button>
-      <button class="btn-danger action-btn" onclick="changeEstado('${service.id}', 'cancelado')">Cancelar</button>
-    `;
-  } else if (currentRole === 'admin') {
-    actionsHTML = `
-      <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
-      <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
-    `;
-  }
-  break;
-
-case 'entregado':
-  if (currentRole === 'admin') {
-    actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
-  } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
-    actionsHTML = `<span class="text-green-700 font-semibold">Servicio entregado</span>`;
-  } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-    actionsHTML = `<span class="text-green-700 font-semibold">Has completado este servicio</span>`;
-  }
-  break;
-case 'cancelado':
-  if (currentRole === 'admin') {
-    actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
-  } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
-    actionsHTML = `<span class="text-red-600 font-semibold">Servicio cancelado</span>`;
-  } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-    actionsHTML = `<span class="text-red-600 font-semibold">Has cancelado este servicio</span>`;
-  }
-  break;
-
-        }
-        
-        serviceCard.innerHTML = `
-          <div class="service-header">
-            <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-            <div class="service-status ${statusClass}">${(service.estado || '').replace('_', ' ')}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-user"></i>
-            <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-phone"></i>
-            <div class="service-detail-content">${service.telefono || 'No especificado'}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-map-marker-alt"></i>
-            <div class="service-detail-content">
-              <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
-              <div><strong>Entregar:</strong> ${service.entregar || 'No especificado'}</div>
+        card.innerHTML = `
+          <div class="flex justify-between items-start gap-2">
+            <div>
+              <p class="font-bold">${escapeHtml(s.empresa || s.cliente || "-")}</p>
+              <p class="text-sm">Contacto: ${escapeHtml(s.contacto || "-")}</p>
+              ${telefono}
             </div>
+            <span class="chip state-${estado}">${estado.replace('_',' ')}</span>
           </div>
-          ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
-          ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
-          ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
-          ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
-          <div class="service-date"><i class="fas fa-calendar"></i> Creado: ${fechaCreacion}</div>
-          ${fechaEntregaHTML}
-          ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
+          ${direccionRecoger}
+          ${direccionEntregar}
+          ${ s.volumen ? `<p class="text-sm"><strong>Volumen:</strong> ${escapeHtml(s.volumen)}</p>` : "" }
+          ${mensajeroInfo}
+          ${(currentRole==='admin' || currentRole==='cliente') ? `<p class="text-sm"><strong>Costo:</strong> $ ${fmt(s.costo || s.pagoMensajero)}</p>` : ""}
+          ${(currentRole==='mensajero' && s.pagoMensajero) ? `<p class="text-sm"><strong>Tu pago:</strong> $ ${fmt(s.pagoMensajero)}</p>` : ""}
+          ${(currentRole==='admin' && s.cobrarProducto) ? `<p class="text-sm"><strong>COBRO:</strong> $ ${fmt(s.cobrarProducto)}</p>` : ""}
+          ${ s.observaciones ? `<p class="text-sm mt-2"><strong>Obs:</strong> ${escapeHtml(s.observaciones)}</p>` : "" }
+          <div class="flex gap-2 mt-3">
+            ${actionButtons}
+          </div>
         `;
-        
-        servicesEl.appendChild(serviceCard);
+        list.appendChild(card);
       });
-
-      function takeService(serviceId) {
-  if (!currentUser) return alert("Debes iniciar sesión para tomar un servicio");
-
-  db.collection("services").doc(serviceId).update({
-    uidMensajero: currentUser.uid,
-    estado: "en_ruta"
-  })
-  .then(() => {
-    console.log("Servicio tomado correctamente");
-  })
-  .catch(error => {
-    console.error("Error al tomar servicio:", error);
-    alert("No se pudo tomar el servicio. Intenta de nuevo.");
-  });
-}
-    }
-
-    async function changeEstado(serviceId, newEstado) {
-      if (!confirm(`¿Estás seguro de que deseas cambiar el estado a '${newEstado}'?`)) return;
-      try {
-        await db.collection('services').doc(serviceId).update({ estado: newEstado });
-        alert(`Servicio actualizado a '${newEstado}'`);
-      } catch (error) {
-        console.error('Error cambiando estado:', error);
-        alert('Error al cambiar el estado del servicio');
+      
+      if (currentRole === 'admin') { 
+        renderCobros(); 
+        renderCostos(); 
       }
     }
-    window.changeEstado = changeEstado;
 
-    async function takeService(serviceId) {
+    // ===== Funciones para abrir mapas y llamar =====
+    function openMaps(address) {
+      const encodedAddress = encodeURIComponent(address);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+    }
+
+    // ===== Funcionalidad para tomar servicio =====
+    async function takeService(id) {
       try {
-        await db.collection('services').doc(serviceId).update({
+        await db.collection('services').doc(id).update({
           estado: 'en_ruta',
           uidMensajero: currentUser.uid
         });
-        alert('Servicio tomado con éxito');
-      } catch (error) {
-        console.error('Error tomando servicio:', error);
-        alert('Error al tomar el servicio');
+        alert('Servicio tomado con éxito. Ahora está en estado "En ruta".');
+      } catch (e) {
+        console.error('Error tomando servicio:', e);
+        alert('No se pudo tomar el servicio. Verifica que tengas permisos y que el servicio siga disponible.');
       }
     }
     window.takeService = takeService;
 
-    async function deleteService(serviceId) {
-      if (!confirm('¿Estás seguro de que deseas eliminar este servicio?')) return;
-      
+    // ===== change, delete =====
+    async function changeEstado(id, estado) {
       try {
-        await db.collection('services').doc(serviceId).delete();
-        alert('Servicio eliminado con éxito');
-      } catch (error) {
-        console.error('Error eliminando servicio:', error);
-        alert('Error al eliminar el servicio');
+        await db.collection('services').doc(id).update({ estado });
+        
+        // Si se marca como entregado, actualizar la lista
+        if (estado === 'entregado') {
+          subscribeServicesByRole();
+        }
+      } catch (e) {
+        alert('No se pudo actualizar el estado');
+        console.error(e);
+      }
+    }
+    window.changeEstado = changeEstado;
+
+    async function deleteService(id) {
+      if (!confirm("¿Eliminar este servicio permanentemente?")) return;
+      try {
+        await db.collection('services').doc(id).delete();
+      } catch (e) {
+        alert('No se pudo eliminar'); console.error(e);
       }
     }
     window.deleteService = deleteService;
 
+    // ===== Evidencia de entrega =====
     function openEvidenceModal(serviceId) {
       currentServiceIdForEvidence = serviceId;
-      document.getElementById('evidence-modal').classList.remove('hidden');
+      const modal = document.getElementById('evidence-modal');
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      
+      // Iniciar cámara
       startCamera();
     }
     window.openEvidenceModal = openEvidenceModal;
 
     function closeEvidenceModal() {
-      document.getElementById('evidence-modal').classList.add('hidden');
+      const modal = document.getElementById('evidence-modal');
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
       stopCamera();
       resetEvidenceModal();
     }
     window.closeEvidenceModal = closeEvidenceModal;
 
+    let stream = null;
+
     async function startCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
         const videoElement = document.getElementById('videoElement');
         videoElement.srcObject = stream;
-        videoElement.play();
-      } catch (error) {
-        console.error('Error accediendo a la cámara:', error);
+      } catch (err) {
+        console.error('Error al acceder a la cámara:', err);
         alert('No se pudo acceder a la cámara. Asegúrate de permitir el acceso.');
       }
     }
 
     function stopCamera() {
-      const videoElement = document.getElementById('videoElement');
-      if (videoElement.srcObject) {
-        videoElement.srcObject.getTracks().forEach(track => track.stop());
-        videoElement.srcObject = null;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
       }
     }
 
@@ -1930,7 +1175,10 @@ case 'cancelado':
       document.getElementById('captured-image-container').classList.add('hidden');
       document.getElementById('videoElement').classList.remove('hidden');
       document.getElementById('capture-btn').classList.remove('hidden');
-      document.querySelectorAll('input[name="paymentMethod"]').forEach(input => input.checked = false);
+      document.querySelectorAll('.payment-option').forEach(opt => {
+        opt.classList.remove('selected');
+        opt.querySelector('input').checked = false;
+      });
       selectedPaymentMethod = null;
       document.getElementById('confirm-delivery').disabled = true;
     }
@@ -1939,156 +1187,310 @@ case 'cancelado':
       const video = document.getElementById('videoElement');
       const canvas = document.getElementById('canvasElement');
       const context = canvas.getContext('2d');
+      
+      // Establecer dimensiones del canvas igual al video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
+      
+      // Dibujar el frame actual del video en el canvas
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
-      document.getElementById('captured-image-container').classList.remove('hidden');
-      document.getElementById('videoElement').classList.add('hidden');
+      
+      // Obtener la imagen como data URL
+      const imageData = canvas.toDataURL('image/png');
+      
+      // Mostrar la imagen capturada
+      const capturedImage = document.getElementById('capturedImage');
+      capturedImage.src = imageData;
+      
+      // Ocultar video y botón de captura, mostrar imagen y botón de retomar
+      video.classList.add('hidden');
       document.getElementById('capture-btn').classList.add('hidden');
+      document.getElementById('captured-image-container').classList.remove('hidden');
+      
+      // Detener la cámara
       stopCamera();
     });
 
     document.getElementById('retake-btn').addEventListener('click', () => {
+      // Ocultar imagen capturada, mostrar video y botón de captura
       document.getElementById('captured-image-container').classList.add('hidden');
       document.getElementById('videoElement').classList.remove('hidden');
       document.getElementById('capture-btn').classList.remove('hidden');
+      
+      // Reiniciar la cámara
       startCamera();
     });
 
     function selectPaymentMethod(method) {
       selectedPaymentMethod = method;
-      document.getElementById('confirm-delivery').disabled = false;
-      document.querySelectorAll('.payment-option').forEach(option => {
-        option.style.background = 'rgba(20, 20, 20, 0.8)';
+      document.querySelectorAll('.payment-option').forEach(opt => {
+        if (opt.querySelector('input').value === method) {
+          opt.classList.add('selected');
+          opt.querySelector('input').checked = true;
+        } else {
+          opt.classList.remove('selected');
+          opt.querySelector('input').checked = false;
+        }
       });
-      event.currentTarget.style.background = 'rgba(207, 149, 36, 0.2)';
+      
+      // Habilitar el botón de confirmar si hay método de pago seleccionado
+      document.getElementById('confirm-delivery').disabled = !selectedPaymentMethod;
     }
     window.selectPaymentMethod = selectPaymentMethod;
 
     document.getElementById('confirm-delivery').addEventListener('click', async () => {
-      if (!selectedPaymentMethod) {
-        alert('Por favor selecciona un método de pago');
+      if (!currentServiceIdForEvidence || !selectedPaymentMethod) {
+        alert('Por favor, completa toda la información requerida.');
         return;
       }
       
       try {
+        // Obtener la imagen capturada
+        const capturedImage = document.getElementById('capturedImage').src;
+        
+        // Actualizar el servicio en la base de datos
         await db.collection('services').doc(currentServiceIdForEvidence).update({
           estado: 'entregado',
-          evidenciaEntrega: document.getElementById('capturedImage').src,
+          evidenciaEntrega: capturedImage,
           metodoPago: selectedPaymentMethod,
           fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert('Entrega confirmada con éxito');
+        
+        alert('Servicio marcado como entregado con éxito.');
         closeEvidenceModal();
+        
+        // Actualizar la lista de servicios
+        subscribeServicesByRole();
       } catch (error) {
-        console.error('Error confirmando entrega:', error);
-        alert('Error al confirmar la entrega');
+        console.error('Error al confirmar la entrega:', error);
+        alert('Error al confirmar la entrega. Por favor, intenta nuevamente.');
       }
     });
 
-    function showSection(section) {
-      document.querySelectorAll('.main-content > div:not(#filters)').forEach(div => div.classList.add('hidden'));
-      const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
-      if (targetSection) targetSection.classList.remove('hidden');
-      document.getElementById('filters').classList.toggle('hidden', section !== 'services');
+    // ===== Historial de servicios =====
+    function showHistory() {
+      document.getElementById("services-section").classList.add("hidden");
+      document.getElementById("filters").classList.add("hidden");
+      document.getElementById("costos-section").classList.add("hidden");
+      document.getElementById("cobros-section").classList.add("hidden");
+      document.getElementById("pending-container").classList.add("hidden");
+      document.getElementById("financial-section").classList.add("hidden");
       
-      if (currentRole === 'admin') {
-        if (section === 'costos') renderCostos();
-        else if (section === 'cobros') renderCobros();
-      }
+      document.getElementById("history-section").classList.remove("hidden");
+      renderHistory();
+      
+      closeSidebarOnClick();
     }
-    window.showSection = showSection;
+    window.showHistory = showHistory;
 
-    function setFilter(filter) {
-      currentFilter = filter;
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      renderServices();
-    }
-    window.setFilter = setFilter;
-
-    function showFinancialSummary() {
-      showSection('financial');
-      renderFinancialSummary();
-    }
-    window.showFinancialSummary = showFinancialSummary;
-
-    // Todas las demás funciones (renderFinancialSummary, markAsPaid, etc.) se mantienen igual...
-    
-    async function renderFinancialSummary() {
-      const financialList = document.getElementById('financial-list');
-      financialList.innerHTML = '<div class="text-center text-gold">Cargando resumen financiero...</div>';
+    async function renderHistory() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '<div class="text-center text-[#d1b070]">Cargando historial...</div>';
       
       try {
-        const snapshot = await db.collection('services')
-          .where('uidMensajero', '==', currentUser.uid)
-          .where('estado', '==', 'entregado')
-          .get();
+        // Para mensajeros, solo sus servicios entregados
+        let query = db.collection('services').where('estado', '==', 'entregado');
+        
+        if (currentRole === 'mensajero') {
+          query = query.where('uidMensajero', '==', currentUser.uid);
+        } else if (currentRole === 'cliente') {
+          query = query.where('uidCliente', '==', currentUser.uid);
+        }
+        
+        const snapshot = await query.orderBy('fechaEntrega', 'desc').get();
         
         if (snapshot.empty) {
-          financialList.innerHTML = '<div class="text-center text-gold">No hay servicios entregados</div>';
-          ['total-earned', 'total-pending', 'total-paid'].forEach(id => document.getElementById(id).textContent = '$0');
+          historyList.innerHTML = '<div class="text-center text-[#d1b070] w-full">No hay servicios entregados.</div>';
           return;
         }
         
-        const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const deliveredServices = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         
-        let totalEarned = 0, totalPending = 0, totalPaid = 0;
-        
-        services.forEach(service => {
-          const amount = service.pagoMensajero || 0;
-          totalEarned += amount;
-          if (service.pagado) totalPaid += amount;
-          else totalPending += amount;
+        // Agrupar servicios por día
+        const servicesByDay = {};
+        deliveredServices.forEach(service => {
+          let deliveryDate = 'Fecha no disponible';
+          if (service.fechaEntrega) {
+            const date = typeof service.fechaEntrega.toDate === 'function' ? 
+                         service.fechaEntrega.toDate() : new Date(service.fechaEntrega);
+            deliveryDate = date.toLocaleDateString('es-CO', { 
+              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+          }
+          
+          if (!servicesByDay[deliveryDate]) {
+            servicesByDay[deliveryDate] = [];
+          }
+          
+          servicesByDay[deliveryDate].push(service);
         });
         
-        document.getElementById('total-earned').textContent = `$${totalEarned.toLocaleString()}`;
-        document.getElementById('total-pending').textContent = `$${totalPending.toLocaleString()}`;
-        document.getElementById('total-paid').textContent = `$${totalPaid.toLocaleString()}`;
+        // Renderizar servicios agrupados por día
+        historyList.innerHTML = '';
         
-        const servicesByDate = {};
-        services.forEach(service => {
-          const date = (service.fechaEntrega && service.fechaEntrega.toDate) ? service.fechaEntrega.toDate().toLocaleDateString('es-CO') : 'Fecha desconocida';
-          if (!servicesByDate[date]) servicesByDate[date] = [];
-          servicesByDate[date].push(service);
+        Object.keys(servicesByDay).forEach(date => {
+          const daySection = document.createElement('div');
+          daySection.className = 'day-section';
+          
+          const dayHeader = document.createElement('div');
+          dayHeader.className = 'day-header';
+          dayHeader.textContent = date;
+          daySection.appendChild(dayHeader);
+          
+          servicesByDay[date].forEach(service => {
+            const card = document.createElement('div');
+            card.className = 'service-card bg-[var(--gold)] text-black p-4 rounded-xl shadow flex flex-col mb-3';
+            
+            // Formatear fecha de entrega
+            let fechaEntrega = 'Fecha no disponible';
+            if (service.fechaEntrega) {
+              const dateObj = typeof service.fechaEntrega.toDate === 'function' ? 
+                             service.fechaEntrega.toDate() : new Date(service.fechaEntrega);
+              fechaEntrega = dateObj.toLocaleString('es-CO');
+            }
+            
+            card.innerHTML = `
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <p class="font-bold">${escapeHtml(service.empresa || service.cliente || "-")}</p>
+                  <p class="text-sm">Contacto: ${escapeHtml(service.contacto || "-")}</p>
+                  <p class="text-sm">📞 <a href="tel:${encodeURIComponent(service.telefono || '')}" class="clickable">${escapeHtml(service.telefono || "-")}</a></p>
+                </div>
+                <span class="chip state-entregado">entregado</span>
+              </div>
+              <p class="text-sm mt-1">📍 Recoger: <span class="clickable" onclick="openMaps('${service.recoger}')">${escapeHtml(service.recoger || "-")}</span></p>
+              <p class="text-sm">📍 Entregar: <span class="clickable" onclick="openMaps('${service.entregar}')">${escapeHtml(service.entregar || "-")}</span></p>
+              ${ service.volumen ? `<p class="text-sm"><strong>Volumen:</strong> ${escapeHtml(service.volumen)}</p>` : "" }
+              <p class="text-sm"><strong>Fecha de entrega:</strong> ${fechaEntrega}</p>
+              <p class="text-sm"><strong>Método de pago:</strong> ${service.metodoPago || 'No especificado'}</p>
+              ${ service.pagoMensajero ? `<p class="text-sm"><strong>Pago mensajero:</strong> $ ${fmt(service.pagoMensajero)}</p>` : "" }
+              ${ service.evidenciaEntrega ? `<img src="${service.evidenciaEntrega}" class="rounded-lg max-h-48 w-auto object-contain mx-auto mt-2">` : "" }
+              ${ service.observaciones ? `<p class="text-sm mt-2"><strong>Obs:</strong> ${escapeHtml(service.observaciones)}</p>` : "" }
+            `;
+            daySection.appendChild(card);
+          });
+          
+          historyList.appendChild(daySection);
+        });
+      } catch (error) {
+        console.error('Error cargando historial:', error);
+        historyList.innerHTML = '<div class="text-center text-red-500">Error cargando el historial.</div>';
+      }
+    }
+
+    // ===== Resumen financiero para mensajeros =====
+    function showFinancialSummary() {
+      document.getElementById("services-section").classList.add("hidden");
+      document.getElementById("filters").classList.add("hidden");
+      document.getElementById("costos-section").classList.add("hidden");
+      document.getElementById("cobros-section").classList.add("hidden");
+      document.getElementById("pending-container").classList.add("hidden");
+      document.getElementById("history-section").classList.add("hidden");
+      
+      document.getElementById("financial-section").classList.remove("hidden");
+      renderFinancialSummary();
+      
+      closeSidebarOnClick();
+    }
+    window.showFinancialSummary = showFinancialSummary;
+
+    async function renderFinancialSummary() {
+      const financialList = document.getElementById('financial-list');
+      financialList.innerHTML = '<div class="text-center text-[#d1b070]">Cargando información financiera...</div>';
+      
+      try {
+        // Obtener servicios del mensajero actual que han sido entregados
+        const snapshot = await db.collection('services')
+          .where('uidMensajero', '==', currentUser.uid)
+          .where('estado', '==', 'entregado')
+          .orderBy('fechaEntrega', 'desc')
+          .get();
+        
+        if (snapshot.empty) {
+          financialList.innerHTML = '<div class="text-center text-[#d1b070] w-full">No hay servicios entregados.</div>';
+          return;
+        }
+        
+        const messengerServices = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Calcular totales
+        const totalEarned = messengerServices.reduce((sum, s) => sum + (parseFloat(s.pagoMensajero) || 0), 0);
+        const totalPending = messengerServices
+          .filter(s => !s.pagado)
+          .reduce((sum, s) => sum + (parseFloat(s.pagoMensajero) || 0), 0);
+        const totalPaid = totalEarned - totalPending;
+        
+        // Actualizar totales en la UI
+        document.getElementById('total-earned').textContent = `$${fmt(totalEarned)}`;
+        document.getElementById('total-pending').textContent = `$${fmt(totalPending)}`;
+        document.getElementById('total-paid').textContent = `$${fmt(totalPaid)}`;
+        
+        // Agrupar servicios por día
+        const servicesByDay = {};
+        messengerServices.forEach(service => {
+          let deliveryDate = 'Fecha no disponible';
+          if (service.fechaEntrega) {
+            const date = typeof service.fechaEntrega.toDate === 'function' ? 
+                         service.fechaEntrega.toDate() : new Date(service.fechaEntrega);
+            deliveryDate = date.toLocaleDateString('es-CO', { 
+              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+          }
+          
+          if (!servicesByDay[deliveryDate]) {
+            servicesByDay[deliveryDate] = [];
+          }
+          
+          servicesByDay[deliveryDate].push(service);
         });
         
+        // Renderizar servicios agrupados por día
         financialList.innerHTML = '';
         
-        Object.keys(servicesByDate).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
-          const dateSection = document.createElement('div');
-          dateSection.className = 'history-day';
+        Object.keys(servicesByDay).forEach(date => {
+          const daySection = document.createElement('div');
+          daySection.className = 'day-section';
           
-          let dayTotal = 0, dayPaid = 0, dayPending = 0;
-          servicesByDate[date].forEach(s => {
-            const amount = s.pagoMensajero || 0;
-            dayTotal += amount;
-            if (s.pagado) dayPaid += amount;
-            else dayPending += amount;
-          });
+          const dayHeader = document.createElement('div');
+          dayHeader.className = 'day-header';
           
-          dateSection.innerHTML = `<div class="history-date">${date} - Total: $${dayTotal.toLocaleString()} (Pagado: $${dayPaid.toLocaleString()}, Pendiente: $${dayPending.toLocaleString()})</div>`;
+          // Calcular total del día
+          const dayTotal = servicesByDay[date].reduce((sum, s) => sum + (parseFloat(s.pagoMensajero) || 0), 0);
+          const dayPaid = servicesByDay[date]
+            .filter(s => s.pagado)
+            .reduce((sum, s) => sum + (parseFloat(s.pagoMensajero) || 0), 0);
           
-          servicesByDate[date].forEach(service => {
-            const serviceCard = document.createElement('div');
-            serviceCard.className = 'service-card';
-            serviceCard.innerHTML = `
-              <div class="service-header">
-                <div class="service-client">${service.empresa || 'Sin nombre'}</div>
-                <div class="service-status ${service.pagado ? 'status-entregado' : 'status-pendiente'}">${service.pagado ? 'Pagado' : 'Pendiente'}</div>
+          dayHeader.textContent = `${date} - Total: $${fmt(dayTotal)} (Pagado: $${fmt(dayPaid)})`;
+          daySection.appendChild(dayHeader);
+          
+          servicesByDay[date].forEach(service => {
+            const isPaid = service.pagado || false;
+            
+            const card = document.createElement('div');
+            card.className = `service-card bg-[var(--gold)] text-black p-4 rounded-xl shadow flex flex-col mb-3 ${isPaid ? 'service-paid' : ''}`;
+            
+            card.innerHTML = `
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <p class="font-bold">${escapeHtml(service.empresa || service.cliente || "-")}</p>
+                  <p class="text-sm">📍 ${escapeHtml(service.entregar || "-")}</p>
+                </div>
+                <span class="chip state-entregado">entregado</span>
               </div>
-              <div class="service-detail"><i class="fas fa-map-marker-alt"></i><div class="service-detail-content">${service.entregar || 'N/A'}</div></div>
-              <div class="service-detail"><i class="fas fa-money-bill-wave"></i><div class="service-detail-content">$${(service.pagoMensajero || 0).toLocaleString()}</div></div>
-              ${!service.pagado ? `<div class="service-actions"><button class="btn-primary action-btn" onclick="markAsPaid('${service.id}')">Marcar como pagado</button></div>` : ''}
+              <p class="text-sm mt-1"><strong>Valor:</strong> $ ${fmt(service.pagoMensajero || 0)}</p>
+              <p class="text-sm"><strong>Estado de pago:</strong> ${isPaid ? 'Pagado' : 'Pendiente'}</p>
+              ${!isPaid ? `
+                <button onclick="markAsPaid('${service.id}')" class="bg-green-500 text-white px-3 py-1 rounded mt-2 mobile-btn">Marcar como pagado</button>
+              ` : ''}
             `;
-            dateSection.appendChild(serviceCard);
+            daySection.appendChild(card);
           });
-          financialList.appendChild(dateSection);
+          
+          financialList.appendChild(daySection);
         });
       } catch (error) {
         console.error('Error cargando resumen financiero:', error);
-        financialList.innerHTML = '<div class="text-center text-red-500">Error cargando el resumen financiero</div>';
+        financialList.innerHTML = '<div class="text-center text-red-500">Error cargando el resumen financiero.</div>';
       }
     }
 
@@ -2098,126 +1500,134 @@ case 'cancelado':
           pagado: true,
           fechaPago: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert('Servicio marcado como pagado');
+        alert('Servicio marcado como pagado.');
         renderFinancialSummary();
       } catch (error) {
-        console.error('Error marcando como pagado:', error);
-        alert('Error al marcar como pagado');
+        console.error('Error al marcar como pagado:', error);
+        alert('Error al marcar como pagado. Por favor, intenta nuevamente.');
       }
     }
     window.markAsPaid = markAsPaid;
 
-    async function listPendingMensajeros() {
-      showSection('pending-container');
-      const pendingList = document.getElementById('pending-list');
-      pendingList.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
-      try {
-        const snapshot = await db.collection('users').where('role', '==', 'pending_mensajero').get();
-        if (snapshot.empty) {
-          pendingList.innerHTML = '<div class="text-center text-gold">No hay solicitudes pendientes</div>';
-          return;
-        }
-        pendingList.innerHTML = '';
-        snapshot.docs.forEach(doc => {
-          const user = { id: doc.id, ...doc.data() };
-          const userCard = document.createElement('div');
-          userCard.className = 'pending-card';
-          userCard.innerHTML = `
-            <div class="service-header"><div class="service-client">${user.displayName || user.email}</div></div>
-            <div class="service-detail"><i class="fas fa-envelope"></i><div class="service-detail-content">${user.email}</div></div>
-            <div class="service-detail"><i class="fas fa-calendar"></i><div class="service-detail-content">Solicitado: ${(user.createdAt && user.createdAt.toDate) ? user.createdAt.toDate().toLocaleDateString() : 'N/A'}</div></div>
-            <div class="pending-actions">
-              <button class="btn-primary action-btn" onclick="approveMensajero('${user.id}')">Aprobar</button>
-              <button class="btn-danger action-btn" onclick="rejectMensajero('${user.id}')">Rechazar</button>
-            </div>`;
-          pendingList.appendChild(userCard);
-        });
-      } catch (error) {
-        console.error('Error cargando solicitudes:', error);
-        pendingList.innerHTML = '<div class="text-center text-red-500">Error cargando las solicitudes</div>';
-      }
-    }
-    window.listPendingMensajeros = listPendingMensajeros;
-
-    async function approveMensajero(userId) {
-      try {
-        await db.collection('users').doc(userId).update({ role: 'mensajero' });
-        alert('Mensajero aprobado');
-        listPendingMensajeros();
-      } catch (error) {
-        console.error('Error aprobando:', error); alert('Error al aprobar');
-      }
-    }
-    window.approveMensajero = approveMensajero;
-
-    async function rejectMensajero(userId) {
-      try {
-        await db.collection('users').doc(userId).update({ role: 'cliente' });
-        alert('Solicitud rechazada');
-        listPendingMensajeros();
-      } catch (error) {
-        console.error('Error rechazando:', error); alert('Error al rechazar');
-      }
-    }
-    window.rejectMensajero = rejectMensajero;
-
-    async function renderCostos() { /* ... */ }
-    async function renderCobros() { /* ... */ }
-    
+    // ===== Editar perfil =====
     function openEditProfile() {
       const modal = document.getElementById('edit-profile-modal');
+      const form = document.getElementById('profile-form');
+      
+      // Cargar el nombre actual
       document.getElementById('profile-displayName').value = userNameEl.textContent;
+      
       modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
     }
     window.openEditProfile = openEditProfile;
 
     function closeEditProfile() {
       document.getElementById('edit-profile-modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
     }
     window.closeEditProfile = closeEditProfile;
 
-    async function handleProfileUpdate(e) {
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
       const displayName = document.getElementById('profile-displayName').value.trim();
-      if (!displayName) { alert('Por favor ingresa un nombre'); return; }
+      
+      if (!displayName) {
+        alert('Por favor, ingresa un nombre válido.');
+        return;
+      }
+      
       try {
-        await db.collection('users').doc(currentUser.uid).update({ displayName });
-        await currentUser.updateProfile({ displayName });
+        // Actualizar en Firestore
+        await db.collection('users').doc(currentUser.uid).set({
+          displayName: displayName
+        }, { merge: true });
+        
+        // Actualizar en Auth
+        await currentUser.updateProfile({
+          displayName: displayName
+        });
+        
+        // Actualizar en la UI
         userNameEl.textContent = displayName;
-        alert('Perfil actualizado');
+        
+        alert('Perfil actualizado correctamente.');
         closeEditProfile();
       } catch (error) {
         console.error('Error actualizando perfil:', error);
-        alert('Error al actualizar el perfil');
+        alert('Error al actualizar el perfil. Por favor, intenta nuevamente.');
       }
-    }
-    
-    // Inicializar la aplicación cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', initApp);
-    // Ejecutar initApp() cuando cargue la ventana
-window.onload = () => {
-  initApp();
-};
-function changeEstado(serviceId, nuevoEstado) {
-  if (!currentUser) return alert("Debes iniciar sesión");
-
-  let updateData = { estado: nuevoEstado };
-
-  // Si el estado es entregado, guarda fechaEntrega
-  if (nuevoEstado === "entregado") {
-    updateData.fechaEntrega = firebase.firestore.FieldValue.serverTimestamp();
-  }
-
-  db.collection("services").doc(serviceId).update(updateData)
-    .then(() => {
-      console.log(`Servicio ${serviceId} actualizado a estado: ${nuevoEstado}`);
-    })
-    .catch(error => {
-      console.error("Error al actualizar estado:", error);
-      alert("No se pudo actualizar el estado. Intenta de nuevo.");
     });
-}
 
+    // ===== submit form (create / edit) =====
+    document.getElementById('service-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!(currentRole === 'admin' || currentRole === 'cliente')) {
+        alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+        return;
+      }
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      const docId = form.dataset.editId || null;
+
+      // base payload
+      const payload = {
+        empresa: data.empresaCliente || "",
+        cliente: "",
+        contacto: data.contacto || "",
+        recoger: data.recoger || "",
+        entregar: data.entregar || "",
+        telefono: data.telefono || "",
+        volumen: data.volumen || "",
+        observaciones: data.observaciones || "",
+        cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+        uidCliente: currentUser.uid,
+        fechaCreacion: docId ? undefined : firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      // Agregar campos según el rol
+      if (currentRole === 'admin') {
+        payload.uidMensajero = data.uidMensajero || "";
+        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+        payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
+      } else {
+        // Cliente
+        payload.costo = parseFloat(data.costoCliente || 0) || 0;
+        payload.pagoMensajero = 0;
+      }
+
+      if (!docId) {
+        payload.estado = "pendiente";
+      }
+
+      try {
+        if (docId) {
+          await db.collection('services').doc(docId).update(payload);
+        } else {
+          await db.collection('services').add(payload);
+        }
+        closeModal();
+        form.reset();
+      } catch (e) {
+        console.error('Error guardando servicio:', e);
+        alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
+      }
+    });
+
+    // ===== initial UI state =====
+    document.getElementById('filters').classList.remove('hidden');
+
+    // Expose functions to global scope
+    window.toggleSidebar = toggleSidebar;
+    window.showSection = showSection;
+    window.setFilter = setFilter;
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+    window.openMaps = openMaps;
 
   </script>
 </body>
