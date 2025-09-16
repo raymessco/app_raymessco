@@ -1630,30 +1630,34 @@ async function signInWithGoogle() {
     return;
   }
 
-  _servicesUnsubscribe = query.onSnapshot(snapshot => {
-    let allServices = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+ _servicesUnsubscribe = query.onSnapshot(snapshot => {
+  let allServices = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
 
-    if (currentRole === 'mensajero') {
-      // Pendientes + los que ya tomó el mensajero
-      services = allServices.filter(service =>
-        service.estado === 'pendiente' ||
-        service.uidMensajero === currentUser.uid
-      );
-    } else if (currentRole === 'cliente') {
-      // Solo los pedidos del cliente actual
-      services = allServices.filter(service =>
-        service.uidCliente === currentUser.uid
-      );
-    } else {
-      // Admin u otros
-      services = allServices;
-    }
+  // 🔎 Logs para depurar
+  console.log("🔎 Servicios descargados de Firestore:", allServices);
+  console.log("Rol actual:", currentRole, "UID actual:", currentUser.uid);
 
-    renderServices(services);
-  });
+  if (currentRole === 'mensajero') {
+    services = allServices.filter(service =>
+      service.estado === 'pendiente' ||
+      service.uidMensajero === currentUser.uid
+    );
+  } else if (currentRole === 'cliente') {
+    services = allServices.filter(service =>
+      service.uidCliente === currentUser.uid
+    );
+  } else {
+    services = allServices;
+  }
+
+  console.log("✅ Servicios después del filtro:", services);
+
+  renderServices(services);
+});
+
 }
 
 
