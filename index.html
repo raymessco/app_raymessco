@@ -1717,125 +1717,135 @@ async function signInWithGoogle() {
   // ===== ROL DESCONOCIDO =====
   servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
 }
+function renderServices(data) {
+  const servicesEl = document.getElementById('services-section');
 
+  // Guardamos los datos en la variable global para filtrado posterior
+  services = data || [];
 
+  // Si no hay servicios
+  if (services.length === 0) {
+    servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
+    return;
+  }
 
-    function renderServices() {
-      const servicesEl = document.getElementById('services-section');
-      
-      if (services.length === 0) {
-        servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
-        return;
-      }
-      
-      let filteredServices = services;
-      
-      if (currentFilter !== 'all') {
-        filteredServices = services.filter(s => s.estado === currentFilter);
-      }
-      
-      if (filteredServices.length === 0) {
-        servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con el filtro '${currentFilter}'</div>`;
-        return;
-      }
-      
-      servicesEl.innerHTML = '';
-      
-      filteredServices.forEach(service => {
-        const serviceCard = document.createElement('div');
-        serviceCard.className = 'service-card';
-        
-        let actionsHTML = '';
-        let statusClass = `status-${service.estado.replace('_', '')}`;
-        
-        let fechaCreacion = 'Fecha no disponible';
-        if (service.fechaCreacion && typeof service.fechaCreacion.toDate === 'function') {
-          fechaCreacion = service.fechaCreacion.toDate().toLocaleString('es-CO');
+  // Filtrar por estado actual
+  let filteredServices = services;
+  if (currentFilter !== 'all') {
+    filteredServices = services.filter(s => s.estado === currentFilter);
+  }
+
+  // Si el filtro no tiene resultados
+  if (filteredServices.length === 0) {
+    servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con el filtro '${currentFilter}'</div>`;
+    return;
+  }
+
+  // Limpiar el contenedor antes de renderizar
+  servicesEl.innerHTML = '';
+
+  // Recorrer los servicios filtrados
+  filteredServices.forEach(service => {
+    const serviceCard = document.createElement('div');
+    serviceCard.className = 'service-card';
+
+    let actionsHTML = '';
+    let statusClass = `status-${service.estado.replace('_', '')}`;
+
+    // Formatear fecha de creación
+    let fechaCreacion = 'Fecha no disponible';
+    if (service.fechaCreacion && typeof service.fechaCreacion.toDate === 'function') {
+      fechaCreacion = service.fechaCreacion.toDate().toLocaleString('es-CO');
+    }
+
+    // Fecha de entrega
+    let fechaEntregaHTML = '';
+    if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
+      fechaEntregaHTML = `<div class="service-date">
+        <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
+      </div>`;
+    }
+
+    // --- Acciones según estado y rol ---
+    switch (service.estado) {
+      case 'pendiente':
+        if (currentRole === 'mensajero') {
+          actionsHTML = `<button class="btn-primary action-btn" onclick="takeService('${service.id}')">Tomar servicio</button>`;
+        } else if (currentRole === 'admin' || currentRole === 'cliente') {
+          actionsHTML = `
+            <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
+            <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
+          `;
         }
-        
-        let fechaEntregaHTML = '';
-        if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
-          fechaEntregaHTML = `<div class="service-date"><i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}</div>`;
+        break;
+
+      case 'en_ruta':
+        if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
+          actionsHTML = `
+            <button class="btn-primary action-btn" onclick="openEvidenceModal('${service.id}')">Tomar evidencia</button>
+            <button class="btn-success action-btn" onclick="changeEstado('${service.id}', 'entregado')">Marcar como entregado</button>
+            <button class="btn-danger action-btn" onclick="changeEstado('${service.id}', 'cancelado')">Cancelar</button>
+          `;
+        } else if (currentRole === 'admin') {
+          actionsHTML = `
+            <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
+            <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
+          `;
         }
-        
-        switch (service.estado) {
-          case 'pendiente':
-            if (currentRole === 'mensajero') {
-              actionsHTML = `<button class="btn-primary action-btn" onclick="takeService('${service.id}')">Tomar servicio</button>`;
-            } else if (currentRole === 'admin' || currentRole === 'cliente') {
-              actionsHTML = `
-                <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
-                <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
-              `;
-            }
-            break;
-          case 'en_ruta':
-  if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-    actionsHTML = `
-      <button class="btn-primary action-btn" onclick="openEvidenceModal('${service.id}')">Tomar evidencia</button>
-      <button class="btn-success action-btn" onclick="changeEstado('${service.id}', 'entregado')">Marcar como entregado</button>
-      <button class="btn-danger action-btn" onclick="changeEstado('${service.id}', 'cancelado')">Cancelar</button>
+        break;
+
+      case 'entregado':
+        if (currentRole === 'admin') {
+          actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
+        } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
+          actionsHTML = `<span class="text-green-700 font-semibold">Servicio entregado</span>`;
+        } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
+          actionsHTML = `<span class="text-green-700 font-semibold">Has completado este servicio</span>`;
+        }
+        break;
+
+      case 'cancelado':
+        if (currentRole === 'admin') {
+          actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
+        } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
+          actionsHTML = `<span class="text-red-600 font-semibold">Servicio cancelado</span>`;
+        } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
+          actionsHTML = `<span class="text-red-600 font-semibold">Has cancelado este servicio</span>`;
+        }
+        break;
+    }
+
+    // --- Plantilla final del servicio ---
+    serviceCard.innerHTML = `
+      <div class="service-header">
+        <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
+        <div class="service-status ${statusClass}">${(service.estado || '').replace('_', ' ')}</div>
+      </div>
+      <div class="service-detail"><i class="fas fa-user"></i>
+        <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
+      </div>
+      <div class="service-detail"><i class="fas fa-phone"></i>
+        <div class="service-detail-content">${service.telefono || 'No especificado'}</div>
+      </div>
+      <div class="service-detail"><i class="fas fa-map-marker-alt"></i>
+        <div class="service-detail-content">
+          <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
+          <div><strong>Entregar:</strong> ${service.entregar || 'No especificado'}</div>
+        </div>
+      </div>
+      ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
+      ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
+      ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
+      ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
+      <div class="service-date"><i class="fas fa-calendar"></i> Creado: ${fechaCreacion}</div>
+      ${fechaEntregaHTML}
+      ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
     `;
-  } else if (currentRole === 'admin') {
-    actionsHTML = `
-      <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
-      <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
-    `;
-  }
-  break;
 
-case 'entregado':
-  if (currentRole === 'admin') {
-    actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
-  } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
-    actionsHTML = `<span class="text-green-700 font-semibold">Servicio entregado</span>`;
-  } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-    actionsHTML = `<span class="text-green-700 font-semibold">Has completado este servicio</span>`;
-  }
-  break;
-case 'cancelado':
-  if (currentRole === 'admin') {
-    actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
-  } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
-    actionsHTML = `<span class="text-red-600 font-semibold">Servicio cancelado</span>`;
-  } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-    actionsHTML = `<span class="text-red-600 font-semibold">Has cancelado este servicio</span>`;
-  }
-  break;
-
-        }
-        
-        serviceCard.innerHTML = `
-          <div class="service-header">
-            <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-            <div class="service-status ${statusClass}">${(service.estado || '').replace('_', ' ')}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-user"></i>
-            <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-phone"></i>
-            <div class="service-detail-content">${service.telefono || 'No especificado'}</div>
-          </div>
-          <div class="service-detail">
-            <i class="fas fa-map-marker-alt"></i>
-            <div class="service-detail-content">
-              <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
-              <div><strong>Entregar:</strong> ${service.entregar || 'No especificado'}</div>
-            </div>
-          </div>
-          ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
-          ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
-          ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
-          ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
-          <div class="service-date"><i class="fas fa-calendar"></i> Creado: ${fechaCreacion}</div>
-          ${fechaEntregaHTML}
-          ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
-        `;
-        
-        servicesEl.appendChild(serviceCard);
-      });
+    servicesEl.appendChild(serviceCard);
+  });
+}
+      
 
       function takeService(serviceId) {
   if (!currentUser) return alert("Debes iniciar sesión para tomar un servicio");
@@ -1852,7 +1862,7 @@ case 'cancelado':
     alert("No se pudo tomar el servicio. Intenta de nuevo.");
   });
 }
-    }
+    
 
     async function changeEstado(serviceId, newEstado) {
       if (!confirm(`¿Estás seguro de que deseas cambiar el estado a '${newEstado}'?`)) return;
@@ -2010,15 +2020,20 @@ case 'cancelado':
     btn.classList.remove('active');
   });
 
-  // Agregar la clase 'active' SOLO al botón que se clickeó
-  element.classList.add('active');
+  // Validar si element existe antes de usarlo
+  if (element) {
+    element.classList.add('active');
+  } else {
+    console.warn("setFilter fue llamado sin pasar el botón como parámetro.");
+  }
 
   // Actualizar la lista según el filtro seleccionado
-  renderServices();
+renderServices(allServices);
 }
 
 // Hacer que setFilter esté disponible globalmente
 window.setFilter = setFilter;
+
 
 
 
