@@ -1537,7 +1537,7 @@ async function signInWithGoogle() {
       
       const payload = {
   empresa: data.empresaCliente || "",
-  cliente: currentUser.displayName || currentUser.email || "Sin nombre", // ✅ Guardar el nombre
+  cliente: currentUser.displayName || currentUser.email || "Sin nombre",
   contacto: data.contacto || "",
   recoger: data.recoger || "",
   entregar: data.entregar || "",
@@ -1545,9 +1545,12 @@ async function signInWithGoogle() {
   volumen: data.volumen || "",
   observaciones: data.observaciones || "",
   cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-  uidCliente: currentUser.uid, // ✅ Guardar UID del cliente
-  emailCliente: currentUser.email || "", // ✅ Extra: email para identificar
+  uidCliente: currentUser.uid,
+  emailCliente: currentUser.email || "",
+  estado: "pendiente",
+  fechaCreacion: firebase.firestore.FieldValue.serverTimestamp() // ✅ Importante
 };
+
       
       if (currentRole === 'admin') {
         payload.uidMensajero = data.uidMensajero || "";
@@ -1600,12 +1603,13 @@ async function signInWithGoogle() {
       }
     }
 
-      function subscribeServicesByRole() {
+    function subscribeServicesByRole() {
   const servicesEl = document.getElementById('services-section');
   servicesEl.innerHTML = '<div class="text-center text-gold">Cargando servicios...</div>';
 
+  // Cancelar cualquier suscripción anterior
   if (_servicesUnsubscribe) {
-    _servicesUnsubscribe();
+    try { _servicesUnsubscribe(); } catch (e) { console.warn("Error al cancelar suscripción anterior:", e); }
     _servicesUnsubscribe = null;
   }
 
@@ -1614,57 +1618,105 @@ async function signInWithGoogle() {
     return;
   }
 
-  let query;
-
+  // ===== ADMIN =====
   if (currentRole === 'admin') {
-    query = db.collection('services').orderBy('fechaCreacion', 'desc');
-  } else if (currentRole === 'cliente') {
-  console.log("UID del usuario actual:", currentUser.uid);
-  console.log("UID del documento:", allServices.map(s => s.uidCliente));
-  
-  services = allServices.filter(service =>
-    service.uidCliente === currentUser.uid
-  );
-}
- else if (currentRole === 'mensajero') {
-    query = db.collection('services').orderBy('fechaCreacion', 'desc');
-  } else if (currentRole === 'pending_mensajero') {
+    const query = db.collection('services').orderBy('fechaCreacion', 'desc');
+
+    _servicesUnsubscribe = query.onSnapshot(snapshot => {
+      const allServices = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      console.log("Servicios obtenidos (admin):", allServices);
+      renderServices(allServices);
+    }, err => {
+      console.error("Error snapshot admin:", err);
+      servicesEl.innerHTML = '<div class="text-center text-gold">Error cargando servicios.</div>';
+    });
+    return;
+  }
+
+  // ===== CLIENTE =====
+  if (currentRole === 'cliente') {
+    console.log("UID actual del cliente:", currentUser.uid);
+
+    const query = db.collection('services')
+                    .where('uidCliente', '==', currentUser.uid)
+                    .orderBy('fechaCreacion', 'desc');
+
+    _servicesUnsubscribe = query.onSnapshot(snapshot => {
+      const allServices = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      console.log("Servicios obtenidos (cliente):", allServices);
+      renderServices(allServices);
+    }, err => {
+      console.error("Error snapshot cliente:", err);
+      servicesEl.innerHTML = '<div class="text-center text-gold">Error cargando tus pedidos.</div>';
+    });
+    return;
+  }
+
+  // ===== MENSAJERO =====
+  if (currentRole === 'mensajero') {
+    const pendientesQuery = db.collection('services').where('estado', '==', 'pendiente');
+    const propiosQuery = db.collection('services').where('uidMensajero', '==', currentUser.uid);
+
+    let pendientesCache = [];
+    let propiosCache = [];
+
+    function combineAndRender() {
+      const combined = [
+        ...pendientesCache,
+        ...propiosCache.filter(p => !pendientesCache.find(pd => pd.id === p.id))
+      ];
+
+      combined.sort((a, b) => {
+        const at = a.fechaCreacion?.seconds || 0;
+        const bt = b.fechaCreacion?.seconds || 0;
+        return bt - at;
+      });
+
+      console.log("Servicios combinados para mensajero:", combined);
+      renderServices(combined);
+    }
+
+    const unsubPendientes = pendientesQuery.onSnapshot(snapshot => {
+      pendientesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      combineAndRender();
+    }, err => {
+      console.error("Error snapshot pendientes:", err);
+    });
+
+    const unsubPropios = propiosQuery.onSnapshot(snapshot => {
+      propiosCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      combineAndRender();
+    }, err => {
+      console.error("Error snapshot propios:", err);
+    });
+
+    // Guardar función que cancela ambos listeners
+    _servicesUnsubscribe = () => {
+      try { unsubPendientes(); } catch (e) {}
+      try { unsubPropios(); } catch (e) {}
+    };
+
+    return;
+  }
+
+  // ===== MENSAJERO EN REVISIÓN =====
+  if (currentRole === 'pending_mensajero') {
     servicesEl.innerHTML = '<div class="text-center text-gold">Tu cuenta está en revisión. No puedes ver servicios aún.</div>';
     return;
-  } else {
-    servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
-    return;
   }
 
- _servicesUnsubscribe = query.onSnapshot(snapshot => {
-  let allServices = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-
-  // 🔎 Logs para depurar
-  console.log("🔎 Servicios descargados de Firestore:", allServices);
-  console.log("Rol actual:", currentRole, "UID actual:", currentUser.uid);
-
-  if (currentRole === 'mensajero') {
-    services = allServices.filter(service =>
-      service.estado === 'pendiente' ||
-      service.uidMensajero === currentUser.uid
-    );
-  } else if (currentRole === 'cliente') {
-    services = allServices.filter(service =>
-      service.uidCliente === currentUser.uid
-    );
-  } else {
-    services = allServices;
-  }
-
-  console.log("✅ Servicios después del filtro:", services);
-
-  renderServices(services);
-});
-
+  // ===== ROL DESCONOCIDO =====
+  servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
 }
+
 
 
     function renderServices() {
