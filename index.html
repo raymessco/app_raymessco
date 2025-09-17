@@ -925,13 +925,19 @@
       <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
         <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
       </div>
-
+<div id="pending-mensajeros-section" class="hidden">
+  <h2 class="text-2xl text-gold mb-4">Solicitudes de Mensajeros</h2>
+  <div id="pending-mensajeros-list">
+    <!-- Aquí se cargarán las solicitudes en tiempo real -->
+  </div>
+</div>
       <div id="filters" class="filters-container">
-        <button onclick="setFilter('all')" class="filter-btn active">Todos</button>
-        <button onclick="setFilter('pendiente')" class="filter-btn">Pendientes</button>
-        <button onclick="setFilter('en_ruta')" class="filter-btn">En ruta</button>
-        <button onclick="setFilter('entregado')" class="filter-btn">Entregados</button>
-        <button onclick="setFilter('cancelado')" class="filter-btn">Cancelados</button>
+      <button onclick="setFilter('all', this)" class="mobile-btn">Todos</button>
+<button onclick="setFilter('pendiente', this)" class="mobile-btn">Pendientes</button>
+<button onclick="setFilter('en_ruta', this)" class="mobile-btn">En ruta</button>
+<button onclick="setFilter('entregado', this)" class="mobile-btn">Entregados</button>
+<button onclick="setFilter('cancelado', this)" class="mobile-btn">Cancelados</button>
+  
       </div>
 
       <div id="services-section" class="services-grid"></div>
@@ -957,9 +963,9 @@
       </div>
 
       <div id="pending-container" class="hidden">
-        <h2 class="section-title">Solicitudes de mensajero</h2>
-        <div id="pending-list"></div>
-      </div>
+  <h2 class="section-title">Solicitudes de mensajero</h2>
+  <div id="pending-list"></div>
+</div>
 
       <div id="costos-section" class="hidden">
         <h2 class="section-title">Costos por empresa</h2>
@@ -2079,31 +2085,29 @@ window.startCamera = startCamera;
       }
     });
 
-    function showSection(section) {
-  // Ocultar todas las secciones excepto el área de filtros
+   function showSection(section) {
+  // Ocultar todas las secciones
   document.querySelectorAll('.main-content > div:not(#filters)').forEach(div => div.classList.add('hidden'));
 
-  // Mostrar la sección seleccionada
+  // Mostrar solo la sección seleccionada
   const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
   if (targetSection) targetSection.classList.remove('hidden');
 
-  // Mostrar u ocultar los filtros solo en la vista de servicios
   document.getElementById('filters').classList.toggle('hidden', section !== 'services');
 
-  // === Opciones específicas para admin ===
+  // Opciones especiales para admin
   if (currentRole === 'admin') {
     if (section === 'costos') {
       renderCostos();
     } else if (section === 'cobros') {
       renderCobros();
-    } else if (section === 'pending-mensajeros') {
-      // 👇 Aquí se cargan en tiempo real las solicitudes pendientes
-      subscribePendingMensajeros();
-      
+    } else if (section === 'pending') {
+      subscribePendingMensajeros(); // 🔹 Aquí se cargan las solicitudes
     }
   }
 }
 window.showSection = showSection;
+
 
 
     function setFilter(filter, element) {
@@ -2344,62 +2348,53 @@ function changeEstado(serviceId, nuevoEstado) {
 }
 // === Función para ver solicitudes de mensajeros pendientes ===
 function subscribePendingMensajeros() {
-  const container = document.getElementById('pending-mensajeros-section');
+  const container = document.getElementById('pending-list'); // 👈 Aquí ya coincide con tu HTML
   container.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
 
   db.collection('users')
     .where('role', '==', 'pending_mensajero')
     .orderBy('createdAt', 'asc')
     .onSnapshot(snapshot => {
-      // Si no hay solicitudes
       if (snapshot.empty) {
         container.innerHTML = '<div class="text-center text-gold">No hay solicitudes pendientes.</div>';
         return;
       }
 
-     // Crear una lista de solicitudes de mensajeros pendientes
-let html = '';
-snapshot.forEach(doc => {
-  const data = doc.data();
+      let html = '';
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        html += `
+          <div class="bg-gray-800 text-white p-4 rounded-lg shadow mb-3">
+            <p><strong>Nombre:</strong> ${data.displayName || 'Sin nombre'}</p>
+            <p><strong>Email:</strong> ${data.email || 'Sin email'}</p>
+            <p><strong>Teléfono:</strong> ${data.phoneNumber || 'No especificado'}</p>
+            <p><strong>Fecha de registro:</strong> ${
+              data.createdAt?.toDate().toLocaleString('es-CO') || 'Desconocida'
+            }</p>
 
-  html += `
-    <div class="bg-gray-800 text-white p-4 rounded-lg shadow mb-3">
-      <p><strong>Nombre:</strong> ${data.displayName || 'Sin nombre'}</p>
-      <p><strong>Email:</strong> ${data.email || 'Sin email'}</p>
-      <p><strong>Teléfono:</strong> ${data.phoneNumber || 'No especificado'}</p>
-      <p><strong>Fecha de registro:</strong> ${
-        data.createdAt?.toDate().toLocaleString('es-CO') || 'Desconocida'
-      }</p>
-<div class="flex gap-2 mt-3">
-  <button onclick="showSection('pending-mensajeros')" 
-          class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
-    Solicitudes de Mensajeros
-  </button>
-</div>
-      <div class="flex gap-2 mt-3">
-        
-        <button onclick="aprobarMensajero('${doc.id}')" 
-                class="bg-green-600 px-3 py-1 rounded text-white hover:bg-green-700">
-          ✅ Aprobar
-        </button>
-        
-        <button onclick="rechazarMensajero('${doc.id}')" 
-                class="bg-red-600 px-3 py-1 rounded text-white hover:bg-red-700">
-          ❌ Rechazar
-        </button>
-      </div>
-    </div>
-  `;
-});
+            <div class="flex gap-2 mt-3">
+              <button onclick="aprobarMensajero('${doc.id}')" 
+                      class="bg-green-600 px-3 py-1 rounded text-white hover:bg-green-700">
+                ✅ Aprobar
+              </button>
+              <button onclick="rechazarMensajero('${doc.id}')" 
+                      class="bg-red-600 px-3 py-1 rounded text-white hover:bg-red-700">
+                ❌ Rechazar
+              </button>
+            </div>
+          </div>
+        `;
+      });
 
-container.innerHTML = html;
-
+      container.innerHTML = html;
     }, error => {
       console.error("Error cargando solicitudes:", error);
       container.innerHTML = '<div class="text-center text-red-600">Error cargando solicitudes.</div>';
     });
 }
 window.subscribePendingMensajeros = subscribePendingMensajeros;
+
+
 
 
 // Aprobar solicitud de mensajero
