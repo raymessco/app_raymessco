@@ -813,6 +813,21 @@
   </style>
 </head>
 <body>
+
+  <div id="pending-mensajeros-section" class="p-4 hidden"></div>
+
+  <!-- Modal para mostrar evidencia -->
+<div id="evidence-view-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg p-4 max-w-lg w-full relative">
+    <button onclick="closeEvidenceView()" 
+            class="absolute top-2 right-2 text-gray-700 hover:text-black text-xl font-bold">
+      ✖
+    </button>
+    <h2 class="text-lg font-bold mb-4">Evidencia de Entrega</h2>
+    <img id="evidence-view-img" src="" alt="Foto de evidencia" class="w-full max-h-[70vh] object-contain rounded border border-gray-300">
+  </div>
+</div>
+
   <div id="login-view" class="login-container">
     <div class="login-card">
       <div class="logo-container">
@@ -894,10 +909,10 @@
           <span class="menu-item-text">Cobros contra entrega</span>
         </div>
         
-        <div id="menu-pendientes" class="menu-item hidden" onclick="listPendingMensajeros()">
-          <i class="fas fa-user-clock"></i>
-          <span class="menu-item-text">Solicitudes mensajero</span>
-        </div>
+       <div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
+  <i class="fas fa-user-clock"></i>
+  <span class="menu-item-text">Solicitudes mensajero</span>
+</div>
         
         <div class="menu-item" onclick="openEditProfile()">
           <i class="fas fa-user-edit"></i>
@@ -1766,33 +1781,38 @@ function renderServices(data) {
       </div>`;
     }
 
-    // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
-    let evidenciaHTML = '';
-    if (service.estado === 'entregado' && currentRole === 'cliente') {
-      if (service.evidenciaEntrega) {
-        evidenciaHTML = `
-          <div class="service-detail">
-            <i class="fas fa-image"></i>
-            <div class="service-detail-content">
-              <strong>Evidencia de entrega:</strong><br>
-              <img src="${service.evidenciaEntrega}" alt="Evidencia de entrega" 
-                   class="mt-2 rounded shadow max-h-48 border border-gray-300">
-            </div>
-          </div>
-        `;
-      }
+   // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
+let evidenciaHTML = '';
+if (service.estado === 'entregado' && currentRole === 'cliente') {
+  // Botón para abrir la foto en modal
+  if (service.evidenciaEntrega) {
+    evidenciaHTML = `
+      <div class="service-detail">
+        <i class="fas fa-image"></i>
+        <div class="service-detail-content">
+          <strong>Evidencia de entrega:</strong><br>
+          <button onclick="openEvidenceView('${service.evidenciaEntrega}')" 
+                  class="text-blue-600 underline hover:text-blue-800">
+            Ver foto de evidencia
+          </button>
+        </div>
+      </div>
+    `;
+  }
 
-      if (service.metodoPago) {
-        evidenciaHTML += `
-          <div class="service-detail">
-            <i class="fas fa-credit-card"></i>
-            <div class="service-detail-content">
-              <strong>Método de pago:</strong> ${service.metodoPago}
-            </div>
-          </div>
-        `;
-      }
-    }
+  // Mostrar método de pago
+  if (service.metodoPago) {
+    evidenciaHTML += `
+      <div class="service-detail">
+        <i class="fas fa-credit-card"></i>
+        <div class="service-detail-content">
+          <strong>Método de pago:</strong> ${service.metodoPago}
+        </div>
+      </div>
+    `;
+  }
+}
+
 
     // --- Acciones según estado y rol ---
     switch (service.estado) {
@@ -1874,6 +1894,19 @@ function renderServices(data) {
     servicesEl.appendChild(serviceCard);
   });
 }
+// Abre el modal y muestra la foto
+function openEvidenceView(imageUrl) {
+  document.getElementById('evidence-view-img').src = imageUrl;
+  document.getElementById('evidence-view-modal').classList.remove('hidden');
+}
+window.openEvidenceView = openEvidenceView;
+
+// Cierra el modal
+function closeEvidenceView() {
+  document.getElementById('evidence-view-modal').classList.add('hidden');
+  document.getElementById('evidence-view-img').src = '';
+}
+window.closeEvidenceView = closeEvidenceView;
 
       
 
@@ -1948,16 +1981,34 @@ function renderServices(data) {
     window.closeEvidenceModal = closeEvidenceModal;
 
     async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        const videoElement = document.getElementById('videoElement');
-        videoElement.srcObject = stream;
-        videoElement.play();
-      } catch (error) {
-        console.error('Error accediendo a la cámara:', error);
-        alert('No se pudo acceder a la cámara. Asegúrate de permitir el acceso.');
-      }
+  const videoElement = document.getElementById('videoElement');
+
+  try {
+    // Intentar con la cámara trasera
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { exact: "environment" } },
+      audio: false
+    });
+
+    videoElement.srcObject = stream;
+    videoElement.play();
+    console.log("📷 Cámara trasera activada");
+  } catch (error) {
+    console.warn("⚠️ No se pudo usar la cámara trasera, intentando cámara por defecto:", error);
+
+    // Si falla, usar la cámara predeterminada
+    try {
+      const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoElement.srcObject = fallbackStream;
+      videoElement.play();
+      console.log("📷 Cámara predeterminada activada");
+    } catch (fallbackError) {
+      console.error("❌ No se pudo acceder a ninguna cámara:", fallbackError);
+      alert("No se pudo acceder a la cámara. Revisa los permisos en tu navegador.");
     }
+  }
+}
+window.startCamera = startCamera;
 
     function stopCamera() {
       const videoElement = document.getElementById('videoElement');
@@ -2029,17 +2080,31 @@ function renderServices(data) {
     });
 
     function showSection(section) {
-      document.querySelectorAll('.main-content > div:not(#filters)').forEach(div => div.classList.add('hidden'));
-      const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
-      if (targetSection) targetSection.classList.remove('hidden');
-      document.getElementById('filters').classList.toggle('hidden', section !== 'services');
+  // Ocultar todas las secciones excepto el área de filtros
+  document.querySelectorAll('.main-content > div:not(#filters)').forEach(div => div.classList.add('hidden'));
+
+  // Mostrar la sección seleccionada
+  const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
+  if (targetSection) targetSection.classList.remove('hidden');
+
+  // Mostrar u ocultar los filtros solo en la vista de servicios
+  document.getElementById('filters').classList.toggle('hidden', section !== 'services');
+
+  // === Opciones específicas para admin ===
+  if (currentRole === 'admin') {
+    if (section === 'costos') {
+      renderCostos();
+    } else if (section === 'cobros') {
+      renderCobros();
+    } else if (section === 'pending-mensajeros') {
+      // 👇 Aquí se cargan en tiempo real las solicitudes pendientes
+      subscribePendingMensajeros();
       
-      if (currentRole === 'admin') {
-        if (section === 'costos') renderCostos();
-        else if (section === 'cobros') renderCobros();
-      }
     }
-    window.showSection = showSection;
+  }
+}
+window.showSection = showSection;
+
 
     function setFilter(filter, element) {
   // Guardar el filtro seleccionado
@@ -2277,6 +2342,94 @@ function changeEstado(serviceId, nuevoEstado) {
       alert("No se pudo actualizar el estado. Intenta de nuevo.");
     });
 }
+// === Función para ver solicitudes de mensajeros pendientes ===
+function subscribePendingMensajeros() {
+  const container = document.getElementById('pending-mensajeros-section');
+  container.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
+
+  db.collection('users')
+    .where('role', '==', 'pending_mensajero')
+    .orderBy('createdAt', 'asc')
+    .onSnapshot(snapshot => {
+      // Si no hay solicitudes
+      if (snapshot.empty) {
+        container.innerHTML = '<div class="text-center text-gold">No hay solicitudes pendientes.</div>';
+        return;
+      }
+
+     // Crear una lista de solicitudes de mensajeros pendientes
+let html = '';
+snapshot.forEach(doc => {
+  const data = doc.data();
+
+  html += `
+    <div class="bg-gray-800 text-white p-4 rounded-lg shadow mb-3">
+      <p><strong>Nombre:</strong> ${data.displayName || 'Sin nombre'}</p>
+      <p><strong>Email:</strong> ${data.email || 'Sin email'}</p>
+      <p><strong>Teléfono:</strong> ${data.phoneNumber || 'No especificado'}</p>
+      <p><strong>Fecha de registro:</strong> ${
+        data.createdAt?.toDate().toLocaleString('es-CO') || 'Desconocida'
+      }</p>
+<div class="flex gap-2 mt-3">
+  <button onclick="showSection('pending-mensajeros')" 
+          class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+    Solicitudes de Mensajeros
+  </button>
+</div>
+      <div class="flex gap-2 mt-3">
+        
+        <button onclick="aprobarMensajero('${doc.id}')" 
+                class="bg-green-600 px-3 py-1 rounded text-white hover:bg-green-700">
+          ✅ Aprobar
+        </button>
+        
+        <button onclick="rechazarMensajero('${doc.id}')" 
+                class="bg-red-600 px-3 py-1 rounded text-white hover:bg-red-700">
+          ❌ Rechazar
+        </button>
+      </div>
+    </div>
+  `;
+});
+
+container.innerHTML = html;
+
+    }, error => {
+      console.error("Error cargando solicitudes:", error);
+      container.innerHTML = '<div class="text-center text-red-600">Error cargando solicitudes.</div>';
+    });
+}
+window.subscribePendingMensajeros = subscribePendingMensajeros;
+
+
+// Aprobar solicitud de mensajero
+async function aprobarMensajero(uid) {
+  if (!confirm("¿Estás seguro de aprobar a este mensajero?")) return;
+
+  try {
+    await db.collection('users').doc(uid).update({ role: 'mensajero' });
+    alert("Mensajero aprobado con éxito.");
+  } catch (error) {
+    console.error("Error al aprobar mensajero:", error);
+    alert("No se pudo aprobar el mensajero. Intenta de nuevo.");
+  }
+}
+window.aprobarMensajero = aprobarMensajero;
+
+// Rechazar solicitud de mensajero
+async function rechazarMensajero(uid) {
+  if (!confirm("¿Estás seguro de rechazar esta solicitud?")) return;
+
+  try {
+    await db.collection('users').doc(uid).delete();
+    alert("Solicitud rechazada y eliminada.");
+  } catch (error) {
+    console.error("Error al rechazar solicitud:", error);
+    alert("No se pudo rechazar la solicitud. Intenta de nuevo.");
+  }
+}
+window.rechazarMensajero = rechazarMensajero;
+
 
 
   </script>
