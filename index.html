@@ -1766,6 +1766,34 @@ function renderServices(data) {
       </div>`;
     }
 
+    // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
+    let evidenciaHTML = '';
+    if (service.estado === 'entregado' && currentRole === 'cliente') {
+      if (service.evidenciaEntrega) {
+        evidenciaHTML = `
+          <div class="service-detail">
+            <i class="fas fa-image"></i>
+            <div class="service-detail-content">
+              <strong>Evidencia de entrega:</strong><br>
+              <img src="${service.evidenciaEntrega}" alt="Evidencia de entrega" 
+                   class="mt-2 rounded shadow max-h-48 border border-gray-300">
+            </div>
+          </div>
+        `;
+      }
+
+      if (service.metodoPago) {
+        evidenciaHTML += `
+          <div class="service-detail">
+            <i class="fas fa-credit-card"></i>
+            <div class="service-detail-content">
+              <strong>Método de pago:</strong> ${service.metodoPago}
+            </div>
+          </div>
+        `;
+      }
+    }
+
     // --- Acciones según estado y rol ---
     switch (service.estado) {
       case 'pendiente':
@@ -1839,12 +1867,14 @@ function renderServices(data) {
       ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
       <div class="service-date"><i class="fas fa-calendar"></i> Creado: ${fechaCreacion}</div>
       ${fechaEntregaHTML}
+      ${evidenciaHTML} <!-- Aquí agregamos la evidencia y el método de pago -->
       ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
     `;
 
     servicesEl.appendChild(serviceCard);
   });
 }
+
       
 
       function takeService(serviceId) {
