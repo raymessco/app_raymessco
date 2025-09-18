@@ -1635,32 +1635,40 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
       
       try {
        if (docId) {
-  // 📌 Estamos actualizando un servicio existente
-
-  console.log("Payload antes de update:", payload);
+  // 📌 Actualizando un servicio existente
+  console.log("Payload justo antes de update:", JSON.stringify(payload, null, 2));
 
   // ❗ Evitar actualizar la fecha de creación
   if (payload.fechaCreacion) {
     delete payload.fechaCreacion;
   }
 
-  // Opcional: Guardar la fecha de última modificación
+  // Fecha de última modificación con timestamp de Firebase
   payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
 
-  // Actualizar el documento
-  await db.collection('services').doc(docId).update(payload);
+  try {
+    await db.collection('services').doc(docId).update(payload);
+    console.log("✅ Servicio actualizado correctamente");
+  } catch (e) {
+    console.error("❌ Error al actualizar servicio:", e);
+  }
 
 } else {
-  // 📌 Estamos creando un nuevo servicio
-
+  // 📌 Creando un nuevo servicio
   payload.estado = "pendiente";
   payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
 
-  // Crear el documento
-  await db.collection('services').add(payload);
+  try {
+    await db.collection('services').add(payload);
+    console.log("✅ Servicio creado correctamente");
+  } catch (e) {
+    console.error("❌ Error al crear servicio:", e);
+  }
 }
+
 console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
 console.log("Payload final:", payload);
+
 
 // ✅ Cerrar modal y resetear formulario
 closeModal();
