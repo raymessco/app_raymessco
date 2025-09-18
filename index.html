@@ -1938,9 +1938,9 @@ serviceCard.innerHTML = `
   </div>
 
   <!-- Teléfono con WhatsApp y llamada -->
-<div class="service-detail flex items-center gap-3 mt-2">
+<div class="service-detail flex items-center gap-4 mt-2">
   <i class="fas fa-phone text-lg text-gold"></i>
-  <div class="service-detail-content flex items-center gap-3">
+  <div class="service-detail-content flex items-center gap-4">
     ${
       service.telefono
         ? `
@@ -1950,15 +1950,16 @@ serviceCard.innerHTML = `
           <a href="https://wa.me/${service.telefonoNormalized || service.telefono}" 
              target="_blank" 
              aria-label="Chatear por WhatsApp"
-             class="flex items-center justify-center w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
-            <i class="fab fa-whatsapp text-xl"></i>
+             class="flex items-center justify-center w-11 h-11 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-md transition duration-200"
+
+            <i class="fab fa-whatsapp text-2xl"></i>
           </a>
 
           <!-- Botón Llamar -->
           <a href="tel:${service.telefono}" 
              aria-label="Llamar por teléfono"
-             class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
-            <i class="fas fa-phone-alt text-xl"></i>
+             class="flex items-center justify-center w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
+            <i class="fas fa-phone-alt text-2xl"></i>
           </a>
         `
         : '<span class="text-gray-400">No especificado</span>'
