@@ -2617,23 +2617,32 @@ function normalizeColombiaPhone(phone) {
 
 
   // === Función para guardar el servicio ===
- async function saveService() {
+async function saveService() {
+  const currentUser = firebase.auth().currentUser;
+
+  if (!currentUser) {
+    alert("Debes iniciar sesión para guardar un servicio.");
+    return;
+  }
+
   const rawPhone = document.getElementById('telefonoInput').value || "";
-  const telefonoNormalizado = normalizeColombiaPhone(rawPhone);
+  const telefonoNormalized = normalizeColombiaPhone(rawPhone);
 
   try {
     await db.collection('services').add({
-      // otros campos de tu formulario
-      telefono: telefonoNormalizado,
+      telefono: rawPhone,
+      telefonoNormalized: telefonoNormalized,
+      uidCliente: currentUser.uid,
       fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     alert('Servicio guardado correctamente');
   } catch (error) {
     console.error("Error guardando servicio:", error);
-    alert('Error al guardar el servicio');
+    alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
   }
 }
+
 
 
   // Hacer que saveService esté disponible globalmente
