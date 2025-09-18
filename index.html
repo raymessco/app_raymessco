@@ -1632,58 +1632,63 @@ function normalizeColombiaPhone(phone) {
     payload.costo = parseFloat(data.costoCliente || 0) || 0;
     payload.pagoMensajero = 0;
   }
+  console.log("FieldValue timestamp:", firebase.firestore.FieldValue.serverTimestamp);
+  console.log("fechaCreacion:", payload.fechaCreacion);
+  console.log("fechaActualizacion:", payload.fechaActualizacion);
+  console.log("Payload inicial:", JSON.stringify(payload, null, 2));
 
   try {
   if (docId) {
-    // --- UPDATE ---
-    console.log("📝 Actualizando servicio. Payload antes:", JSON.stringify(payload, null, 2));
-console.log("fechaActualizacion asignada:", payload.fechaActualizacion);
+  console.log("📝 Actualizando servicio. Payload antes:", JSON.stringify(payload, null, 2));
 
-    // ❗ Eliminar fechaCreacion si existe en el payload
+  // ❗ Eliminar fechaCreacion si viene en el payload
   if ('fechaCreacion' in payload) {
-  delete payload.fechaCreacion; // ⚠️ Evita enviar la fecha de creación
+    delete payload.fechaCreacion;
+  }
+
+  // ✅ Agregar fechaActualizacion de forma correcta
+  payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
+
+  // Verificación antes de update
+  console.log("Payload FINAL antes de update:", JSON.stringify(payload, null, 2));
+  console.log("Valor fechaActualizacion justo antes de update:", payload.fechaActualizacion);
+
+  // 🔹 Actualizar documento
+  await db.collection('services').doc(docId).update(payload);
+
+  // 🔹 Obtener documento actualizado
+  const updatedDoc = await db.collection('services').doc(docId).get();
+  const updatedData = { id: updatedDoc.id, ...updatedDoc.data() };
+
+  // 🔹 Actualizar lista local y re-renderizar
+  services = services.map(s => (s.id === updatedData.id ? updatedData : s));
+  renderServices(services);
+
+  console.log("✅ Servicio actualizado correctamente:", updatedData.id);
 }
 
-payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
 
-await db.collection('services').doc(docId).update(payload);
+   else {
+  // --- CREATE ---
+  console.log("📝 Creando nuevo servicio. Payload:", JSON.stringify(payload, null, 2));
 
-    
-    // 🕒 Asignar timestamp correctamente
-    payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
+  payload.estado = "pendiente";
+  payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
 
-    // 🔹 Actualizar en Firestore
-    await db.collection('services').doc(docId).update(payload);
+  // Crear en Firestore
+  const docRef = await db.collection('services').add(payload);
 
-    // 🔹 Obtener el documento actualizado
-    const updatedDoc = await db.collection('services').doc(docId).get();
-    const updatedData = { id: updatedDoc.id, ...updatedDoc.data() };
+  // Obtener el nuevo documento
+  const newDoc = await docRef.get();
+  const newData = { id: newDoc.id, ...newDoc.data() };
 
-    // 🔹 Reemplazar en la lista local
-    services = services.map(s => (s.id === updatedData.id ? updatedData : s));
+  // Agregar a la lista en pantalla
+  services.unshift(newData);
+  renderServices(services);
 
-    // 🔹 Renderizar nuevamente
-    renderServices(services);
+  console.log("✅ Servicio creado correctamente:", newData.id);
+}
 
-    console.log("✅ Servicio actualizado correctamente:", updatedData.id);
-
-  } else {
-    // --- CREATE ---
-    console.log("📝 Creando nuevo servicio. Payload:", JSON.stringify(payload, null, 2));
-
-    payload.estado = "pendiente";
-    payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
-
-    const docRef = await db.collection('services').add(payload);
-
-    const newDoc = await docRef.get();
-    const newData = { id: newDoc.id, ...newDoc.data() };
-
-    services.unshift(newData);
-    renderServices(services);
-
-    console.log("✅ Servicio creado correctamente:", newData.id);
-  }
 
   // ✅ Cerrar modal y resetear formulario
   closeModal();
