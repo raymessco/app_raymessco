@@ -1880,13 +1880,47 @@ if (service.estado === 'entregado' && currentRole === 'cliente') {
       <div class="service-detail"><i class="fas fa-user"></i>
         <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
       </div>
-      <div class="service-detail"><i class="fas fa-phone"></i>
-        <div class="service-detail-content">${service.telefono || 'No especificado'}</div>
+      
+      <div class="service-detail flex items-center gap-2">
+  <i class="fas fa-phone"></i>
+  <div class="service-detail-content flex items-center gap-2">
+    ${service.telefono ? `
+      <span>${service.telefono}</span>
+
+      <!-- Botón para WhatsApp -->
+      <button onclick="openWhatsApp('${service.telefono}')" 
+              class="text-green-500 hover:text-green-700" 
+              title="Chatear por WhatsApp">
+        <i class="fab fa-whatsapp text-xl"></i>
+      </button>
+
+      <!-- Botón para llamar -->
+      <a href="tel:${service.telefono}" 
+         class="text-blue-500 hover:text-blue-700" 
+         title="Llamar">
+        <i class="fas fa-phone-alt text-xl"></i>
+      </a>
+    ` : 'No especificado'}
+  </div>
+</div>
+
+
       </div>
       <div class="service-detail"><i class="fas fa-map-marker-alt"></i>
         <div class="service-detail-content">
           <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
-          <div><strong>Entregar:</strong> ${service.entregar || 'No especificado'}</div>
+          <div class="flex items-center gap-2">
+  <strong>Entregar:</strong> 
+  <span>${service.entregar || 'No especificado'}</span>
+  ${service.entregar ? `
+    <button onclick="openInGoogleMaps('${service.entregar}')" 
+            class="ml-2 text-blue-500 hover:text-blue-700" 
+            title="Abrir en Google Maps">
+      <i class="fas fa-map-marked-alt"></i>
+    </button>
+  ` : ''}
+</div>
+
         </div>
       </div>
       ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
@@ -1934,6 +1968,34 @@ window.closeEvidenceView = closeEvidenceView;
   });
 }
     
+function openInGoogleMaps(address) {
+  if (!address) {
+    alert("No hay dirección disponible para esta entrega.");
+    return;
+  }
+
+  // Codifica la dirección para usarla en la URL de Google Maps
+  const encodedAddress = encodeURIComponent(address);
+
+  // Abre Google Maps en una nueva pestaña
+  window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+}
+window.openInGoogleMaps = openInGoogleMaps;
+
+function openWhatsApp(phone) {
+  if (!phone) {
+    alert("No hay número disponible para WhatsApp.");
+    return;
+  }
+
+  // Formatear el número quitando espacios y símbolos
+  const cleanedPhone = phone.replace(/\D/g, '');
+
+  // Abrir WhatsApp Web o App
+  window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+}
+window.openWhatsApp = openWhatsApp;
+
 
     async function changeEstado(serviceId, newEstado) {
       if (!confirm(`¿Estás seguro de que deseas cambiar el estado a '${newEstado}'?`)) return;
