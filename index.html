@@ -1640,10 +1640,15 @@ function normalizeColombiaPhone(phone) {
 console.log("fechaActualizacion asignada:", payload.fechaActualizacion);
 
     // ❗ Eliminar fechaCreacion si existe en el payload
-    if ('fechaCreacion' in payload) {
-      delete payload.fechaCreacion;
-    }
+  if ('fechaCreacion' in payload) {
+  delete payload.fechaCreacion; // ⚠️ Evita enviar la fecha de creación
+}
 
+payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
+
+await db.collection('services').doc(docId).update(payload);
+
+    
     // 🕒 Asignar timestamp correctamente
     payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
 
