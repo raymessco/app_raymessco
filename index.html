@@ -1996,10 +1996,11 @@ serviceCard.innerHTML = `
   ${service.entregar ? `
     <button 
   onclick="openInGoogleMaps('${service.entregar}')"
-  class="ml-2 text-gold hover:text-yellow-500 focus:outline-none"
+  class="btn-maps ml-2 flex items-center justify-center w-10 h-10 rounded-full bg-gold hover:bg-yellow-500 text-black shadow"
   title="Abrir en Google Maps">
-  <i class="fas fa-map-marked-alt text-2xl"></i>
+  <i class="fas fa-map-marked-alt text-xl"></i>
 </button>
+
 
   ` : ''}
 </div>
