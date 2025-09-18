@@ -810,6 +810,13 @@
       color: var(--text-gray);
       margin-top: 10px;
     }
+
+.service-detail-content i {
+  font-size: 22px !important; /* Tamaño más grande solo para los íconos */
+  margin-left: 6px; /* Espaciado adicional entre texto e ícono */
+}
+
+
   </style>
 </head>
 <body>
@@ -1938,33 +1945,28 @@ serviceCard.innerHTML = `
   </div>
 
  <!-- Teléfono con WhatsApp y llamada -->
-<div class="service-detail flex items-center gap-3 mt-2">
-  <i class="fas fa-phone text-lg text-gold"></i>
-  <div class="service-detail-content flex items-center gap-3">
-    ${
-      service.telefono
-        ? `
-          <span class="font-medium">${service.telefono}</span>
+<div class="service-detail flex items-center gap-4 mt-2">
+  <i class="fas fa-phone text-xl text-gold"></i>
+  <div class="service-detail-content flex items-center gap-4">
+    <span class="font-medium">${service.telefono}</span>
 
-          <!-- Botón WhatsApp -->
-          <a href="https://wa.me/${service.telefonoNormalized || service.telefono}" 
-             target="_blank" 
-             aria-label="Chatear por WhatsApp"
-             class="flex items-center justify-center w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
-            <i class="fab fa-whatsapp text-2xl"></i>
-          </a>
+    <!-- WhatsApp -->
+    <a href="https://wa.me/${service.telefonoNormalized || service.telefono}" 
+       target="_blank" 
+       aria-label="Chatear por WhatsApp"
+       class="flex items-center justify-center w-11 h-11 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
+      <i class="fab fa-whatsapp text-2xl"></i>
+    </a>
 
-          <!-- Botón Llamar -->
-          <a href="tel:${service.telefono}" 
-             aria-label="Llamar por teléfono"
-             class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
-            <i class="fas fa-phone-alt text-2xl"></i>
-          </a>
-        `
-        : `<span class="text-gray-400">No especificado</span>`
-    }
+    <!-- Llamar -->
+    <a href="tel:${service.telefono}" 
+       aria-label="Llamar por teléfono"
+       class="flex items-center justify-center w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
+      <i class="fas fa-phone-alt text-2xl"></i>
+    </a>
   </div>
 </div>
+
 
 
 
