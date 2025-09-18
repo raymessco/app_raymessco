@@ -1881,27 +1881,34 @@ if (service.estado === 'entregado' && currentRole === 'cliente') {
         <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
       </div>
       
-      <div class="service-detail flex items-center gap-2">
+     <div class="service-detail flex items-center gap-2">
   <i class="fas fa-phone"></i>
   <div class="service-detail-content flex items-center gap-2">
-    ${service.telefono ? `
+    ${ service.telefono ? `
       <span>${service.telefono}</span>
 
-      <!-- Botón para WhatsApp -->
+      <input type="text" id="telefonoInput" placeholder="Número de teléfono" class="border p-2">
+<button onclick="saveService()" class="bg-green-500 text-white px-4 py-2 rounded">
+  Guardar Servicio
+</button>
+
+      <!-- WhatsApp -->
       <button onclick="openWhatsApp('${service.telefono}')" 
               class="text-green-500 hover:text-green-700" 
               title="Chatear por WhatsApp">
         <i class="fab fa-whatsapp text-xl"></i>
       </button>
 
-      <!-- Botón para llamar -->
-      <a href="tel:${service.telefono}" 
-         class="text-blue-500 hover:text-blue-700" 
-         title="Llamar">
+      <!-- Llamar -->
+      <button onclick="callPhone('${service.telefono}')" 
+              class="text-blue-500 hover:text-blue-700" 
+              title="Llamar">
         <i class="fas fa-phone-alt text-xl"></i>
-      </a>
-    ` : 'No especificado'}
+      </button>
+    ` : 'No especificado' }
   </div>
+</div>
+
 </div>
 
 
@@ -1982,19 +1989,76 @@ function openInGoogleMaps(address) {
 }
 window.openInGoogleMaps = openInGoogleMaps;
 
-function openWhatsApp(phone) {
-  if (!phone) {
-    alert("No hay número disponible para WhatsApp.");
-    return;
+
+// === Normalizar teléfono Colombia ===
+function normalizeColombiaPhone(phone) {
+  if (!phone) return "";
+
+  // Quitar todo lo que no sean dígitos
+  let digits = String(phone).replace(/\D/g, "");
+
+  // Eliminar ceros iniciales
+  digits = digits.replace(/^0+/, "");
+
+  // Si ya empieza por 57, devolver tal cual
+  if (digits.startsWith("57")) return digits;
+
+  // Si es un celular colombiano (empieza con 3 y tiene 10 dígitos)
+  if (digits.length === 10 && digits.startsWith("3")) {
+    return "57" + digits;
   }
 
-  // Formatear el número quitando espacios y símbolos
-  const cleanedPhone = phone.replace(/\D/g, '');
+  // Para cualquier otro caso, si tiene entre 7 y 12 dígitos, agregar 57
+  if (digits.length >= 7 && digits.length <= 12) {
+    return "57" + digits;
+  }
 
-  // Abrir WhatsApp Web o App
-  window.open(`https://wa.me/${cleanedPhone}`, '_blank');
+  // En caso extremo, devolver los dígitos como estén
+  return digits;
+}
+
+// === Teléfono para href tel:+57...
+function formatTelHref(phone) {
+  const norm = normalizeColombiaPhone(phone);
+  return norm ? `+${norm}` : "";
+}
+
+// === Abrir chat de WhatsApp ===
+function openWhatsApp(phone) {
+  const digits = normalizeColombiaPhone(phone);
+  if (!digits) {
+    alert("Número inválido para WhatsApp.");
+    return;
+  }
+  window.open(`https://wa.me/${digits}`, "_blank");
 }
 window.openWhatsApp = openWhatsApp;
+
+// === Llamar directamente ===
+function callPhone(phone) {
+  const href = formatTelHref(phone);
+  if (!href) {
+    alert("Número de teléfono inválido.");
+    return;
+  }
+  window.location.href = `tel:${href}`;
+}
+window.callPhone = callPhone;
+
+// === Formatear automáticamente el input de teléfono al perder foco ===
+function attachPhoneAutoFormat(inputElement) {
+  if (!inputElement) return;
+  inputElement.addEventListener("blur", () => {
+    const raw = inputElement.value || "";
+    const digits = normalizeColombiaPhone(raw);
+    if (digits) {
+      inputElement.value = "+" + digits; // Mostrar con +
+    }
+  });
+}
+window.attachPhoneAutoFormat = attachPhoneAutoFormat;
+
+
 
 
     async function changeEstado(serviceId, newEstado) {
@@ -2488,7 +2552,57 @@ async function rechazarMensajero(uid) {
 window.rechazarMensajero = rechazarMensajero;
 
 
-
   </script>
+
+<!-- Scripts de Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<!-- Tu archivo principal si tienes un .js separado -->
+<script src="/app_raymessco/app.js"></script>
+
+<!-- Aquí va la función saveService -->
+<script>
+  // === Función para normalizar números de teléfono en Colombia ===
+  function normalizeColombiaPhone(phone) {
+    let cleaned = phone.replace(/\D/g, ""); // Eliminar todo lo que no sea número
+
+    // Si empieza con 0 (ej: 03105455020) lo quitamos
+    if (cleaned.startsWith("0")) {
+      cleaned = cleaned.substring(1);
+    }
+
+    // Asegurarnos de que el número tenga el prefijo +57
+    if (!cleaned.startsWith("57")) {
+      cleaned = "57" + cleaned;
+    }
+
+    return cleaned;
+  }
+
+  // === Función para guardar el servicio ===
+  async function saveService() {
+    const rawPhone = document.getElementById('telefonoInput').value || "";
+    const telefonoNormalized = normalizeColombiaPhone(rawPhone);
+
+    try {
+      await db.collection('services').add({
+        telefono: rawPhone,                    // Como lo escribió el usuario
+        telefonoNormalized: telefonoNormalized, // Número limpio para WhatsApp
+        fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      alert('Servicio guardado correctamente');
+    } catch (error) {
+      console.error("Error guardando servicio:", error);
+      alert('Error al guardar el servicio');
+    }
+  }
+
+  // Hacer que saveService esté disponible globalmente
+  window.saveService = saveService;
+</script>
+
 </body>
 </html>
