@@ -1938,32 +1938,34 @@ serviceCard.innerHTML = `
   </div>
 
   <!-- Teléfono con WhatsApp y llamada -->
-  <div class="service-detail flex items-center gap-2">
-    <i class="fas fa-phone"></i>
-    <div class="service-detail-content flex items-center gap-2">
-      ${
-        telefono
-          ? `
-            <span>${telefono}</span>
-            <!-- Botón WhatsApp -->
-            <a href="https://wa.me/${telefonoNormalized}" 
-               target="_blank" 
-               class="text-green-500 hover:text-green-700" 
-               title="Chatear por WhatsApp">
-              <i class="fab fa-whatsapp text-xl"></i>
-            </a>
+<div class="service-detail flex items-center gap-3">
+  <i class="fas fa-phone text-lg text-gold"></i>
+  <div class="service-detail-content flex items-center gap-3">
+    ${
+      telefono
+        ? `
+          <span class="font-medium">${telefono}</span>
 
-            <!-- Botón Llamar -->
-            <a href="tel:${telefono}" 
-               class="text-blue-500 hover:text-blue-700" 
-               title="Llamar">
-              <i class="fas fa-phone-alt text-xl"></i>
-            </a>
-          `
-          : '<span>No especificado</span>'
-      }
-    </div>
+          <!-- Botón WhatsApp -->
+          <a href="https://wa.me/${telefonoNormalized}" 
+             target="_blank" 
+             aria-label="Chatear por WhatsApp"
+             class="flex items-center justify-center w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
+            <i class="fab fa-whatsapp text-xl"></i>
+          </a>
+
+          <!-- Botón Llamar -->
+          <a href="tel:${telefono}" 
+             aria-label="Llamar por teléfono"
+             class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
+            <i class="fas fa-phone-alt text-xl"></i>
+          </a>
+        `
+        : '<span class="text-gray-400">No especificado</span>'
+    }
   </div>
+</div>
+
 </div>
 
 
