@@ -1634,65 +1634,70 @@ function normalizeColombiaPhone(phone) {
   }
 
   try {
-    if (docId) {
-      // --- UPDATE ---
-      console.log("📝 Actualizando servicio. Payload antes:", JSON.stringify(payload, null, 2));
+  if (docId) {
+    // --- UPDATE ---
+    console.log("📝 Actualizando servicio. Payload antes:", JSON.stringify(payload, null, 2));
 
-      // Eliminar fechaCreacion si viene en el payload
-      if ('fechaCreacion' in payload) {
-        delete payload.fechaCreacion;
-      }
-
-      // Timestamp para la última actualización
-      payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
-
-      // Actualizar en Firestore
-      await db.collection('services').doc(docId).update(payload);
-
-      // Obtener el documento actualizado
-      const updatedDoc = await db.collection('services').doc(docId).get();
-      const updatedData = { id: updatedDoc.id, ...updatedDoc.data() };
-
-      // Reemplazar en la lista local
-      services = services.map(s => (s.id === updatedData.id ? updatedData : s));
-
-      // Renderizar nuevamente
-      renderServices(services);
-
-      console.log("✅ Servicio actualizado correctamente:", updatedData.id);
-
-    } else {
-      // --- CREATE ---
-      console.log("📝 Creando nuevo servicio. Payload:", JSON.stringify(payload, null, 2));
-
-      payload.estado = "pendiente";
-      payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
-
-      // Crear en Firestore
-      const docRef = await db.collection('services').add(payload);
-
-      // Obtener el nuevo documento para mostrarlo
-      const newDoc = await docRef.get();
-      const newData = { id: newDoc.id, ...newDoc.data() };
-
-      // Agregarlo a la lista y renderizar
-      services.unshift(newData);
-      renderServices(services);
-
-      console.log("✅ Servicio creado correctamente:", newData.id);
+    // ❗ Eliminar cualquier campo que pueda causar problemas
+    if ('fechaCreacion' in payload) {
+      delete payload.fechaCreacion;
+    }
+    if ('fechaActualizacion' in payload) {
+      delete payload.fechaActualizacion;
     }
 
-    // ✅ Cerrar modal y resetear formulario
-    closeModal();
-    form.reset();
+    // ✅ Asignar la fecha actual correcta para la actualización
+    payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
 
-    console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
-    console.log("Payload final:", payload);
+    console.log("Payload FINAL antes de update:", JSON.stringify(payload, null, 2));
 
-  } catch (error) {
-    console.error("❌ Error guardando servicio:", error);
-    alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
+    // Actualizar en Firestore
+    await db.collection('services').doc(docId).update(payload);
+
+    // 🔹 Obtener el documento actualizado
+    const updatedDoc = await db.collection('services').doc(docId).get();
+    const updatedData = { id: updatedDoc.id, ...updatedDoc.data() };
+
+    // 🔹 Reemplazar en la lista local
+    services = services.map(s => (s.id === updatedData.id ? updatedData : s));
+
+    // 🔹 Renderizar nuevamente
+    renderServices(services);
+
+    console.log("✅ Servicio actualizado correctamente:", updatedData.id);
+
+  } else {
+    // --- CREATE ---
+    console.log("📝 Creando nuevo servicio. Payload:", JSON.stringify(payload, null, 2));
+
+    payload.estado = "pendiente";
+    payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+
+    // Crear en Firestore
+    const docRef = await db.collection('services').add(payload);
+
+    // Obtener el nuevo documento para mostrarlo
+    const newDoc = await docRef.get();
+    const newData = { id: newDoc.id, ...newDoc.data() };
+
+    // Agregarlo a la lista y renderizar
+    services.unshift(newData);
+    renderServices(services);
+
+    console.log("✅ Servicio creado correctamente:", newData.id);
   }
+
+  // ✅ Cerrar modal y resetear formulario
+  closeModal();
+  form.reset();
+
+  console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
+  console.log("Payload final:", payload);
+
+} catch (error) {
+  console.error("❌ Error guardando servicio:", error);
+  alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
+}
 }
 
 
