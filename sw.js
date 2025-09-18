@@ -110,14 +110,25 @@ async function networkFirst(req) {
 }
 
 // Stale While Revalidate: Primero cache, actualiza en segundo plano
-async function staleWhileRevalidate(req) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(req);
+async function staleWhileRevalidate(event) {
+  const cache = await caches.open('app-cache');
 
-  const networkFetch = fetch(req).then(fresh => {
-    cache.put(req, fresh.clone());
-    return fresh;
-  });
+  try {
+    const response = await fetch(event.request);
 
-  return cached || networkFetch;
+    // ✅ Validar que la respuesta sea correcta antes de cachearla
+    if (response && response.ok) {
+      cache.put(event.request, response.clone());
+    } else {
+      console.warn('⚠️ Respuesta no válida, no se cachea:', event.request.url);
+    }
+
+    return response;
+  } catch (error) {
+    console.error('❌ Error en fetch para', event.request.url, error);
+
+    // 🔹 Intentar devolver desde caché si hay error de red
+    const cachedResponse = await cache.match(event.request);
+    return cachedResponse || new Response('Offline', { status: 503 });
+  }
 }
