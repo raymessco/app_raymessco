@@ -1635,17 +1635,18 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
       }
       
       try {
-       if (docId) {
-  console.log("Payload antes de update:", JSON.stringify(payload, null, 2));
-  console.log("Tipo de fechaActualizacion:", typeof payload.fechaActualizacion, payload.fechaActualizacion);
+      if (docId) {
+  console.log("Payload justo antes de update:", JSON.stringify(payload, null, 2));
 
-  // ❗ Evitar actualizar la fecha de creación
-  if (payload.fechaCreacion) {
+  // ❗ Asegurarnos de eliminar completamente `fechaCreacion`
+  if ('fechaCreacion' in payload) {
     delete payload.fechaCreacion;
   }
 
-  // Asignar directamente el timestamp
+  // ❗ Asignar la fecha de actualización como un timestamp válido
   payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
+
+  console.log("Payload después de limpieza:", JSON.stringify(payload, null, 2));
 
   try {
     await db.collection('services').doc(docId).update(payload);
@@ -1655,7 +1656,7 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
   }
 
 } else {
-  // Nuevo servicio
+  // Creando un nuevo servicio
   payload.estado = "pendiente";
   payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
 
@@ -1666,6 +1667,7 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
     console.error("❌ Error al crear servicio:", e);
   }
 }
+
 
 console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
 console.log("Payload final:", payload);
