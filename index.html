@@ -1615,12 +1615,19 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
       
       try {
         if (docId) {
-          await db.collection('services').doc(docId).update(payload);
-        } else {
-          payload.estado = "pendiente";
-          payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
-          await db.collection('services').add(payload);
-        }
+  // 🔹 Evitar actualizar la fecha de creación en update
+  if (payload.fechaCreacion) {
+    delete payload.fechaCreacion;
+  }
+
+  await db.collection('services').doc(docId).update(payload);
+} else {
+  // 🔹 Para un nuevo servicio, agregar la fecha correctamente
+  payload.estado = "pendiente";
+  payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+  await db.collection('services').add(payload);
+}
+
         closeModal();
         form.reset();
       } catch (e) {
