@@ -2599,21 +2599,21 @@ window.rechazarMensajero = rechazarMensajero;
  
  // Normalizar número de teléfono para WhatsApp
 function normalizeColombiaPhone(phone) {
-  if (!phone) return "";
-  let cleaned = phone.replace(/\D/g, ""); // Eliminar caracteres que no sean números
+  let cleaned = phone.replace(/\D/g, ""); // Eliminar caracteres no numéricos
 
-  // Si empieza por "0", se lo quitamos
+  // Si empieza por "0", lo quitamos
   if (cleaned.startsWith("0")) {
     cleaned = cleaned.substring(1);
   }
 
-  // Asegurarnos de que tenga el prefijo de Colombia
+  // Si no empieza por "57", agregamos el prefijo de Colombia
   if (!cleaned.startsWith("57")) {
     cleaned = "57" + cleaned;
   }
 
   return cleaned;
 }
+
 
 
   // === Función para guardar el servicio ===
@@ -2625,23 +2625,35 @@ async function saveService() {
     return;
   }
 
+  // Obtén el teléfono ingresado por el usuario
   const rawPhone = document.getElementById('telefonoInput').value || "";
   const telefonoNormalized = normalizeColombiaPhone(rawPhone);
 
+  // Verifica en consola antes de guardar
+  console.log("Datos a guardar:", {
+    telefono: rawPhone,
+    telefonoNormalized,
+    uidCliente: currentUser.uid,
+    fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
   try {
+    // Guarda el documento en la colección "services"
     await db.collection('services').add({
-      telefono: rawPhone,
-      telefonoNormalized: telefonoNormalized,
+      telefono: rawPhone,                  // Como lo escribió el usuario
+      telefonoNormalized: telefonoNormalized, // Normalizado para WhatsApp y búsquedas
       uidCliente: currentUser.uid,
-      fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+      fechaCreacion: firebase.firestore.FieldValue.serverTimestamp() // ✅ Timestamp correcto
     });
 
     alert('Servicio guardado correctamente');
   } catch (error) {
     console.error("Error guardando servicio:", error);
-    alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
+    alert('Error guardando servicio. Verifica que tengas permisos y que la colección exista.');
   }
 }
+
+
 
 
 
