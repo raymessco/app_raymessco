@@ -816,7 +816,11 @@
   margin-left: 6px; /* Espaciado adicional entre texto e ícono */
 }
 
-
+button i,
+button {
+  background: transparent !important;
+  border: none !important;
+}
   </style>
 </head>
 <body>
@@ -1981,11 +1985,13 @@ serviceCard.innerHTML = `
   <strong>Entregar:</strong> 
   <span>${service.entregar || 'No especificado'}</span>
   ${service.entregar ? `
-    <button onclick="openInGoogleMaps('${service.entregar}')" 
-            class="ml-2 text-blue-500 hover:text-blue-700" 
-            title="Abrir en Google Maps">
-      <i class="fas fa-map-marked-alt"></i>
-    </button>
+    <button 
+  onclick="openInGoogleMaps('${service.entregar}')"
+  class="ml-2 text-gold hover:text-yellow-500 focus:outline-none"
+  title="Abrir en Google Maps">
+  <i class="fas fa-map-marked-alt text-2xl"></i>
+</button>
+
   ` : ''}
 </div>
 
