@@ -1211,9 +1211,10 @@
     <i class="fas fa-download"></i> Instalar
   </button>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+ <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="/app_raymessco/app.js"></script>
 
   <script>
     // Configuración de Firebase
@@ -1635,15 +1636,15 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
       
       try {
        if (docId) {
-  // 📌 Actualizando un servicio existente
-  console.log("Payload justo antes de update:", JSON.stringify(payload, null, 2));
+  console.log("Payload antes de update:", JSON.stringify(payload, null, 2));
+  console.log("Tipo de fechaActualizacion:", typeof payload.fechaActualizacion, payload.fechaActualizacion);
 
   // ❗ Evitar actualizar la fecha de creación
   if (payload.fechaCreacion) {
     delete payload.fechaCreacion;
   }
 
-  // Fecha de última modificación con timestamp de Firebase
+  // Asignar directamente el timestamp
   payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
 
   try {
@@ -1654,7 +1655,7 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
   }
 
 } else {
-  // 📌 Creando un nuevo servicio
+  // Nuevo servicio
   payload.estado = "pendiente";
   payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
 
@@ -1668,7 +1669,6 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
 
 console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
 console.log("Payload final:", payload);
-
 
 // ✅ Cerrar modal y resetear formulario
 closeModal();
@@ -2643,6 +2643,7 @@ window.rechazarMensajero = rechazarMensajero;
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="/app_raymessco/app.js"></script>
 
 <!-- Tu archivo principal si tienes un .js separado -->
 <script src="/app_raymessco/app.js"></script>
