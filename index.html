@@ -1593,94 +1593,109 @@ function normalizeColombiaPhone(phone) {
 }
 
 
-    async function handleServiceSubmit(e) {
-      e.preventDefault();
-      
-      if (!(currentRole === 'admin' || currentRole === 'cliente')) {
-        alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
-        return;
-      }
-      
-      const form = e.target;
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      const docId = form.dataset.editId || null;
-      
-const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
+  async function handleServiceSubmit(e) {
+  e.preventDefault();
 
-      const payload = {
-  empresa: data.empresaCliente || "",
-  cliente: currentUser.displayName || currentUser.email || "Sin nombre",
-  contacto: data.contacto || "",
-  recoger: data.recoger || "",
-  entregar: data.entregar || "",
-  telefono: telefonoNormalizado || "",
-  volumen: data.volumen || "",
-  observaciones: data.observaciones || "",
-  cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-  uidCliente: currentUser.uid,
-  emailCliente: currentUser.email || "",
-  estado: "pendiente",
-  fechaCreacion: firebase.firestore.FieldValue.serverTimestamp() // ✅ Importante
-};
-
-      
-      if (currentRole === 'admin') {
-        payload.uidMensajero = data.uidMensajero || "";
-        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
-        payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
-      } else {
-        payload.costo = parseFloat(data.costoCliente || 0) || 0;
-        payload.pagoMensajero = 0;
-      }
-      
-      try {
-      if (docId) {
-  console.log("Payload justo antes de update:", JSON.stringify(payload, null, 2));
-
-  // ❗ Asegurarnos de eliminar completamente `fechaCreacion`
-  if ('fechaCreacion' in payload) {
-    delete payload.fechaCreacion;
+  if (!(currentRole === 'admin' || currentRole === 'cliente')) {
+    alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+    return;
   }
 
-  // ❗ Asignar la fecha de actualización como un timestamp válido
-  payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
+  const form = e.target;
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+  const docId = form.dataset.editId || null;
 
-  console.log("Payload después de limpieza:", JSON.stringify(payload, null, 2));
+  const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
 
-  try {
-    await db.collection('services').doc(docId).update(payload);
-    console.log("✅ Servicio actualizado correctamente");
-  } catch (e) {
-    console.error("❌ Error al actualizar servicio:", e);
+  const payload = {
+    empresa: data.empresaCliente || "",
+    cliente: currentUser.displayName || currentUser.email || "Sin nombre",
+    contacto: data.contacto || "",
+    recoger: data.recoger || "",
+    entregar: data.entregar || "",
+    telefono: telefonoNormalizado || "",
+    volumen: data.volumen || "",
+    observaciones: data.observaciones || "",
+    cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+    uidCliente: currentUser.uid,
+    emailCliente: currentUser.email || "",
+    estado: "pendiente",
+    fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  if (currentRole === 'admin') {
+    payload.uidMensajero = data.uidMensajero || "";
+    payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+    payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
+  } else {
+    payload.costo = parseFloat(data.costoCliente || 0) || 0;
+    payload.pagoMensajero = 0;
   }
 
-} else {
-  // Creando un nuevo servicio
-  payload.estado = "pendiente";
-  payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
-
   try {
-    await db.collection('services').add(payload);
-    console.log("✅ Servicio creado correctamente");
-  } catch (e) {
-    console.error("❌ Error al crear servicio:", e);
+    if (docId) {
+      // --- UPDATE ---
+      console.log("📝 Actualizando servicio. Payload antes:", JSON.stringify(payload, null, 2));
+
+      // Eliminar fechaCreacion si viene en el payload
+      if ('fechaCreacion' in payload) {
+        delete payload.fechaCreacion;
+      }
+
+      // Timestamp para la última actualización
+      payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
+
+      // Actualizar en Firestore
+      await db.collection('services').doc(docId).update(payload);
+
+      // Obtener el documento actualizado
+      const updatedDoc = await db.collection('services').doc(docId).get();
+      const updatedData = { id: updatedDoc.id, ...updatedDoc.data() };
+
+      // Reemplazar en la lista local
+      services = services.map(s => (s.id === updatedData.id ? updatedData : s));
+
+      // Renderizar nuevamente
+      renderServices(services);
+
+      console.log("✅ Servicio actualizado correctamente:", updatedData.id);
+
+    } else {
+      // --- CREATE ---
+      console.log("📝 Creando nuevo servicio. Payload:", JSON.stringify(payload, null, 2));
+
+      payload.estado = "pendiente";
+      payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+
+      // Crear en Firestore
+      const docRef = await db.collection('services').add(payload);
+
+      // Obtener el nuevo documento para mostrarlo
+      const newDoc = await docRef.get();
+      const newData = { id: newDoc.id, ...newDoc.data() };
+
+      // Agregarlo a la lista y renderizar
+      services.unshift(newData);
+      renderServices(services);
+
+      console.log("✅ Servicio creado correctamente:", newData.id);
+    }
+
+    // ✅ Cerrar modal y resetear formulario
+    closeModal();
+    form.reset();
+
+    console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
+    console.log("Payload final:", payload);
+
+  } catch (error) {
+    console.error("❌ Error guardando servicio:", error);
+    alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
   }
 }
 
 
-console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
-console.log("Payload final:", payload);
-
-// ✅ Cerrar modal y resetear formulario
-closeModal();
-form.reset();
-
-      } catch (e) {
-        console.error('Error guardando servicio:', e);
-        alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
-      }
-    }
 
     async function loadMensajerosList() {
       try {
@@ -1974,7 +1989,8 @@ serviceCard.innerHTML = `
     <span class="font-medium">${service.telefono}</span>
 
     <!-- WhatsApp -->
-    <a href="https://wa.me/${service.telefonoNormalized || service.telefono}" 
+    <a href="https://wa.me/${telefonoNormalized}" 
+
        target="_blank" 
        aria-label="Chatear por WhatsApp"
        class="flex items-center justify-center w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
@@ -2704,9 +2720,8 @@ async function saveService() {
 
     alert('Servicio guardado correctamente');
   } catch (error) {
-    console.error("Error guardando servicio:", error);
-    alert('Error guardando servicio. Verifica que tengas permisos y que la colección exista.');
-  }
+  console.error("Error guardando servicio:", error);
+  alert('Error guardando servicio. Verifica que tengas permisos y que la colección exista.');
 }
 
 
@@ -2714,7 +2729,7 @@ async function saveService() {
 
 
   // Hacer que saveService esté disponible globalmente
-  window.saveService = saveService;
+  window.saveService = saveService;}
 </script>
 
 </body>
