@@ -1614,22 +1614,38 @@ const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
       }
       
       try {
-        if (docId) {
-  // 🔹 Evitar actualizar la fecha de creación en update
+       if (docId) {
+  // 📌 Estamos actualizando un servicio existente
+
+  console.log("Payload antes de update:", payload);
+
+  // ❗ Evitar actualizar la fecha de creación
   if (payload.fechaCreacion) {
     delete payload.fechaCreacion;
   }
 
+  // Opcional: Guardar la fecha de última modificación
+  payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
+
+  // Actualizar el documento
   await db.collection('services').doc(docId).update(payload);
+
 } else {
-  // 🔹 Para un nuevo servicio, agregar la fecha correctamente
+  // 📌 Estamos creando un nuevo servicio
+
   payload.estado = "pendiente";
   payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+
+  // Crear el documento
   await db.collection('services').add(payload);
 }
+console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
+console.log("Payload final:", payload);
 
-        closeModal();
-        form.reset();
+// ✅ Cerrar modal y resetear formulario
+closeModal();
+form.reset();
+
       } catch (e) {
         console.error('Error guardando servicio:', e);
         alert('Error guardando servicio. Verifica que tengas los permisos necesarios.');
