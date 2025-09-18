@@ -1637,21 +1637,17 @@ function normalizeColombiaPhone(phone) {
   if (docId) {
     // --- UPDATE ---
     console.log("📝 Actualizando servicio. Payload antes:", JSON.stringify(payload, null, 2));
+console.log("fechaActualizacion asignada:", payload.fechaActualizacion);
 
-    // ❗ Eliminar cualquier campo que pueda causar problemas
+    // ❗ Eliminar fechaCreacion si existe en el payload
     if ('fechaCreacion' in payload) {
       delete payload.fechaCreacion;
     }
-    if ('fechaActualizacion' in payload) {
-      delete payload.fechaActualizacion;
-    }
 
-    // ✅ Asignar la fecha actual correcta para la actualización
+    // 🕒 Asignar timestamp correctamente
     payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
 
-    console.log("Payload FINAL antes de update:", JSON.stringify(payload, null, 2));
-
-    // Actualizar en Firestore
+    // 🔹 Actualizar en Firestore
     await db.collection('services').doc(docId).update(payload);
 
     // 🔹 Obtener el documento actualizado
@@ -1673,14 +1669,11 @@ function normalizeColombiaPhone(phone) {
     payload.estado = "pendiente";
     payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
 
-    // Crear en Firestore
     const docRef = await db.collection('services').add(payload);
 
-    // Obtener el nuevo documento para mostrarlo
     const newDoc = await docRef.get();
     const newData = { id: newDoc.id, ...newDoc.data() };
 
-    // Agregarlo a la lista y renderizar
     services.unshift(newData);
     renderServices(services);
 
@@ -1691,13 +1684,11 @@ function normalizeColombiaPhone(phone) {
   closeModal();
   form.reset();
 
-  console.log(docId ? "Actualizando servicio existente" : "Creando nuevo servicio");
-  console.log("Payload final:", payload);
-
 } catch (error) {
   console.error("❌ Error guardando servicio:", error);
   alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
 }
+
 }
 
 
