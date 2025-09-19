@@ -1862,7 +1862,6 @@ function normalizeColombiaPhone(phone) {
   // ===== ROL DESCONOCIDO =====
   servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
 }
-// Con esta versión corregida:
 function renderServices(data) {
   const servicesEl = document.getElementById('services-section');
   
@@ -1872,20 +1871,6 @@ function renderServices(data) {
   }
 
   // Resto del código permanece igual...
-  if (services.length === 0) {
-    servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
-    return;
-  }
-
-  // Filtrar por estado actual
-  let filteredServices = services;
-  if (currentFilter !== 'all') {
-    filteredServices = services.filter(s => s.estado === currentFilter);
-  }
-  
-}
-
-  // Si no hay servicios
   if (services.length === 0) {
     servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
     return;
@@ -1928,39 +1913,37 @@ function renderServices(data) {
       </div>`;
     }
 
-   // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
-let evidenciaHTML = '';
-if (service.estado === 'entregado' && currentRole === 'cliente') {
-  // Botón para abrir la foto en modal
-  if (service.evidenciaEntrega) {
-    evidenciaHTML = `
-      <div class="service-detail">
-        <i class="fas fa-image"></i>
-        <div class="service-detail-content">
-          <strong>Evidencia de entrega:</strong><br>
-          <button onclick="openEvidenceView('${service.evidenciaEntrega}')" 
-                  class="text-blue-600 underline hover:text-blue-800">
-            Ver foto de evidencia
-          </button>
-        </div>
-      </div>
-    `;
-  }
+    // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
+    let evidenciaHTML = '';
+    if (service.estado === 'entregado' && currentRole === 'cliente') {
+      // Botón para abrir la foto en modal
+      if (service.evidenciaEntrega) {
+        evidenciaHTML = `
+          <div class="service-detail">
+            <i class="fas fa-image"></i>
+            <div class="service-detail-content">
+              <strong>Evidencia de entrega:</strong><br>
+              <button onclick="openEvidenceView('${service.evidenciaEntrega}')" 
+                      class="text-blue-600 underline hover:text-blue-800">
+                Ver foto de evidencia
+              </button>
+            </div>
+          </div>
+        `;
+      }
 
-  // Mostrar método de pago
-  if (service.metodoPago) {
-    evidenciaHTML += `
-      <div class="service-detail">
-        <i class="fas fa-credit-card"></i>
-        <div class="service-detail-content">
-          <strong>Método de pago:</strong> ${service.metodoPago}
-        </div>
-      </div>
-    `;
-  }
-}
-
-
+      // Mostrar método de pago
+      if (service.metodoPago) {
+        evidenciaHTML += `
+          <div class="service-detail">
+            <i class="fas fa-credit-card"></i>
+            <div class="service-detail-content">
+              <strong>Método de pago:</strong> ${service.metodoPago}
+            </div>
+          </div>
+        `;
+      }
+    }
 
     // --- Acciones según estado y rol ---
     switch (service.estado) {
@@ -2010,83 +1993,60 @@ if (service.estado === 'entregado' && currentRole === 'cliente') {
         }
         break;
     }
-function showAdminActions() {
-  const adminActions = document.getElementById('admin-actions');
-
-  if (currentRole === 'admin') {
-    adminActions.classList.remove('hidden'); // Mostrar para admin
-  } else {
-    adminActions.classList.add('hidden');    // Ocultar para otros roles
-  }
-}
-
-// Llamar después de cargar el usuario y rol
-document.addEventListener('DOMContentLoaded', showAdminActions);
 
     // --- Plantilla final del servicio ---
     const telefono = service.telefono || '';
-const telefonoNormalized = normalizeColombiaPhone(telefono);
+    const telefonoNormalized = normalizeColombiaPhone(telefono);
 
-serviceCard.innerHTML = `
-  <div class="service-header">
-    <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-    <div class="service-status ${statusClass}">${(service.estado || '').replace('_', ' ')}</div>
-  </div>
-
-  <div class="service-detail">
-    <i class="fas fa-user"></i>
-    <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
-  </div>
-
- <!-- Teléfono con WhatsApp y llamada -->
-<div class="service-detail flex items-center gap-4 mt-2">
-  <i class="fas fa-phone text-xl text-gold"></i>
-  <div class="service-detail-content flex items-center gap-4">
-    <span class="font-medium">${service.telefono}</span>
-
-    <!-- WhatsApp -->
-    <a href="https://wa.me/${telefonoNormalized}" 
-
-       target="_blank" 
-       aria-label="Chatear por WhatsApp"
-       class="flex items-center justify-center w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
-      <i class="fab fa-whatsapp text-2xl"></i>
-    </a>
-
-    <!-- Llamar -->
-    <a href="tel:${service.telefono}" 
-       aria-label="Llamar por teléfono"
-       class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
-      <i class="fas fa-phone-alt text-2xl"></i>
-    </a>
-  </div>
-</div>
-
-
-
-
-</div>
-
-
+    serviceCard.innerHTML = `
+      <div class="service-header">
+        <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
+        <div class="service-status ${statusClass}">${(service.estado || '').replace('_', ' ')}</div>
       </div>
+
+      <div class="service-detail">
+        <i class="fas fa-user"></i>
+        <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
+      </div>
+
+      <!-- Teléfono con WhatsApp y llamada -->
+      <div class="service-detail flex items-center gap-4 mt-2">
+        <i class="fas fa-phone text-xl text-gold"></i>
+        <div class="service-detail-content flex items-center gap-4">
+          <span class="font-medium">${service.telefono}</span>
+
+          <!-- WhatsApp -->
+          <a href="https://wa.me/${telefonoNormalized}" 
+             target="_blank" 
+             aria-label="Chatear por WhatsApp"
+             class="flex items-center justify-center w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
+            <i class="fab fa-whatsapp text-2xl"></i>
+          </a>
+
+          <!-- Llamar -->
+          <a href="tel:${service.telefono}" 
+             aria-label="Llamar por teléfono"
+             class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
+            <i class="fas fa-phone-alt text-2xl"></i>
+          </a>
+        </div>
+      </div>
+
       <div class="service-detail"><i class="fas fa-map-marker-alt"></i>
         <div class="service-detail-content">
           <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
           <div class="flex items-center gap-2">
-  <strong>Entregar:</strong> 
-  <span>${service.entregar || 'No especificado'}</span>
-  ${service.entregar ? `
-    <button 
-  onclick="openInGoogleMaps('${service.entregar}')"
-  class="btn-maps ml-2 flex items-center justify-center w-10 h-10 rounded-full bg-gold hover:bg-yellow-500 text-black shadow"
-  title="Abrir en Google Maps">
-  <i class="fas fa-map-marked-alt text-xl"></i>
-</button>
-
-
-  ` : ''}
-</div>
-
+            <strong>Entregar:</strong> 
+            <span>${service.entregar || 'No especificado'}</span>
+            ${service.entregar ? `
+              <button 
+                onclick="openInGoogleMaps('${service.entregar}')"
+                class="btn-maps ml-2 flex items-center justify-center w-10 h-10 rounded-full bg-gold hover:bg-yellow-500 text-black shadow"
+                title="Abrir en Google Maps">
+                <i class="fas fa-map-marked-alt text-xl"></i>
+              </button>
+            ` : ''}
+          </div>
         </div>
       </div>
       ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
@@ -2101,6 +2061,7 @@ serviceCard.innerHTML = `
 
     servicesEl.appendChild(serviceCard);
   });
+}
 
 // Abre el modal y muestra la foto
 function openEvidenceView(imageUrl) {
