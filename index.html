@@ -1065,6 +1065,18 @@ th, td {
           <input type="text" name="entregar" class="form-input" placeholder="Donde se entregará el paquete" required>
         </div>
         
+        <!-- Campo para Barrio o Municipio -->
+<div class="mb-4">
+  <label for="barrioMunicipio" class="block text-gold font-semibold">Barrio o Municipio</label>
+  <input 
+    type="text" 
+    id="barrioMunicipio" 
+    name="barrioMunicipio" 
+    placeholder="Ej: La Candelaria, Medellín" 
+    class="w-full p-2 rounded border border-gray-700 bg-black text-white"
+  >
+</div>
+
         <div class="form-group">
           <label class="form-label">Volumen (cantidad/medidas)</label>
           <input type="text" name="volumen" class="form-input" placeholder="Descripción del volumen">
@@ -1203,17 +1215,7 @@ th, td {
       </form>
     </div>
   </div>
-<!-- Campo para Barrio o Municipio -->
-<div class="mb-4">
-  <label for="barrioMunicipio" class="block text-gold font-semibold">Barrio o Municipio</label>
-  <input 
-    type="text" 
-    id="barrioMunicipio" 
-    name="barrioMunicipio" 
-    placeholder="Ej: La Candelaria, Medellín" 
-    class="w-full p-2 rounded border border-gray-700 bg-black text-white"
-  >
-</div>
+
 
   <div id="roleChoiceModal" class="modal-backdrop hidden">
     <div class="modal-content" style="max-width: 500px;">
@@ -1949,6 +1951,7 @@ function renderServices(data) {
         <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
       </div>`;
     }
+<div id="services" class="services-container"></div>
 
     // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
     let evidenciaHTML = '';
@@ -2101,13 +2104,17 @@ function renderServices(data) {
 }
 
 function renderServices(services) {
-  const container = document.getElementById('services-list');
+  const container = document.getElementById('services');
+
+  if (!container) {
+    console.warn("⚠️ El contenedor #services no existe en el DOM.");
+    return;
+  }
+
   container.innerHTML = '';
 
   services.forEach(service => {
-    let serviceHTML = '';
-
-    serviceHTML += `
+    const serviceHTML = `
       <div class="service-card">
         <h3>${service.empresa}</h3>
         <p><strong>Contacto:</strong> ${service.contacto}</p>
@@ -2124,6 +2131,7 @@ function renderServices(services) {
     container.innerHTML += serviceHTML;
   });
 }
+
 
 
 // Abre el modal y muestra la foto
