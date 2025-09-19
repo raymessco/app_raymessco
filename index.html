@@ -1210,13 +1210,10 @@
   <button id="install-button" class="install-btn hidden">
     <i class="fas fa-download"></i> Instalar
   </button>
-
- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
-
-  <script>
+   <script>
     // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCkjLdn1NYI5eApE4N5ylkGJnlYsmO5hq4",
@@ -1639,42 +1636,48 @@ function normalizeColombiaPhone(phone) {
 
   try {
   if (docId) {
-  console.log("📝 Actualizando servicio. Payload antes:", JSON.stringify(payload, null, 2));
-
-  // ❗ Eliminar fechaCreacion si viene en el payload
-  if ('fechaCreacion' in payload) {
-    delete payload.fechaCreacion;
-  }
-
-  // ✅ Agregar fechaActualizacion de forma correcta
-  // Crear un objeto separado para la actualización
-  const updateData = {...payload};
-  updateData.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
-
-  // Verificación antes de update - evitar stringify del FieldValue
-  const logData = {...updateData};
-  // Remover FieldValue para logging
-  delete logData.fechaActualizacion; 
-  console.log("Payload FINAL antes de update:", JSON.stringify(logData, null, 2));
-  console.log("Campo fechaActualizacion es un FieldValue (no serializable)");
+  console.log("📝 Actualizando servicio");
 
   try {
+    // Crear un objeto de actualización sin el campo problemático
+    const updateData = {...payload};
+    delete updateData.fechaCreacion;
+    
+    // Convertir a objeto simple para asegurar la compatibilidad
+    const simpleUpdateData = {};
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] !== undefined && updateData[key] !== null) {
+        simpleUpdateData[key] = updateData[key];
+      }
+    });
+    
     // 🔹 Actualizar documento
-    await db.collection('services').doc(docId).update(updateData);
-
+    await db.collection('services').doc(docId).update(simpleUpdateData);
+    
     // 🔹 Obtener documento actualizado
     const updatedDoc = await db.collection('services').doc(docId).get();
-    const updatedData = { id: updatedDoc.id, ...updatedDoc.data() };
+    const updatedDataResult = { id: updatedDoc.id, ...updatedDoc.data() };
 
     // 🔹 Actualizar lista local y re-renderizar
-    services = services.map(s => (s.id === updatedData.id ? updatedData : s));
+    services = services.map(s => (s.id === updatedDataResult.id ? updatedDataResult : s));
     renderServices(services);
 
-    console.log("✅ Servicio actualizado correctamente:", updatedData.id);
+    console.log("✅ Servicio actualizado correctamente:", updatedDataResult.id);
   } catch (error) {
     console.error("❌ Error en update:", error);
-    // Manejar el error apropiadamente
     alert("Error al actualizar el servicio: " + error.message);
+    
+    // Intentar una solución alternativa sin el campo de fecha
+    try {
+      const updateDataWithoutDate = {...payload};
+      delete updateDataWithoutDate.fechaCreacion;
+      delete updateDataWithoutDate.fechaActualizacion;
+      
+      await db.collection('services').doc(docId).update(updateDataWithoutDate);
+      console.log("✅ Servicio actualizado sin campo de fecha");
+    } catch (fallbackError) {
+      console.error("❌ Error incluso en actualización alternativa:", fallbackError);
+    }
   }
 }
 
@@ -2672,18 +2675,7 @@ async function rechazarMensajero(uid) {
 window.rechazarMensajero = rechazarMensajero;
 
 
-  </script>
-
-<!-- Scripts de Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
-
-
-
-<!-- Aquí va la función saveService -->
-<script>
+ 
  
  // Normalizar número de teléfono para WhatsApp
 function normalizeColombiaPhone(phone) {
