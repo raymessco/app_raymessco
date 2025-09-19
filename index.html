@@ -1944,13 +1944,13 @@ function renderServices(data) {
       fechaCreacion = service.fechaCreacion.toDate().toLocaleString('es-CO');
     }
 
-    // Fecha de entrega
-    let fechaEntregaHTML = '';
-    if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
-      fechaEntregaHTML = `<div class="service-date">
-        <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
-      </div>`;
-    }
+  // Fecha de entrega
+let fechaEntregaHTML = '';
+if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
+  fechaEntregaHTML = `<div class="service-date">
+    <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
+  </div>`;
+}
 <div id="services" class="services-container"></div>
 
     // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
