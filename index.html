@@ -958,11 +958,11 @@
   </div>
 </div>
       <div id="filters" class="filters-container">
-      <button onclick="setFilter('all', this)" class="mobile-btn">Todos</button>
-<button onclick="setFilter('pendiente', this)" class="mobile-btn">Pendientes</button>
-<button onclick="setFilter('en_ruta', this)" class="mobile-btn">En ruta</button>
-<button onclick="setFilter('entregado', this)" class="mobile-btn">Entregados</button>
-<button onclick="setFilter('cancelado', this)" class="mobile-btn">Cancelados</button>
+      <button onclick="setFilter('all', this)" class="filter-btn">Todos</button>
+<button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
+<button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
+<button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
+<button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
   
       </div>
 
@@ -1862,11 +1862,28 @@ function normalizeColombiaPhone(phone) {
   // ===== ROL DESCONOCIDO =====
   servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
 }
+// Con esta versión corregida:
 function renderServices(data) {
   const servicesEl = document.getElementById('services-section');
+  
+  // Solo actualiza services si se proporcionan datos
+  if (data !== undefined) {
+    services = data;
+  }
 
-  // Guardamos los datos en la variable global para filtrado posterior
-  services = data || [];
+  // Resto del código permanece igual...
+  if (services.length === 0) {
+    servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
+    return;
+  }
+
+  // Filtrar por estado actual
+  let filteredServices = services;
+  if (currentFilter !== 'all') {
+    filteredServices = services.filter(s => s.estado === currentFilter);
+  }
+  
+}
 
   // Si no hay servicios
   if (services.length === 0) {
@@ -2084,7 +2101,7 @@ serviceCard.innerHTML = `
 
     servicesEl.appendChild(serviceCard);
   });
-}
+
 // Abre el modal y muestra la foto
 function openEvidenceView(imageUrl) {
   document.getElementById('evidence-view-img').src = imageUrl;
