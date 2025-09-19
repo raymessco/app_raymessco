@@ -835,7 +835,13 @@
 <body>
 
   <div id="pending-mensajeros-section" class="p-4 hidden"></div>
-
+<!-- Botón visible solo para el administrador -->
+<div id="admin-actions" class="mt-4 hidden text-right">
+  <button onclick="archiveOldServices()" 
+          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+    📂 Archivar pedidos antiguos
+  </button>
+</div>
   <!-- Modal para mostrar evidencia -->
 <div id="evidence-view-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center hidden z-50">
   <div class="bg-white rounded-lg p-4 max-w-lg w-full relative">
@@ -1206,13 +1212,7 @@
       </p>
     </div>
   </div>
-<!-- Botón visible solo para el administrador -->
-<div id="admin-actions" class="mt-4">
-  <button onclick="archiveOldServices()" 
-          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-    🗂 Archivar pedidos antiguos
-  </button>
-</div>
+
   <button id="install-button" class="install-btn hidden">
     <i class="fas fa-download"></i> Instalar
   </button>
@@ -1994,17 +1994,18 @@ if (service.estado === 'entregado' && currentRole === 'cliente') {
         break;
     }
 function showAdminActions() {
-    const adminActions = document.getElementById('admin-actions');
+  const adminActions = document.getElementById('admin-actions');
 
-    if (currentRole === 'admin') {
-      adminActions.classList.remove('hidden'); // Mostrar el div
-    } else {
-      adminActions.classList.add('hidden'); // Asegurarse de que esté oculto
-    }
+  if (currentRole === 'admin') {
+    adminActions.classList.remove('hidden'); // Mostrar para admin
+  } else {
+    adminActions.classList.add('hidden');    // Ocultar para otros roles
   }
+}
 
-  // Llama a esta función después de cargar la sesión
-  document.addEventListener('DOMContentLoaded', showAdminActions);
+// Llamar después de cargar el usuario y rol
+document.addEventListener('DOMContentLoaded', showAdminActions);
+
     // --- Plantilla final del servicio ---
     const telefono = service.telefono || '';
 const telefonoNormalized = normalizeColombiaPhone(telefono);
