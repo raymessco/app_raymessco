@@ -111,24 +111,27 @@ async function networkFirst(req) {
 
 // Stale While Revalidate: Primero cache, actualiza en segundo plano
 async function staleWhileRevalidate(event) {
-  const cache = await caches.open('app-cache');
+  // 🛑 Validar que el request exista y tenga URL
+  if (!event.request || !event.request.url) {
+    console.warn('[Service Worker] Request inválido detectado. Saltando...');
+    return;
+  }
 
+  // Evitar cachear recursos externos de Google
+  if (event.request.url.includes('google.com/images/cleardot.gif')) {
+    console.log('[Service Worker] Ignorando:', event.request.url);
+    return;
+  }
+
+  const cache = await caches.open(CACHE_NAME);
   try {
-    const response = await fetch(event.request);
-
-    // ✅ Validar que la respuesta sea correcta antes de cachearla
-    if (response && response.ok) {
-      cache.put(event.request, response.clone());
-    } else {
-      console.warn('⚠️ Respuesta no válida, no se cachea:', event.request.url);
-    }
-
-    return response;
+    const networkResponse = await fetch(event.request);
+    cache.put(event.request, networkResponse.clone());
+    return networkResponse;
   } catch (error) {
-    console.error('❌ Error en fetch para', event.request.url, error);
-
-    // 🔹 Intentar devolver desde caché si hay error de red
-    const cachedResponse = await cache.match(event.request);
-    return cachedResponse || new Response('Offline', { status: 503 });
+    console.error('[Service Worker] Error en staleWhileRevalidate:', error);
+    return await cache.match(event.request); // fallback
   }
 }
+
+
