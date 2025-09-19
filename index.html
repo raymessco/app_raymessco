@@ -1647,24 +1647,35 @@ function normalizeColombiaPhone(phone) {
   }
 
   // ✅ Agregar fechaActualizacion de forma correcta
-  payload.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
+  // Crear un objeto separado para la actualización
+  const updateData = {...payload};
+  updateData.fechaActualizacion = firebase.firestore.FieldValue.serverTimestamp();
 
-  // Verificación antes de update
-  console.log("Payload FINAL antes de update:", JSON.stringify(payload, null, 2));
-  console.log("Valor fechaActualizacion justo antes de update:", payload.fechaActualizacion);
+  // Verificación antes de update - evitar stringify del FieldValue
+  const logData = {...updateData};
+  // Remover FieldValue para logging
+  delete logData.fechaActualizacion; 
+  console.log("Payload FINAL antes de update:", JSON.stringify(logData, null, 2));
+  console.log("Campo fechaActualizacion es un FieldValue (no serializable)");
 
-  // 🔹 Actualizar documento
-  await db.collection('services').doc(docId).update(payload);
+  try {
+    // 🔹 Actualizar documento
+    await db.collection('services').doc(docId).update(updateData);
 
-  // 🔹 Obtener documento actualizado
-  const updatedDoc = await db.collection('services').doc(docId).get();
-  const updatedData = { id: updatedDoc.id, ...updatedDoc.data() };
+    // 🔹 Obtener documento actualizado
+    const updatedDoc = await db.collection('services').doc(docId).get();
+    const updatedData = { id: updatedDoc.id, ...updatedDoc.data() };
 
-  // 🔹 Actualizar lista local y re-renderizar
-  services = services.map(s => (s.id === updatedData.id ? updatedData : s));
-  renderServices(services);
+    // 🔹 Actualizar lista local y re-renderizar
+    services = services.map(s => (s.id === updatedData.id ? updatedData : s));
+    renderServices(services);
 
-  console.log("✅ Servicio actualizado correctamente:", updatedData.id);
+    console.log("✅ Servicio actualizado correctamente:", updatedData.id);
+  } catch (error) {
+    console.error("❌ Error en update:", error);
+    // Manejar el error apropiadamente
+    alert("Error al actualizar el servicio: " + error.message);
+  }
 }
 
 
