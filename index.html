@@ -2959,13 +2959,13 @@ async function saveService() {
 
     alert('Servicio guardado correctamente');
   } catch (error) {
-  console.error("Error guardando servicio:", error);
-  alert('Error guardando servicio. Verifica que tengas permisos y que la colección exista.');
-}
-
+    console.error("Error guardando servicio:", error);
+    alert('Error guardando servicio. Verifica que tengas permisos y que la colección exista.');
+  }
 
   // Hacer que saveService esté disponible globalmente
-  window.saveService = saveService;}
+  window.saveService = saveService;
+}
 
 
 async function archiveOldServices() {
