@@ -2100,6 +2100,32 @@ function renderServices(data) {
   });
 }
 
+function renderServices(services) {
+  const container = document.getElementById('services-list');
+  container.innerHTML = '';
+
+  services.forEach(service => {
+    let serviceHTML = '';
+
+    serviceHTML += `
+      <div class="service-card">
+        <h3>${service.empresa}</h3>
+        <p><strong>Contacto:</strong> ${service.contacto}</p>
+        <p><strong>Teléfono:</strong> ${service.telefono}</p>
+
+        <!-- Dirección y barrio/municipio -->
+        <div class="service-detail">
+          <strong>Dirección de Entrega:</strong> ${service.entregar || 'No especificada'}<br>
+          <strong>Barrio/Municipio:</strong> ${service.barrioMunicipio || 'No especificado'}
+        </div>
+      </div>
+    `;
+
+    container.innerHTML += serviceHTML;
+  });
+}
+
+
 // Abre el modal y muestra la foto
 function openEvidenceView(imageUrl) {
   document.getElementById('evidence-view-img').src = imageUrl;
