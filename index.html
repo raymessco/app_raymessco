@@ -1364,7 +1364,7 @@ th, td {
      // Registrar Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
- navigator.serviceWorker.register('/app_raymessco/sw.js')
+ navigator.serviceWorker.register('./sw.js')
   .then(registration => console.log('Service Worker registrado:', registration))
   .catch(err => console.error('Error al registrar Service Worker:', err));
 
