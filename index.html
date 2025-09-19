@@ -1937,6 +1937,13 @@ if (service.estado === 'entregado' && currentRole === 'cliente') {
   }
 }
 
+<!-- Botón visible solo para el administrador -->
+<div id="admin-actions" class="mt-4">
+  <button onclick="archiveOldServices()" 
+          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+    🗂 Archivar pedidos antiguos
+  </button>
+</div>
 
     // --- Acciones según estado y rol ---
     switch (service.estado) {
@@ -1986,7 +1993,18 @@ if (service.estado === 'entregado' && currentRole === 'cliente') {
         }
         break;
     }
+function showAdminActions() {
+    const adminActions = document.getElementById('admin-actions');
 
+    if (currentRole === 'admin') {
+      adminActions.classList.remove('hidden'); // Mostrar el div
+    } else {
+      adminActions.classList.add('hidden'); // Asegurarse de que esté oculto
+    }
+  }
+
+  // Llama a esta función después de cargar la sesión
+  document.addEventListener('DOMContentLoaded', showAdminActions);
     // --- Plantilla final del servicio ---
     const telefono = service.telefono || '';
 const telefonoNormalized = normalizeColombiaPhone(telefono);
@@ -2733,11 +2751,74 @@ async function saveService() {
 }
 
 
-
-
-
   // Hacer que saveService esté disponible globalmente
   window.saveService = saveService;}
+
+
+async function archiveOldServices() {
+  console.log("⏳ Iniciando archivado de pedidos antiguos...");
+
+  const now = Date.now();
+  const cutoff = now - (24 * 60 * 60 * 1000); // 24 horas en milisegundos
+
+  try {
+    // Obtener todos los pedidos
+    const snapshot = await db.collection('services').get();
+
+    if (snapshot.empty) {
+      alert("No hay pedidos para archivar.");
+      console.log("📭 No se encontraron pedidos en la colección services.");
+      return;
+    }
+
+    const batch = db.batch();
+    let count = 0;
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+
+      // Solo archivar si fechaCreacion existe y es más vieja de 24 horas
+      if (data.fechaCreacion && data.fechaCreacion.toDate().getTime() < cutoff) {
+
+        // Datos reducidos para services_history
+        const historyData = {
+          empresa: data.empresa || "",
+          cliente: data.cliente || "",
+          direccionEntrega: data.entregar || "",
+          estado: data.estado || "desconocido",
+          fechaRegistro: data.fechaCreacion,
+          fechaEntrega: data.fechaEntrega || null,
+          fechaArchivado: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Guardar en services_history
+        const historyRef = db.collection('services_history').doc();
+        batch.set(historyRef, historyData);
+
+        // Borrar de services
+        batch.delete(db.collection('services').doc(doc.id));
+
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      await batch.commit();
+      alert(`✅ ${count} pedidos archivados correctamente.`);
+      console.log(`📦 ${count} pedidos movidos a services_history.`);
+    } else {
+      alert("No se encontraron pedidos que cumplan el criterio de 24 horas.");
+      console.log("📭 Ningún pedido superó el límite de 24 horas.");
+    }
+
+  } catch (error) {
+    console.error("❌ Error archivando pedidos:", error);
+    alert("Error al archivar pedidos. Revisa la consola para más detalles.");
+  }
+}
+
+
+
 </script>
 
 </body>
