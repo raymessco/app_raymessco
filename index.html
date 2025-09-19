@@ -830,6 +830,23 @@
   font-size: 20px;
 }
 
+/* Mejorar visualización de tablas en móvil */
+table {
+  min-width: 600px;
+}
+
+th, td {
+  text-align: left;
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  th, td {
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -997,26 +1014,12 @@
       <div id="costos-section" class="hidden p-6">
   <h2 class="text-2xl font-bold text-gold mb-4">Costos por empresa</h2>
 
-  <!-- Resumen general -->
-  <div id="costos-resumen" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
-      <p class="text-gray-400">Total General</p>
-      <p id="total-general" class="text-2xl font-bold">$0</p>
-    </div>
-    <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
-      <p class="text-gray-400">Servicios Totales</p>
-      <p id="total-servicios" class="text-2xl font-bold">0</p>
-    </div>
-    <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
-      <p class="text-gray-400">Promedio por Servicio</p>
-      <p id="promedio-servicio" class="text-2xl font-bold">$0</p>
-    </div>
-  </div>
-
-  <!-- Listado detallado por empresa -->
-  <div id="costos-empresas" class="space-y-6"></div>
+  <!-- Listado de empresas -->
+  <div id="costos-empresas" class="space-y-8"></div>
 </div>
 
+
+ 
 
       <div id="cobros-section" class="hidden">
         <h2 class="section-title">Cobros contra entrega</h2>
@@ -2561,9 +2564,6 @@ window.setFilter = setFilter;
    
 async function renderCostos() {
   const section = document.getElementById('costos-section');
-  const resumenTotal = document.getElementById('total-general');
-  const totalServicios = document.getElementById('total-servicios');
-  const promedioServicio = document.getElementById('promedio-servicio');
   const empresasContainer = document.getElementById('costos-empresas');
 
   section.classList.remove('hidden');
@@ -2574,16 +2574,11 @@ async function renderCostos() {
 
     if (snapshot.empty) {
       empresasContainer.innerHTML = '<p class="text-center text-gold">No hay servicios registrados.</p>';
-      resumenTotal.textContent = "$0";
-      totalServicios.textContent = "0";
-      promedioServicio.textContent = "$0";
       return;
     }
 
-    // Procesar datos
+    // Procesar datos por empresa
     const dataPorEmpresa = {};
-    let totalGeneral = 0;
-    let totalCount = 0;
 
     snapshot.forEach(doc => {
       const data = doc.data();
@@ -2603,15 +2598,7 @@ async function renderCostos() {
         fecha: data.fechaCreacion?.toDate().toLocaleString('es-CO') || 'Sin fecha',
         costo,
       });
-
-      totalGeneral += costo;
-      totalCount++;
     });
-
-    // Actualizar resumen general
-    resumenTotal.textContent = `$${totalGeneral.toLocaleString('es-CO')}`;
-    totalServicios.textContent = totalCount;
-    promedioServicio.textContent = `$${(totalGeneral / totalCount).toLocaleString('es-CO')}`;
 
     // Renderizar empresas
     empresasContainer.innerHTML = '';
@@ -2621,29 +2608,35 @@ async function renderCostos() {
       datos.servicios.forEach(serv => {
         rows += `
           <tr class="border-b border-gray-700">
-            <td class="p-2">${serv.direccion}</td>
-            <td class="p-2">${serv.fecha}</td>
-            <td class="p-2 text-right">$${serv.costo.toLocaleString('es-CO')}</td>
+            <td class="p-2 whitespace-nowrap">${serv.direccion}</td>
+            <td class="p-2 whitespace-nowrap">${serv.fecha}</td>
+            <td class="p-2 text-right whitespace-nowrap">$${serv.costo.toLocaleString('es-CO')}</td>
           </tr>
         `;
       });
 
       empresasContainer.innerHTML += `
         <div class="bg-gray-900 text-white rounded-lg shadow p-4">
-          <h3 class="text-xl font-semibold text-gold mb-2">${empresa}</h3>
-          <table class="w-full text-left">
-            <thead>
-              <tr class="text-gray-400">
-                <th class="p-2">Dirección de Entrega</th>
-                <th class="p-2">Fecha de Entrega</th>
-                <th class="p-2 text-right">Costo</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
-          <div class="text-right text-gold font-bold mt-2">
+          <h3 class="text-xl font-semibold text-gold mb-4">${empresa}</h3>
+
+          <!-- Contenedor con scroll horizontal en móvil -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-800 text-gray-400">
+                  <th class="p-2 whitespace-nowrap">Dirección de Entrega</th>
+                  <th class="p-2 whitespace-nowrap">Fecha de Entrega</th>
+                  <th class="p-2 whitespace-nowrap text-right">Costo</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Total por empresa -->
+          <div class="text-right text-gold font-bold mt-3">
             Total: $${datos.total.toLocaleString('es-CO')}
           </div>
         </div>
@@ -2654,6 +2647,7 @@ async function renderCostos() {
     empresasContainer.innerHTML = `<p class="text-center text-red-500">Error cargando datos</p>`;
   }
 }
+
 
 
 // También necesitamos implementar renderCobros() para la sección de cobros:
