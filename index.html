@@ -994,10 +994,29 @@
 </div>
 
 
-      <div id="costos-section" class="hidden">
-        <h2 class="section-title">Costos por empresa</h2>
-        <div id="costos-body"></div>
-      </div>
+      <div id="costos-section" class="hidden p-6">
+  <h2 class="text-2xl font-bold text-gold mb-4">Costos por empresa</h2>
+
+  <!-- Resumen general -->
+  <div id="costos-resumen" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
+      <p class="text-gray-400">Total General</p>
+      <p id="total-general" class="text-2xl font-bold">$0</p>
+    </div>
+    <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
+      <p class="text-gray-400">Servicios Totales</p>
+      <p id="total-servicios" class="text-2xl font-bold">0</p>
+    </div>
+    <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
+      <p class="text-gray-400">Promedio por Servicio</p>
+      <p id="promedio-servicio" class="text-2xl font-bold">$0</p>
+    </div>
+  </div>
+
+  <!-- Listado detallado por empresa -->
+  <div id="costos-empresas" class="space-y-6"></div>
+</div>
+
 
       <div id="cobros-section" class="hidden">
         <h2 class="section-title">Cobros contra entrega</h2>
@@ -2541,83 +2560,101 @@ window.setFilter = setFilter;
 
    
 async function renderCostos() {
-  const costosBody = document.getElementById('costos-body');
-  costosBody.innerHTML = '<div class="text-center text-gold">Cargando costos por empresa...</div>';
+  const section = document.getElementById('costos-section');
+  const resumenTotal = document.getElementById('total-general');
+  const totalServicios = document.getElementById('total-servicios');
+  const promedioServicio = document.getElementById('promedio-servicio');
+  const empresasContainer = document.getElementById('costos-empresas');
+
+  section.classList.remove('hidden');
+  empresasContainer.innerHTML = '<p class="text-center text-gold">Cargando datos...</p>';
 
   try {
-    // Obtener todos los servicios para calcular costos por empresa
     const snapshot = await db.collection('services').get();
-    
+
     if (snapshot.empty) {
-      costosBody.innerHTML = '<div class="text-center text-gold">No hay servicios para calcular costos</div>';
+      empresasContainer.innerHTML = '<p class="text-center text-gold">No hay servicios registrados.</p>';
+      resumenTotal.textContent = "$0";
+      totalServicios.textContent = "0";
+      promedioServicio.textContent = "$0";
       return;
     }
 
-    // Calcular costos por empresa
-    const costosPorEmpresa = {};
-    
-    snapshot.docs.forEach(doc => {
-      const service = doc.data();
-      const empresa = service.empresa || service.cliente || 'Sin nombre';
-      const costo = service.costo || 0;
-      
-      if (!costosPorEmpresa[empresa]) {
-        costosPorEmpresa[empresa] = {
+    // Procesar datos
+    const dataPorEmpresa = {};
+    let totalGeneral = 0;
+    let totalCount = 0;
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const empresa = data.empresa || "Sin empresa";
+      const costo = parseFloat(data.costo || 0);
+
+      if (!dataPorEmpresa[empresa]) {
+        dataPorEmpresa[empresa] = {
           total: 0,
-          count: 0
+          servicios: [],
         };
       }
-      
-      costosPorEmpresa[empresa].total += costo;
-      costosPorEmpresa[empresa].count += 1;
+
+      dataPorEmpresa[empresa].total += costo;
+      dataPorEmpresa[empresa].servicios.push({
+        direccion: data.entregar,
+        fecha: data.fechaCreacion?.toDate().toLocaleString('es-CO') || 'Sin fecha',
+        costo,
+      });
+
+      totalGeneral += costo;
+      totalCount++;
     });
 
-    // Crear HTML para mostrar los resultados
-    let html = '';
-    
-    // Convertir a array y ordenar por total descendente
-    const empresas = Object.entries(costosPorEmpresa)
-      .sort((a, b) => b[1].total - a[1].total);
-    
-    if (empresas.length === 0) {
-      html = '<div class="text-center text-gold">No hay datos de costos</div>';
-    } else {
-      html = `
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr class="bg-gold/20">
-                <th class="p-3 text-left border border-gold">Empresa/Cliente</th>
-                <th class="p-3 text-right border border-gold">Total Gastado</th>
-                <th class="p-3 text-right border border-gold">Servicios</th>
-                <th class="p-3 text-right border border-gold">Promedio por Servicio</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-      
-      empresas.forEach(([empresa, datos]) => {
-        const promedio = datos.count > 0 ? datos.total / datos.count : 0;
-        
-        html += `
-          <tr class="border-b border-gold/30">
-            <td class="p-3 border border-gold/30">${empresa}</td>
-            <td class="p-3 text-right border border-gold/30">$${datos.total.toLocaleString()}</td>
-            <td class="p-3 text-right border border-gold/30">${datos.count}</td>
-            <td class="p-3 text-right border border-gold/30">$${promedio.toLocaleString()}</td>
+    // Actualizar resumen general
+    resumenTotal.textContent = `$${totalGeneral.toLocaleString('es-CO')}`;
+    totalServicios.textContent = totalCount;
+    promedioServicio.textContent = `$${(totalGeneral / totalCount).toLocaleString('es-CO')}`;
+
+    // Renderizar empresas
+    empresasContainer.innerHTML = '';
+
+    for (const [empresa, datos] of Object.entries(dataPorEmpresa)) {
+      let rows = '';
+      datos.servicios.forEach(serv => {
+        rows += `
+          <tr class="border-b border-gray-700">
+            <td class="p-2">${serv.direccion}</td>
+            <td class="p-2">${serv.fecha}</td>
+            <td class="p-2 text-right">$${serv.costo.toLocaleString('es-CO')}</td>
           </tr>
         `;
       });
-      
-      html += '</tbody></table></div>';
+
+      empresasContainer.innerHTML += `
+        <div class="bg-gray-900 text-white rounded-lg shadow p-4">
+          <h3 class="text-xl font-semibold text-gold mb-2">${empresa}</h3>
+          <table class="w-full text-left">
+            <thead>
+              <tr class="text-gray-400">
+                <th class="p-2">Dirección de Entrega</th>
+                <th class="p-2">Fecha de Entrega</th>
+                <th class="p-2 text-right">Costo</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+          <div class="text-right text-gold font-bold mt-2">
+            Total: $${datos.total.toLocaleString('es-CO')}
+          </div>
+        </div>
+      `;
     }
-    
-    costosBody.innerHTML = html;
   } catch (error) {
-    console.error('Error cargando costos por empresa:', error);
-    costosBody.innerHTML = '<div class="text-center text-red-500">Error cargando costos por empresa</div>';
+    console.error("❌ Error cargando costos:", error);
+    empresasContainer.innerHTML = `<p class="text-center text-red-500">Error cargando datos</p>`;
   }
 }
+
 
 // También necesitamos implementar renderCobros() para la sección de cobros:
 async function renderCobros() {
