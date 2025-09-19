@@ -2343,16 +2343,18 @@ window.startCamera = startCamera;
 
   document.getElementById('filters').classList.toggle('hidden', section !== 'services');
 
-  // Opciones especiales para admin
+    // Opciones especiales para admin (reemplaza SOLO este if)
   if (currentRole === 'admin') {
     if (section === 'costos') {
       renderCostos();
     } else if (section === 'cobros') {
       renderCobros();
-    } else if (section === 'pending-mensajeros') {
+    } else if (section === 'pending' || section === 'pending-mensajeros') {
+      // Suscribimos/mostramos solicitudes pendientes (tolera varios IDs/aliases)
       subscribePendingMensajeros();
     }
   }
+
 }
 // Esta línea debe estar FUERA de la función
 window.showSection = showSection;
@@ -2730,9 +2732,21 @@ function changeEstado(serviceId, nuevoEstado) {
 }
 // === Función para ver solicitudes de mensajeros pendientes ===
 function subscribePendingMensajeros() {
-  const container = document.getElementById('pending-list'); // 👈 Aquí ya coincide con tu HTML
+  // Buscar dinámicamente el contenedor correcto
+  const container =
+    document.getElementById('pending-mensajeros-list') ||
+    document.getElementById('pending-list') ||
+    document.getElementById('pending-container');
+
+  if (!container) {
+    console.warn('⚠️ No se encontró contenedor para solicitudes pendientes.');
+    return;
+  }
+
+  // Mostrar mensaje de carga
   container.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
 
+  // Suscripción a Firestore
   db.collection('users')
     .where('role', '==', 'pending_mensajero')
     .orderBy('createdAt', 'asc')
@@ -2770,10 +2784,14 @@ function subscribePendingMensajeros() {
 
       container.innerHTML = html;
     }, error => {
-      console.error("Error cargando solicitudes:", error);
-      container.innerHTML = '<div class="text-center text-red-600">Error cargando solicitudes.</div>';
+      console.error("❌ Error cargando solicitudes pendientes:", error);
+      container.innerHTML = `
+        <div class="text-center text-red-500">
+          Error cargando solicitudes. Revisa la consola.
+        </div>`;
     });
 }
+
 window.subscribePendingMensajeros = subscribePendingMensajeros;
 
 
