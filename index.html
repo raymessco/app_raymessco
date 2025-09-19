@@ -1206,7 +1206,13 @@
       </p>
     </div>
   </div>
-
+<!-- Botón visible solo para el administrador -->
+<div id="admin-actions" class="mt-4">
+  <button onclick="archiveOldServices()" 
+          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+    🗂 Archivar pedidos antiguos
+  </button>
+</div>
   <button id="install-button" class="install-btn hidden">
     <i class="fas fa-download"></i> Instalar
   </button>
@@ -1937,13 +1943,7 @@ if (service.estado === 'entregado' && currentRole === 'cliente') {
   }
 }
 
-<!-- Botón visible solo para el administrador -->
-<div id="admin-actions" class="mt-4">
-  <button onclick="archiveOldServices()" 
-          class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-    🗂 Archivar pedidos antiguos
-  </button>
-</div>
+
 
     // --- Acciones según estado y rol ---
     switch (service.estado) {
