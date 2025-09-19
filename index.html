@@ -1203,6 +1203,17 @@ th, td {
       </form>
     </div>
   </div>
+<!-- Campo para Barrio o Municipio -->
+<div class="mb-4">
+  <label for="barrioMunicipio" class="block text-gold font-semibold">Barrio o Municipio</label>
+  <input 
+    type="text" 
+    id="barrioMunicipio" 
+    name="barrioMunicipio" 
+    placeholder="Ej: La Candelaria, Medellín" 
+    class="w-full p-2 rounded border border-gray-700 bg-black text-white"
+  >
+</div>
 
   <div id="roleChoiceModal" class="modal-backdrop hidden">
     <div class="modal-content" style="max-width: 500px;">
@@ -1234,6 +1245,8 @@ th, td {
       </p>
     </div>
   </div>
+
+
 
   <button id="install-button" class="install-btn hidden">
     <i class="fas fa-download"></i> Instalar
@@ -1633,21 +1646,23 @@ function normalizeColombiaPhone(phone) {
 
   const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
 
-  const payload = {
-    empresa: data.empresaCliente || "",
-    cliente: currentUser.displayName || currentUser.email || "Sin nombre",
-    contacto: data.contacto || "",
-    recoger: data.recoger || "",
-    entregar: data.entregar || "",
-    telefono: telefonoNormalizado || "",
-    volumen: data.volumen || "",
-    observaciones: data.observaciones || "",
-    cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-    uidCliente: currentUser.uid,
-    emailCliente: currentUser.email || "",
-    estado: "pendiente",
-    fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
-  };
+ const payload = {
+  empresa: data.empresaCliente || "",
+  cliente: currentUser.displayName || currentUser.email || "Sin nombre",
+  contacto: data.contacto || "",
+  recoger: data.recoger || "",
+  entregar: data.entregar || "",
+  barrioMunicipio: data.barrioMunicipio || "", // ✅ Nuevo campo
+  telefono: telefonoNormalizado || "",
+  volumen: data.volumen || "",
+  observaciones: data.observaciones || "",
+  cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+  uidCliente: currentUser.uid,
+  emailCliente: currentUser.email || "",
+  estado: "pendiente",
+  fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+};
+
 
   if (currentRole === 'admin') {
     payload.uidMensajero = data.uidMensajero || "";
