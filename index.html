@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -935,27 +935,25 @@
           </button>
         </div>
         
-        <div class="sidebar-menu">
-  <div class="menu-item" onclick="showSection('services')">
+        <div class="sidebar-menu"><div class="menu-item" onclick="showSection('services-section')">
   <i class="fas fa-clipboard-list"></i>
   <span class="menu-item-text">Servicios</span>
 </div>
 
-<div id="menu-costos" class="menu-item hidden" onclick="showSection('costos')">
+<div id="menu-costos" class="menu-item hidden" onclick="showSection('costos-section')">
   <i class="fas fa-dollar-sign"></i>
   <span class="menu-item-text">Costos por empresa</span>
 </div>
 
-<div id="menu-cobros" class="menu-item hidden" onclick="showSection('cobros')">
+<div id="menu-cobros" class="menu-item hidden" onclick="showSection('cobros-section')">
   <i class="fas fa-cash-register"></i>
   <span class="menu-item-text">Cobros contra entrega</span>
 </div>
 
-<div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
+<div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros-section')">
   <i class="fas fa-user-clock"></i>
   <span class="menu-item-text">Solicitudes mensajero</span>
 </div>
-
 
           
           <div class="menu-item" onclick="openEditProfile()">
@@ -1454,7 +1452,7 @@
           loadMensajerosList();
         }
         
-        showSection('services');
+        showSection('services-section');
       setFilter('all', this);
 
       }
