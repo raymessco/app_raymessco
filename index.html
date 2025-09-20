@@ -1805,22 +1805,24 @@ function normalizeColombiaPhone(phone) {
 
   // ===== ADMIN =====
   if (currentRole === 'admin') {
-    const query = db.collection('services').orderBy('fechaCreacion', 'desc');
+  const query = db.collection('services').orderBy('fechaCreacion', 'desc');
 
-    _servicesUnsubscribe = query.onSnapshot(snapshot => {
-      const allServices = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+  _servicesUnsubscribe = query.onSnapshot(snapshot => {
+    const allServices = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-      console.log("Servicios obtenidos (admin):", allServices);
-      renderServices(allServices);
-    }, err => {
-      console.error("Error snapshot admin:", err);
-      servicesEl.innerHTML = '<div class="text-center text-gold">Error cargando servicios.</div>';
-    });
-    return;
-  }
+    console.log("Servicios obtenidos (admin):", allServices);
+    renderServices(allServices);
+  }, err => {
+    console.error("Error snapshot admin:", err);
+    servicesEl.innerHTML = '<div class="text-center text-gold">Error cargando servicios.</div>';
+  });
+
+  return;
+}
+
 
   // ===== CLIENTE =====
   if (currentRole === 'cliente') {
@@ -1831,10 +1833,8 @@ function normalizeColombiaPhone(phone) {
                     .orderBy('fechaCreacion', 'desc');
 
     _servicesUnsubscribe = query.onSnapshot(snapshot => {
-      const allServices = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+      const allServices = snapshot.docs.map
+      (doc => ({ id: doc.id, ...doc.data() }));
 
       console.log("Servicios obtenidos (cliente):", allServices);
       renderServices(allServices);
@@ -1951,7 +1951,7 @@ if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
     <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
   </div>`;
 }
-<div id="services" class="services-container"></div>
+
 
     // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
     let evidenciaHTML = '';
@@ -2104,7 +2104,7 @@ if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
 }
 
 function renderServices(services) {
-  const container = document.getElementById('services');
+
 
   if (!container) {
     console.warn("⚠️ El contenedor #services no existe en el DOM.");
