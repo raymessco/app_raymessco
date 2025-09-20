@@ -1910,6 +1910,7 @@ function renderServices(data) {
     console.error("❌ No se encontró el contenedor #services-section en el DOM");
     return;
   }
+console.log("Datos recibidos en renderServices:", data);
 
   // Actualiza la variable global `services` solo si recibimos nuevos datos
   if (data !== undefined) {
@@ -1923,9 +1924,11 @@ function renderServices(data) {
   }
 
   // Filtrar por estado actual
-  let filteredServices = services;
-  if (currentFilter !== 'all') {
-    filteredServices = services.filter(s => s.estado === currentFilter);
+  let filteredServices = services;{
+ filteredServices = services.filter(s => 
+  (s.estado || '').toLowerCase() === currentFilter.toLowerCase()
+);
+
   }
 
   // Si el filtro no tiene resultados
@@ -2110,6 +2113,7 @@ function renderServices(data) {
       ${evidenciaHTML}
       ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
     `;
+console.log("Pintando servicio:", service);
 
     servicesEl.appendChild(serviceCard);
   });
