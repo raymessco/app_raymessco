@@ -2457,39 +2457,32 @@
   } else {
     console.error(`❌ No se encontró la sección: ${section}`);
   }
-}
 
-
-
-
-  // Mostrar/ocultar filtros
-  const filtersEl = document.getElementById('filters');
-  if (filtersEl) {
+  // 🔥 Muevo aquí tu lógica de filtros
+  if (typeof filtersEl !== "undefined" && filtersEl) {
     filtersEl.classList.toggle('hidden', section !== 'services');
   }
 
-
-
-
-
-
-
-    // Opciones especiales solo para ADMIN
-    if (currentRole === 'admin') {
-      switch (section) {
-        case 'costos':
-          renderCostos();
-          break;
-        case 'cobros':
-          renderCobros();
-          break;
-        case 'pending':
-        case 'pending-mensajeros':
-          subscribePendingMensajeros();
-          break;
-      }
-    }
-
+  switch (section) {
+    case 'services':
+      console.log("➡️ Mostrando lógica de servicios");
+      break;
+    case 'financial':
+      console.log("➡️ Mostrando lógica financiera");
+      break;
+    case 'pending-mensajeros':
+      console.log("➡️ Mostrando solicitudes de mensajeros");
+      break;
+    case 'costos':
+      console.log("➡️ Mostrando costos");
+      break;
+    case 'cobros':
+      console.log("➡️ Mostrando cobros");
+      break;
+    default:
+      console.log("⚠️ No hay lógica definida para:", section);
+  }
+}
 
   // Esta línea debe estar fuera de la función
   window.showSection = showSection;
