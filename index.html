@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -1522,33 +1522,42 @@
         }, err => console.error('Error en listener de perfil:', err));
       }
 
-      function updateUIByRole() {
-        menuRegistrar.classList.add('hidden');
-        menuCostos.classList.add('hidden');
-        menuCobros.classList.add('hidden');
-        menuPendientes.classList.add('hidden');
-        menuFinanzasMensajero.classList.add('hidden');
-        fieldCostoClienteContainer.classList.add('hidden');
-        adminFields.classList.add('hidden');
-        document.getElementById('pending-banner').classList.add('hidden');
-        
-        if (currentRole === 'admin') {
-          menuRegistrar.classList.remove('hidden');
-          menuCostos.classList.remove('hidden');
-          menuCobros.classList.remove('hidden');
-          menuPendientes.classList.remove('hidden');
-          adminFields.classList.remove('hidden');
-        } else if (currentRole === 'mensajero') {
-          menuFinanzasMensajero.classList.remove('hidden');
-        } else if (currentRole === 'pending_mensajero') {
-          document.getElementById('pending-banner').classList.remove('hidden');
-        } else {
-          menuRegistrar.classList.remove('hidden');
-          fieldCostoClienteContainer.classList.remove('hidden');
-        }
-        
-        roleBadge.textContent = currentRole.toUpperCase().replace('_', ' ');
-      }
+     function updateUIByRole() {
+  // función auxiliar para ocultar de forma segura
+  const hide = el => el && el.classList.add('hidden');
+  const show = el => el && el.classList.remove('hidden');
+
+  // Ocultar todo por defecto
+  hide(menuRegistrar);
+  hide(menuCostos);
+  hide(menuCobros);
+  hide(menuPendientes);
+  hide(menuFinanzasMensajero);
+  hide(fieldCostoClienteContainer);
+  hide(adminFields);
+  hide(document.getElementById('pending-banner'));
+
+  // Mostrar según el rol
+  if (currentRole === 'admin') {
+    show(menuRegistrar);
+    show(menuCostos);
+    show(menuCobros);
+    show(menuPendientes);
+    show(adminFields);
+  } else if (currentRole === 'mensajero') {
+    show(menuFinanzasMensajero);
+  } else if (currentRole === 'pending_mensajero') {
+    show(document.getElementById('pending-banner'));
+  } else {
+    show(menuRegistrar);
+    show(fieldCostoClienteContainer);
+  }
+
+  // Actualizar badge de rol de forma segura
+  if (roleBadge) {
+    roleBadge.textContent = currentRole.toUpperCase().replace('_', ' ');
+  }
+}
 
       function toggleSidebar() {
         sidebar.classList.toggle('open');
