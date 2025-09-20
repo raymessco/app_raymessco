@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -857,20 +857,18 @@
 /* Ajuste para asegurar visibilidad */
 #services-section {
   position: relative;
-  z-index: 50;            /* Para que quede por encima si es necesario */
-  min-height: 300px;      /* Espacio mínimo para mostrar contenido */
-  padding: 1rem;          /* Espaciado interno */
-  background: var(--bg-darker); /* Fondo oscuro usando tu variable */
-  color: var(--text-light);     /* Texto claro */
-  display: block;          /* Asegura visibilidad */
-  overflow-y: auto;        /* Scroll si el contenido crece */
+  z-index: 50;
+  padding: 1rem;
+  background: var(--bg-darker);
+  color: var(--text-light);
+  display: block;
+  overflow-y: auto;
 }
 
 
 /* Evita que otros elementos lo tapen */
-.app-container {
-  position: relative;
-  z-index: 1;
+.app-container > *:first-child {
+  margin-top: 0;
 }
 
     </style>
