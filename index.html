@@ -1901,7 +1901,7 @@ function normalizeColombiaPhone(phone) {
 function renderServices(data) {
   // 🔹 Contenedor donde se mostrarán los servicios
   const servicesEl = document.getElementById('services-section');
-
+servicesEl.innerHTML = '<div>Servicios cargados</div>';
   if (!servicesEl) {
     console.error("❌ No se encontró el contenedor #services-section en el DOM");
     return;
@@ -2431,6 +2431,7 @@ function setFilter(filter) {
   document.querySelectorAll('#filters .mobile-btn').forEach(btn => {
     btn.classList.remove('active');
   });
+console.log("¿Qué es element?", typeof element, element);
 
   // Agregar la clase 'active' SOLO al botón que se clickeó
   if (element instanceof HTMLElement) {
