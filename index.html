@@ -1523,9 +1523,18 @@
       }
 
      function updateUIByRole() {
-  // función auxiliar para ocultar de forma segura
-  const hide = el => el && el.classList.add('hidden');
-  const show = el => el && el.classList.remove('hidden');
+  const menuRegistrar = document.getElementById("menu-registrar");
+  const menuCostos = document.getElementById("menu-costos");
+  const menuCobros = document.getElementById("menu-cobros");
+  const menuPendientes = document.getElementById("menu-pendientes");
+  const menuFinanzasMensajero = document.getElementById("menu-finanzas-mensajero");
+  const fieldCostoClienteContainer = document.getElementById("field-costo-cliente-container");
+  const adminFields = document.getElementById("admin-fields");
+  const roleBadge = document.getElementById("role-badge");
+  const pendingBanner = document.getElementById("pending-banner");
+
+  const hide = el => el && el.classList.add("hidden");
+  const show = el => el && el.classList.remove("hidden");
 
   // Ocultar todo por defecto
   hide(menuRegistrar);
@@ -1535,29 +1544,32 @@
   hide(menuFinanzasMensajero);
   hide(fieldCostoClienteContainer);
   hide(adminFields);
-  hide(document.getElementById('pending-banner'));
+  hide(pendingBanner);
 
   // Mostrar según el rol
-  if (currentRole === 'admin') {
+  if (currentRole === "admin") {
     show(menuRegistrar);
     show(menuCostos);
     show(menuCobros);
     show(menuPendientes);
     show(adminFields);
-  } else if (currentRole === 'mensajero') {
+  } else if (currentRole === "mensajero") {
     show(menuFinanzasMensajero);
-  } else if (currentRole === 'pending_mensajero') {
-    show(document.getElementById('pending-banner'));
+  } else if (currentRole === "pending_mensajero") {
+    show(pendingBanner);
   } else {
     show(menuRegistrar);
     show(fieldCostoClienteContainer);
   }
 
-  // Actualizar badge de rol de forma segura
+  // Actualizar badge de rol
   if (roleBadge) {
-    roleBadge.textContent = currentRole.toUpperCase().replace('_', ' ');
+    roleBadge.textContent = currentRole.toUpperCase().replace("_", " ");
+  } else {
+    console.warn("⚠️ No se encontró el elemento #role-badge");
   }
 }
+
 
       function toggleSidebar() {
         sidebar.classList.toggle('open');
