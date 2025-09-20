@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -1941,8 +1941,7 @@
 
   function renderServices(data) {
     // 🔹 Contenedor donde se mostrarán los servicios
-    const servicesEl = document.getElementById('services-section');
-  servicesEl.innerHTML = '<div>Servicios cargados</div>';
+    renderServices(services);
     if (!servicesEl) {
       console.error("❌ No se encontró el contenedor #services-section en el DOM");
       return;
@@ -2159,6 +2158,8 @@
     });
   }
 
+  const container = document.getElementById("services-section");
+  console.log("📦 Contenido actual de #services-section:", container.innerHTML);
 
 
 
