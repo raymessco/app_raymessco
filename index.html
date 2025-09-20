@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -857,10 +857,7 @@
   </head>
   <body>
 
-    <div id="pending-mensajeros-section" class="hidden p-4">
-  <h2 class="section-title">Solicitudes de Mensajeros</h2>
-  <div id="pending-mensajeros-list"></div>
-</div>
+   
   <!-- Botón visible solo para el administrador -->
   <div id="admin-actions" class="mt-4 hidden text-right">
     <button onclick="archiveOldServices()" 
@@ -935,32 +932,32 @@
           </button>
         </div>
         
-        <!-- Servicios -->
-<div class="menu-item" onclick="showSection('services-section')">
+    <!-- Servicios -->
+<div class="menu-item" onclick="showSection('services')">
   <i class="fas fa-clipboard-list"></i>
   <span class="menu-item-text">Servicios</span>
 </div>
 
 <!-- Costos -->
-<div id="menu-costos" class="menu-item hidden" onclick="showSection('costos-section')">
+<div id="menu-costos" class="menu-item hidden" onclick="showSection('costos')">
   <i class="fas fa-dollar-sign"></i>
   <span class="menu-item-text">Costos por empresa</span>
 </div>
 
 <!-- Cobros -->
-<div id="menu-cobros" class="menu-item hidden" onclick="showSection('cobros-section')">
+<div id="menu-cobros" class="menu-item hidden" onclick="showSection('cobros')">
   <i class="fas fa-cash-register"></i>
   <span class="menu-item-text">Cobros contra entrega</span>
 </div>
 
 <!-- Solicitudes de mensajero -->
-<div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros-section')">
+<div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
   <i class="fas fa-user-clock"></i>
   <span class="menu-item-text">Solicitudes mensajero</span>
 </div>
 
 <!-- Finanzas mensajero -->
-<div id="menu-finanzas-mensajero" class="menu-item hidden" onclick="showSection('financial-section')">
+<div id="menu-finanzas-mensajero" class="menu-item hidden" onclick="showSection('financial')">
   <i class="fas fa-chart-line"></i>
   <span class="menu-item-text">Mis Finanzas</span>
 </div>
@@ -2435,7 +2432,7 @@
  function showSection(sectionId) {
   console.log("Mostrando sección:", sectionId);
 
-  // Seleccionar todas las secciones
+  // Seleccionar todas las secciones por ID
   const allSections = document.querySelectorAll(
     '#services-section, #financial-section, #pending-container, #pending-mensajeros-section, #costos-section, #cobros-section'
   );
@@ -2447,7 +2444,7 @@
     div.classList.add('hidden');
   });
 
-  // Buscar la sección destino directamente
+  // Mostrar la sección solicitada
   const targetSection = document.getElementById(sectionId);
   console.log("Sección que se mostrará:", targetSection ? targetSection.id : "❌ NO ENCONTRADA");
 
@@ -2458,6 +2455,7 @@
     console.error(`❌ No se encontró la sección: ${sectionId}`);
   }
 }
+
 
 
   // Mostrar/ocultar filtros
