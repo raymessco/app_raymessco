@@ -2397,31 +2397,49 @@ window.startCamera = startCamera;
       }
     });
 
-   function showSection(section) {
-  // Ocultar todas las secciones
-  document.querySelectorAll('.main-content > div:not(#filters)').forEach(div => div.classList.add('hidden'));
+  function showSection(section) {
+  console.log("Mostrando sección:", section);
+console.log("Secciones encontradas:", allSections);
+allSections.forEach(section => console.log("Encontrada:", section.id));
+
+  // Ocultar todas las secciones excepto los filtros
+  const allSections = document.querySelectorAll('#services-section, #costos-section, #pending-container, #financial-section');
+  allSections.forEach(div => div.classList.add('hidden'));
 
   // Mostrar solo la sección seleccionada
   const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
-  if (targetSection) targetSection.classList.remove('hidden');
-
-  document.getElementById('filters').classList.toggle('hidden', section !== 'services');
-
-    // Opciones especiales para admin (reemplaza SOLO este if)
-  if (currentRole === 'admin') {
-    if (section === 'costos') {
-      renderCostos();
-    } else if (section === 'cobros') {
-      renderCobros();
-    } else if (section === 'pending' || section === 'pending-mensajeros') {
-      // Suscribimos/mostramos solicitudes pendientes (tolera varios IDs/aliases)
-      subscribePendingMensajeros();
-    }
+  if (targetSection) {
+    targetSection.classList.remove('hidden');
+  } else {
+    console.error(`❌ No se encontró la sección: ${section}`);
   }
 
+  // Mostrar u ocultar filtros SOLO en la sección de servicios
+  const filtersEl = document.getElementById('filters');
+  if (filtersEl) {
+    filtersEl.classList.toggle('hidden', section !== 'services');
+  }
+
+  // Opciones especiales solo para ADMIN
+  if (currentRole === 'admin') {
+    switch (section) {
+      case 'costos':
+        renderCostos();
+        break;
+      case 'cobros':
+        renderCobros();
+        break;
+      case 'pending':
+      case 'pending-mensajeros':
+        subscribePendingMensajeros();
+        break;
+    }
+  }
 }
-// Esta línea debe estar FUERA de la función
+
+// Esta línea debe estar fuera de la función
 window.showSection = showSection;
+
 
 
 function setFilter(filter, element) {
