@@ -1902,14 +1902,20 @@ function normalizeColombiaPhone(phone) {
   servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
 }
 function renderServices(data) {
+  // 🔹 Contenedor donde se mostrarán los servicios
   const servicesEl = document.getElementById('services-section');
-  
-  // Solo actualiza services si se proporcionan datos
+
+  if (!servicesEl) {
+    console.error("❌ No se encontró el contenedor #services-section en el DOM");
+    return;
+  }
+
+  // Actualiza la variable global `services` solo si recibimos nuevos datos
   if (data !== undefined) {
     services = data;
   }
 
-  // Resto del código permanece igual...
+  // Si no hay servicios, mostrar mensaje
   if (services.length === 0) {
     servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
     return;
@@ -1938,32 +1944,32 @@ function renderServices(data) {
     let actionsHTML = '';
     let statusClass = `status-${service.estado.replace('_', '')}`;
 
-    // Formatear fecha de creación
+    // --- Fecha de creación ---
     let fechaCreacion = 'Fecha no disponible';
     if (service.fechaCreacion && typeof service.fechaCreacion.toDate === 'function') {
       fechaCreacion = service.fechaCreacion.toDate().toLocaleString('es-CO');
     }
 
-  // Fecha de entrega
-let fechaEntregaHTML = '';
-if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
-  fechaEntregaHTML = `<div class="service-date">
-    <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
-  </div>`;
-}
+    // --- Fecha de entrega ---
+    let fechaEntregaHTML = '';
+    if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
+      fechaEntregaHTML = `
+        <div class="service-date">
+          <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
+        </div>
+      `;
+    }
 
-
-    // --- Mostrar evidencia y método de pago cuando el servicio está entregado ---
+    // --- Evidencia y método de pago ---
     let evidenciaHTML = '';
     if (service.estado === 'entregado' && currentRole === 'cliente') {
-      // Botón para abrir la foto en modal
       if (service.evidenciaEntrega) {
         evidenciaHTML = `
           <div class="service-detail">
             <i class="fas fa-image"></i>
             <div class="service-detail-content">
               <strong>Evidencia de entrega:</strong><br>
-              <button onclick="openEvidenceView('${service.evidenciaEntrega}')" 
+              <button onclick="openEvidenceView('${service.evidenciaEntrega}')"
                       class="text-blue-600 underline hover:text-blue-800">
                 Ver foto de evidencia
               </button>
@@ -1972,7 +1978,6 @@ if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
         `;
       }
 
-      // Mostrar método de pago
       if (service.metodoPago) {
         evidenciaHTML += `
           <div class="service-detail">
@@ -2072,7 +2077,8 @@ if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
         </div>
       </div>
 
-      <div class="service-detail"><i class="fas fa-map-marker-alt"></i>
+      <div class="service-detail">
+        <i class="fas fa-map-marker-alt"></i>
         <div class="service-detail-content">
           <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
           <div class="flex items-center gap-2">
@@ -2089,48 +2095,73 @@ if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
           </div>
         </div>
       </div>
+
       ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
       ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
       ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
       ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
-      <div class="service-date"><i class="fas fa-calendar"></i> Creado: ${fechaCreacion}</div>
+
+      <div class="service-date">
+        <i class="fas fa-calendar"></i> Creado: ${fechaCreacion}
+      </div>
+
       ${fechaEntregaHTML}
-      ${evidenciaHTML} <!-- Aquí agregamos la evidencia y el método de pago -->
+      ${evidenciaHTML}
       ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
     `;
+
+    // ✅ Usamos `servicesEl` y no `container`
+    servicesEl.appendChild(serviceCard);
+  });
+}
+
+
+function renderServices(data) {
+  const servicesEl = document.getElementById('services-section');
+
+  if (!servicesEl) {
+    console.error("❌ No se encontró el contenedor #services-section en el DOM");
+    return;
+  }
+
+  // Actualiza variable global solo si recibimos datos nuevos
+  if (data !== undefined) {
+    services = data;
+  }
+
+  // Mostrar mensaje si no hay servicios
+  if (services.length === 0) {
+    servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
+    return;
+  }
+
+  // Filtrar por estado actual
+  let filteredServices = services;
+  if (currentFilter !== 'all') {
+    filteredServices = services.filter(s => s.estado === currentFilter);
+  }
+
+  // Si después del filtro no hay resultados
+  if (filteredServices.length === 0) {
+    servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con el filtro '${currentFilter}'</div>`;
+    return;
+  }
+
+  // Limpiar contenedor antes de renderizar
+  servicesEl.innerHTML = '';
+
+  // Recorrer y pintar servicios
+  filteredServices.forEach(service => {
+    const serviceCard = document.createElement('div');
+    serviceCard.className = 'service-card';
+
+    // Aquí va toda la lógica para estados, evidencias, botones y detalles
+    // ... (usa el bloque largo que ya te pasé antes con actionsHTML y evidencias)
 
     servicesEl.appendChild(serviceCard);
   });
 }
 
-function renderServices(services) {
-
-
-  if (!container) {
-    console.warn("⚠️ El contenedor #services no existe en el DOM.");
-    return;
-  }
-
-  container.innerHTML = '';
-
-  services.forEach(service => {
-    const serviceHTML = `
-      <div class="service-card">
-        <h3>${service.empresa}</h3>
-        <p><strong>Contacto:</strong> ${service.contacto}</p>
-        <p><strong>Teléfono:</strong> ${service.telefono}</p>
-
-        <!-- Dirección y barrio/municipio -->
-        <div class="service-detail">
-          <strong>Dirección de Entrega:</strong> ${service.entregar || 'No especificada'}<br>
-          <strong>Barrio/Municipio:</strong> ${service.barrioMunicipio || 'No especificado'}
-        </div>
-      </div>
-    `;
-
-    container.innerHTML += serviceHTML;
-  });
-}
 
 
 
@@ -2810,66 +2841,81 @@ function changeEstado(serviceId, nuevoEstado) {
       alert("No se pudo actualizar el estado. Intenta de nuevo.");
     });
 }
+function escapeHtml(str) {
+  return String(str === undefined || str === null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
 // === Función para ver solicitudes de mensajeros pendientes ===
 function subscribePendingMensajeros() {
-  // Buscar dinámicamente el contenedor correcto
-  const container =
+  const pendingListEl =
     document.getElementById('pending-mensajeros-list') ||
     document.getElementById('pending-list') ||
     document.getElementById('pending-container');
 
-  if (!container) {
+  if (!pendingListEl) {
     console.warn('⚠️ No se encontró contenedor para solicitudes pendientes.');
     return;
   }
 
-  // Mostrar mensaje de carga
-  container.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
+  // Mensaje inicial de carga
+  pendingListEl.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
 
-  // Suscripción a Firestore
-  db.collection('users')
+  const query = db.collection('users')
     .where('role', '==', 'pending_mensajero')
-    .orderBy('createdAt', 'asc')
-    .onSnapshot(snapshot => {
-      if (snapshot.empty) {
-        container.innerHTML = '<div class="text-center text-gold">No hay solicitudes pendientes.</div>';
-        return;
-      }
+    .orderBy('createdAt', 'asc');
 
-      let html = '';
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        html += `
-          <div class="bg-gray-800 text-white p-4 rounded-lg shadow mb-3">
-            <p><strong>Nombre:</strong> ${data.displayName || 'Sin nombre'}</p>
-            <p><strong>Email:</strong> ${data.email || 'Sin email'}</p>
-            <p><strong>Teléfono:</strong> ${data.phoneNumber || 'No especificado'}</p>
-            <p><strong>Fecha de registro:</strong> ${
-              data.createdAt?.toDate().toLocaleString('es-CO') || 'Desconocida'
-            }</p>
+  // Registramos el listener y devolvemos la función de cancelación en caso de querer unsubscribe
+  const unsubscribe = query.onSnapshot(snapshot => {
+    if (snapshot.empty) {
+      pendingListEl.innerHTML = '<div class="text-center text-gold">No hay solicitudes pendientes.</div>';
+      return;
+    }
 
-            <div class="flex gap-2 mt-3">
-              <button onclick="aprobarMensajero('${doc.id}')" 
-                      class="bg-green-600 px-3 py-1 rounded text-white hover:bg-green-700">
-                ✅ Aprobar
-              </button>
-              <button onclick="rechazarMensajero('${doc.id}')" 
-                      class="bg-red-600 px-3 py-1 rounded text-white hover:bg-red-700">
-                ❌ Rechazar
-              </button>
-            </div>
+    let html = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const createdAt = (data.createdAt && typeof data.createdAt.toDate === 'function')
+        ? data.createdAt.toDate().toLocaleString('es-CO')
+        : 'Desconocida';
+
+      html += `
+        <div class="bg-gray-800 text-white p-4 rounded-lg shadow mb-3">
+          <p><strong>Nombre:</strong> ${escapeHtml(data.displayName || 'Sin nombre')}</p>
+          <p><strong>Email:</strong> ${escapeHtml(data.email || 'Sin email')}</p>
+          <p><strong>Teléfono:</strong> ${escapeHtml(data.phoneNumber || 'No especificado')}</p>
+          <p><strong>Fecha de registro:</strong> ${createdAt}</p>
+
+          <div class="flex gap-2 mt-3">
+            <button onclick="aprobarMensajero('${doc.id}')" 
+                    class="bg-green-600 px-3 py-1 rounded text-white hover:bg-green-700">
+              ✅ Aprobar
+            </button>
+            <button onclick="rechazarMensajero('${doc.id}')" 
+                    class="bg-red-600 px-3 py-1 rounded text-white hover:bg-red-700">
+              ❌ Rechazar
+            </button>
           </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }, error => {
-      console.error("❌ Error cargando solicitudes pendientes:", error);
-      container.innerHTML = `
-        <div class="text-center text-red-500">
-          Error cargando solicitudes. Revisa la consola.
-        </div>`;
+        </div>
+      `;
     });
+
+    pendingListEl.innerHTML = html;
+  }, error => {
+    console.error('❌ Error cargando solicitudes pendientes:', error);
+    pendingListEl.innerHTML = `
+      <div class="text-center text-red-500">
+        Error cargando solicitudes. Revisa la consola.
+      </div>
+    `;
+  });
+
+  // Devuelve unsubscribe para que quien llame pueda cancelar el listener si quiere
+  return unsubscribe;
 }
 
 window.subscribePendingMensajeros = subscribePendingMensajeros;
