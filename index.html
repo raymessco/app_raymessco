@@ -857,7 +857,10 @@
   </head>
   <body>
 
-    <div id="pending-mensajeros-section" class="p-4 hidden"></div>
+    <div id="pending-mensajeros-section" class="hidden p-4">
+  <h2 class="section-title">Solicitudes de Mensajeros</h2>
+  <div id="pending-mensajeros-list"></div>
+</div>
   <!-- Botón visible solo para el administrador -->
   <div id="admin-actions" class="mt-4 hidden text-right">
     <button onclick="archiveOldServices()" 
@@ -987,50 +990,60 @@
   </div>
 
 
-        <div id="services-section" class="services-grid"></div>
+<!-- Sección de servicios -->
+<div id="services-section" class="services-grid"></div>
 
-        <div id="financial-section" class="hidden">
-          <h2 class="section-title">Resumen financiero</h2>
-          <div class="financial-card">
-            <div class="financial-item">
-              <span>Total ganado:</span>
-              <span id="total-earned" class="text-gold">$0</span>
-            </div>
-            <div class="financial-item">
-              <span>Total pendiente de pago:</span>
-              <span id="total-pending" class="text-gold">$0</span>
-            </div>
-            <div class="financial-item">
-              <span>Total pagado:</span>
-              <span id="total-paid" class="text-gold">$0</span>
-            </div>
-          </div>
-          <h3 class="section-title">Detalle de servicios por día</h3>
-          <div id="financial-list"></div>
-        </div>
-
-      <div id="pending-container" class="hidden">
-    <h2 class="section-title">Solicitudes de mensajero</h2>
-    <div id="pending-list"></div> <!-- 👈 este ID es importante -->
-  </div>
-
-
-        <div id="costos-section" class="hidden p-6">
-    <h2 class="text-2xl font-bold text-gold mb-4">Costos por empresa</h2>
-
-    <!-- Listado de empresas -->
-    <div id="costos-empresas" class="space-y-8"></div>
-  </div>
-
-
-  
-
-        <div id="cobros-section" class="hidden">
-          <h2 class="section-title">Cobros contra entrega</h2>
-          <div id="cobros-body"></div>
-        </div>
-      </div>
+<!-- Sección financiera -->
+<div id="financial-section" class="hidden">
+  <h2 class="section-title">Resumen financiero</h2>
+  <div class="financial-card">
+    <div class="financial-item">
+      <span>Total ganado:</span>
+      <span id="total-earned" class="text-gold">$0</span>
     </div>
+    <div class="financial-item">
+      <span>Total pendiente de pago:</span>
+      <span id="total-pending" class="text-gold">$0</span>
+    </div>
+    <div class="financial-item">
+      <span>Total pagado:</span>
+      <span id="total-paid" class="text-gold">$0</span>
+    </div>
+  </div>
+  <h3 class="section-title">Detalle de servicios por día</h3>
+  <div id="financial-list"></div>
+</div>
+
+<!-- Solicitudes de mensajeros antiguas -->
+<div id="pending-container" class="hidden">
+  <h2 class="section-title">Solicitudes de mensajero</h2>
+  <div id="pending-list"></div> <!-- 👈 este ID es importante -->
+</div>
+
+<!-- Nueva sección para solicitudes de mensajeros -->
+<div id="pending-mensajeros-section" class="hidden p-4">
+  <h2 class="section-title">Solicitudes de Mensajeros</h2>
+  <div id="pending-mensajeros-list"></div>
+</div>
+
+<!-- Costos por empresa -->
+<div id="costos-section" class="hidden p-6">
+  <h2 class="text-2xl font-bold text-gold mb-4">Costos por empresa</h2>
+  <div id="costos-empresas" class="space-y-8"></div>
+</div>
+
+<!-- Cobros contra entrega -->
+<div id="cobros-section" class="hidden">
+  <h2 class="section-title">Cobros contra entrega</h2>
+  <div id="cobros-body"></div>
+</div>
+
+<!-- Botón de menú para solicitudes -->
+<div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
+  <i class="fas fa-user-clock"></i>
+  <span class="menu-item-text">Solicitudes mensajero</span>
+</div>
+
 
     <div id="modal" class="modal-backdrop hidden">
       <div class="modal-content">
@@ -2402,21 +2415,24 @@
   function showSection(section) {
   console.log("Mostrando sección:", section);
 
-  // Ocultar todas las secciones principales
- const allSections = document.querySelectorAll(
-  '#services-section, #costos-section, #cobros-section, #pending-container, #financial-section'
-);
-
+  // Todas las secciones principales
+  const allSections = document.querySelectorAll(
+    '#pending-mensajeros-section, #services-section, #financial-section, #pending-container, #costos-section, #cobros-section'
+  );
 
   console.log("Secciones encontradas:", allSections);
 
+  // Ocultar todas
   allSections.forEach(div => {
     console.log("Ocultando:", div.id);
     div.classList.add('hidden');
   });
 
-  // Mostrar la sección seleccionada
-  const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
+  // Buscar la sección a mostrar
+  const targetSection = document.getElementById(section) || 
+                        document.getElementById(`${section}-section`) || 
+                        document.getElementById(`${section}-container`);
+
   console.log("Sección que se mostrará:", targetSection ? targetSection.id : "❌ NO ENCONTRADA");
 
   if (targetSection) {
@@ -2426,12 +2442,13 @@
     console.error(`❌ No se encontró la sección: ${section}`);
   }
 
-  // Mostrar u ocultar filtros solo para la sección de servicios
+  // Mostrar filtros solo si la sección es services
   const filtersEl = document.getElementById('filters');
   if (filtersEl) {
     filtersEl.classList.toggle('hidden', section !== 'services');
   }
 }
+
 
 
 
