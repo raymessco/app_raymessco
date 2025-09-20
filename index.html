@@ -1928,9 +1928,12 @@ services.forEach(s => console.log("Estado desde Firebase:", s.estado));
 
 if ((currentFilter || '').toLowerCase() !== 'all') {
   filteredServices = services.filter(s => 
-    (s.estado || '').toLowerCase() === currentFilter.toLowerCase()
+    (s.estado || '').toLowerCase() === (currentFilter || '').toLowerCase()
   );
 }
+
+console.log("Servicios después del filtro:", filteredServices);
+
   // Si el filtro no tiene resultados
   if (filteredServices.length === 0) {
     servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con el filtro '${currentFilter}'</div>`;
@@ -2419,10 +2422,14 @@ window.startCamera = startCamera;
 window.showSection = showSection;
 
 
-
-   function setFilter(filter, element = null) {
-  // Guardar el filtro seleccionado
+function setFilter(filter) {
   currentFilter = filter;
+  console.log("Filtro actualizado a:", currentFilter);
+  renderServices();
+}
+
+  // Guardar el filtro seleccionado
+
 
   // Quitar la clase 'active' de todos los botones
   document.querySelectorAll('#filters .mobile-btn').forEach(btn => {
@@ -2436,7 +2443,7 @@ window.showSection = showSection;
 
   // Actualizar la lista según el filtro seleccionado
   renderServices();
-}
+
 console.log("Valor actual de currentFilter:", currentFilter);
 console.log("Servicios disponibles:", services);
 
