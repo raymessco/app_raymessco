@@ -968,11 +968,7 @@ th, td {
       <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
         <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
       </div>
-<div id="pending-mensajeros-section" class="hidden">
-  <h2 class="text-2xl text-gold mb-4">Solicitudes de Mensajeros</h2>
-  <div id="pending-mensajeros-list">
-    <!-- Aquí se cargarán las solicitudes en tiempo real -->
-  </div>
+
 </div>
       <div id="filters" class="filters-container">
       <button onclick="setFilter('all', this)" class="filter-btn">Todos</button>
@@ -2558,7 +2554,9 @@ window.setFilter = setFilter;
   showSection('pending-container');
 
   // Obtener referencia al contenedor
-  const pendingListEl = document.getElementById('pending-list');
+  const pendingContainer = document.getElementById('pending-container');
+const pendingList = document.getElementById('pending-list');
+
 
   if (!pendingListEl) {
     console.error("❌ No se encontró el contenedor #pending-list en el DOM");
