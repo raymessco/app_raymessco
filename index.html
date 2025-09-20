@@ -2448,7 +2448,10 @@
   });
 
   // Buscar la sección destino
-  const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
+  const targetSection =
+    document.getElementById(`${section}-section`) ||
+    document.getElementById(`${section}-container`);
+
   console.log("Sección que se mostrará:", targetSection ? targetSection.id : "❌ NO ENCONTRADA");
 
   if (targetSection) {
@@ -2458,11 +2461,12 @@
     console.error(`❌ No se encontró la sección: ${section}`);
   }
 
-  // 🔥 Muevo aquí tu lógica de filtros
+  // 🔥 Lógica de filtros (solo una vez)
   if (typeof filtersEl !== "undefined" && filtersEl) {
     filtersEl.classList.toggle('hidden', section !== 'services');
   }
 
+  // 🔥 Lógica según la sección
   switch (section) {
     case 'services':
       console.log("➡️ Mostrando lógica de servicios");
@@ -2484,8 +2488,8 @@
   }
 }
 
-  // Esta línea debe estar fuera de la función
-  window.showSection = showSection;
+// 👇 Esto va FUERA de la función
+window.showSection = showSection;
 
 
 
