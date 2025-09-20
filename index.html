@@ -2399,14 +2399,15 @@ window.startCamera = startCamera;
 
   function showSection(section) {
   console.log("Mostrando sección:", section);
-console.log("Secciones encontradas:", allSections);
-allSections.forEach(section => console.log("Encontrada:", section.id));
 
-  // Ocultar todas las secciones excepto los filtros
+  // Selecciona TODAS las secciones principales
   const allSections = document.querySelectorAll('#services-section, #costos-section, #pending-container, #financial-section');
+  console.log("Secciones encontradas:", allSections);
+
+  // Oculta todas las secciones
   allSections.forEach(div => div.classList.add('hidden'));
 
-  // Mostrar solo la sección seleccionada
+  // Muestra la sección seleccionada
   const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
   if (targetSection) {
     targetSection.classList.remove('hidden');
@@ -2414,11 +2415,13 @@ allSections.forEach(section => console.log("Encontrada:", section.id));
     console.error(`❌ No se encontró la sección: ${section}`);
   }
 
-  // Mostrar u ocultar filtros SOLO en la sección de servicios
+  // Mostrar/ocultar filtros
   const filtersEl = document.getElementById('filters');
   if (filtersEl) {
     filtersEl.classList.toggle('hidden', section !== 'services');
   }
+}
+
 
   // Opciones especiales solo para ADMIN
   if (currentRole === 'admin') {
@@ -2435,7 +2438,7 @@ allSections.forEach(section => console.log("Encontrada:", section.id));
         break;
     }
   }
-}
+
 
 // Esta línea debe estar fuera de la función
 window.showSection = showSection;
