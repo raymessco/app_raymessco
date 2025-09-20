@@ -2432,10 +2432,10 @@
         }
       });
 
- function showSection(sectionId) {
-  console.log("Mostrando sección:", sectionId);
+  function showSection(section) {
+  console.log("Mostrando sección:", section);
 
-  // Seleccionar todas las secciones por ID
+  // Seleccionar todas las secciones
   const allSections = document.querySelectorAll(
     '#services-section, #financial-section, #pending-container, #pending-mensajeros-section, #costos-section, #cobros-section'
   );
@@ -2447,17 +2447,18 @@
     div.classList.add('hidden');
   });
 
-  // Mostrar la sección solicitada
-  const targetSection = document.getElementById(sectionId);
+  // Buscar la sección destino
+  const targetSection = document.getElementById(`${section}-section`) || document.getElementById(`${section}-container`);
   console.log("Sección que se mostrará:", targetSection ? targetSection.id : "❌ NO ENCONTRADA");
 
   if (targetSection) {
     targetSection.classList.remove('hidden');
     console.log("✅ Mostrada:", targetSection.id);
   } else {
-    console.error(`❌ No se encontró la sección: ${sectionId}`);
+    console.error(`❌ No se encontró la sección: ${section}`);
   }
 }
+
 
 
 
