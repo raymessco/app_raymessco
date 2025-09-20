@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -2435,38 +2435,24 @@
   function showSection(section) {
   console.log("Mostrando sección:", section);
 
-  // Seleccionar todas las secciones
   const allSections = document.querySelectorAll(
     '#services-section, #financial-section, #pending-container, #pending-mensajeros-section, #costos-section, #cobros-section'
   );
-  console.log("Secciones encontradas:", allSections);
 
-  // Ocultar todas
-  allSections.forEach(div => {
-    console.log("Ocultando:", div.id);
-    div.classList.add('hidden');
-  });
+  allSections.forEach(div => div.classList.add('hidden'));
 
-  // Buscar la sección destino
   const targetSection =
     document.getElementById(`${section}-section`) ||
     document.getElementById(`${section}-container`);
 
-  console.log("Sección que se mostrará:", targetSection ? targetSection.id : "❌ NO ENCONTRADA");
+  if (targetSection) targetSection.classList.remove('hidden');
 
-  if (targetSection) {
-    targetSection.classList.remove('hidden');
-    console.log("✅ Mostrada:", targetSection.id);
-  } else {
-    console.error(`❌ No se encontró la sección: ${section}`);
-  }
-
-  // 🔥 Lógica de filtros (solo una vez)
+  // 👇 Filtros SOLO aquí
   if (typeof filtersEl !== "undefined" && filtersEl) {
     filtersEl.classList.toggle('hidden', section !== 'services');
   }
 
-  // 🔥 Lógica según la sección
+  // 👇 Switch SOLO aquí
   switch (section) {
     case 'services':
       console.log("➡️ Mostrando lógica de servicios");
@@ -2488,8 +2474,8 @@
   }
 }
 
-// 👇 Esto va FUERA de la función
 window.showSection = showSection;
+
 
 
 
