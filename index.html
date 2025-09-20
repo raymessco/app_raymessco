@@ -392,14 +392,7 @@
         }
       }
       
-      #services-section {
-  min-height: 300px;      /* Espacio mínimo para mostrar algo */
-  padding: 1rem;          /* Espaciado interno */
-  background: #050505;    /* Fondo oscuro */
-  color: white;           /* Texto visible */
-  position: relative;
-  z-index: 10;
-}
+   
 
       .service-card {
         background: rgba(20, 20, 20, 0.8);
@@ -864,15 +857,15 @@
 /* Ajuste para asegurar visibilidad */
 #services-section {
   position: relative;
-  z-index: 50; /* Mayor que otros elementos */
-  background: var(--bg-dark);
-  padding: 1rem;
-  color: var(--text-light);
-  min-height: 200px;
-  display: block; /* Asegura visibilidad */
-  overflow-y: auto; /* Permite scroll si crece */
-  border: 2px solid red; /* TEST - Para depuración */
+  z-index: 50;            /* Para que quede por encima si es necesario */
+  min-height: 300px;      /* Espacio mínimo para mostrar contenido */
+  padding: 1rem;          /* Espaciado interno */
+  background: var(--bg-darker); /* Fondo oscuro usando tu variable */
+  color: var(--text-light);     /* Texto claro */
+  display: block;          /* Asegura visibilidad */
+  overflow-y: auto;        /* Scroll si el contenido crece */
 }
+
 
 /* Evita que otros elementos lo tapen */
 .app-container {
