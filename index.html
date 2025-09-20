@@ -1922,15 +1922,15 @@ console.log("Datos recibidos en renderServices:", data);
     servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
     return;
   }
-
+services.forEach(s => console.log("Estado desde Firebase:", s.estado));
   // Filtrar por estado actual
-  let filteredServices = services;{
- filteredServices = services.filter(s => 
-  (s.estado || '').toLowerCase() === currentFilter.toLowerCase()
-);
+  let filteredServices = services;
 
-  }
-
+if ((currentFilter || '').toLowerCase() !== 'all') {
+  filteredServices = services.filter(s => 
+    (s.estado || '').toLowerCase() === currentFilter.toLowerCase()
+  );
+}
   // Si el filtro no tiene resultados
   if (filteredServices.length === 0) {
     servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con el filtro '${currentFilter}'</div>`;
@@ -2437,6 +2437,8 @@ window.showSection = showSection;
   // Actualizar la lista según el filtro seleccionado
   renderServices();
 }
+console.log("Valor actual de currentFilter:", currentFilter);
+console.log("Servicios disponibles:", services);
 
 // Hacer que setFilter esté disponible globalmente
 window.setFilter = setFilter;
