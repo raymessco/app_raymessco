@@ -1901,6 +1901,7 @@ function normalizeColombiaPhone(phone) {
   // ===== ROL DESCONOCIDO =====
   servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
 }
+
 function renderServices(data) {
   // 🔹 Contenedor donde se mostrarán los servicios
   const servicesEl = document.getElementById('services-section');
@@ -2109,54 +2110,6 @@ function renderServices(data) {
       ${evidenciaHTML}
       ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
     `;
-
-    // ✅ Usamos `servicesEl` y no `container`
-    servicesEl.appendChild(serviceCard);
-  });
-}
-
-
-function renderServices(data) {
-  const servicesEl = document.getElementById('services-section');
-
-  if (!servicesEl) {
-    console.error("❌ No se encontró el contenedor #services-section en el DOM");
-    return;
-  }
-
-  // Actualiza variable global solo si recibimos datos nuevos
-  if (data !== undefined) {
-    services = data;
-  }
-
-  // Mostrar mensaje si no hay servicios
-  if (services.length === 0) {
-    servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
-    return;
-  }
-
-  // Filtrar por estado actual
-  let filteredServices = services;
-  if (currentFilter !== 'all') {
-    filteredServices = services.filter(s => s.estado === currentFilter);
-  }
-
-  // Si después del filtro no hay resultados
-  if (filteredServices.length === 0) {
-    servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con el filtro '${currentFilter}'</div>`;
-    return;
-  }
-
-  // Limpiar contenedor antes de renderizar
-  servicesEl.innerHTML = '';
-
-  // Recorrer y pintar servicios
-  filteredServices.forEach(service => {
-    const serviceCard = document.createElement('div');
-    serviceCard.className = 'service-card';
-
-    // Aquí va toda la lógica para estados, evidencias, botones y detalles
-    // ... (usa el bloque largo que ya te pasé antes con actionsHTML y evidencias)
 
     servicesEl.appendChild(serviceCard);
   });
@@ -2588,35 +2541,74 @@ window.setFilter = setFilter;
     window.markAsPaid = markAsPaid;
 
     async function listPendingMensajeros() {
-      showSection('pending-container');
-      const pendingList = document.getElementById('pending-list');
-      pendingList.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
-      try {
-        const snapshot = await db.collection('users').where('role', '==', 'pending_mensajero').get();
-        if (snapshot.empty) {
-          pendingList.innerHTML = '<div class="text-center text-gold">No hay solicitudes pendientes</div>';
-          return;
-        }
-        pendingList.innerHTML = '';
-        snapshot.docs.forEach(doc => {
-          const user = { id: doc.id, ...doc.data() };
-          const userCard = document.createElement('div');
-          userCard.className = 'pending-card';
-          userCard.innerHTML = `
-            <div class="service-header"><div class="service-client">${user.displayName || user.email}</div></div>
-            <div class="service-detail"><i class="fas fa-envelope"></i><div class="service-detail-content">${user.email}</div></div>
-            <div class="service-detail"><i class="fas fa-calendar"></i><div class="service-detail-content">Solicitado: ${(user.createdAt && user.createdAt.toDate) ? user.createdAt.toDate().toLocaleDateString() : 'N/A'}</div></div>
-            <div class="pending-actions">
-              <button class="btn-primary action-btn" onclick="approveMensajero('${user.id}')">Aprobar</button>
-              <button class="btn-danger action-btn" onclick="rejectMensajero('${user.id}')">Rechazar</button>
-            </div>`;
-          pendingList.appendChild(userCard);
-        });
-      } catch (error) {
-        console.error('Error cargando solicitudes:', error);
-        pendingList.innerHTML = '<div class="text-center text-red-500">Error cargando las solicitudes</div>';
-      }
+  // Muestra la sección de pendientes
+  showSection('pending-container');
+
+  // Obtener referencia al contenedor
+  const pendingListEl = document.getElementById('pending-list');
+
+  if (!pendingListEl) {
+    console.error("❌ No se encontró el contenedor #pending-list en el DOM");
+    return;
+  }
+
+  // Mostrar mensaje de carga
+  pendingListEl.innerHTML = '<div class="text-center text-gold">Cargando solicitudes...</div>';
+
+  try {
+    // Traer los datos desde Firestore
+    const snapshot = await db.collection('users')
+      .where('role', '==', 'pending_mensajero')
+      .orderBy('createdAt', 'asc')
+      .get();
+
+    if (snapshot.empty) {
+      pendingListEl.innerHTML = '<div class="text-center text-gold">No hay solicitudes pendientes.</div>';
+      return;
     }
+
+    // Construir HTML dinámicamente
+    let html = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const createdAt = (data.createdAt && typeof data.createdAt.toDate === 'function')
+        ? data.createdAt.toDate().toLocaleString('es-CO')
+        : 'Desconocida';
+
+      html += `
+        <div class="bg-gray-800 text-white p-4 rounded-lg shadow mb-3">
+          <p><strong>Nombre:</strong> ${data.displayName || 'Sin nombre'}</p>
+          <p><strong>Email:</strong> ${data.email || 'Sin email'}</p>
+          <p><strong>Teléfono:</strong> ${data.phoneNumber || 'No especificado'}</p>
+          <p><strong>Fecha de registro:</strong> ${createdAt}</p>
+
+          <div class="flex gap-2 mt-3">
+            <button onclick="aprobarMensajero('${doc.id}')"
+                    class="bg-green-600 px-3 py-1 rounded text-white hover:bg-green-700">
+              ✅ Aprobar
+            </button>
+            <button onclick="rechazarMensajero('${doc.id}')"
+                    class="bg-red-600 px-3 py-1 rounded text-white hover:bg-red-700">
+              ❌ Rechazar
+            </button>
+          </div>
+        </div>
+      `;
+    });
+
+    // Renderizar el contenido final
+    pendingListEl.innerHTML = html;
+
+  } catch (error) {
+    console.error("❌ Error cargando solicitudes pendientes:", error);
+    pendingListEl.innerHTML = `
+      <div class="text-center text-red-500">
+        Error cargando solicitudes. Revisa la consola.
+      </div>
+    `;
+  }
+}
+
     window.listPendingMensajeros = listPendingMensajeros;
 
     async function approveMensajero(userId) {
