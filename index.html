@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -1273,19 +1273,45 @@
           });
 
         // Event listeners para la interfaz
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        closeSidebarBtn.addEventListener('click', toggleSidebar);
-        sidebarBackdrop.addEventListener('click', toggleSidebar);
+       if (sidebarToggle) {
+  sidebarToggle.addEventListener('click', toggleSidebar);
+}
+
+if (closeSidebarBtn) {
+  closeSidebarBtn.addEventListener('click', toggleSidebar);
+}
+
+if (sidebarBackdrop) {
+  sidebarBackdrop.addEventListener('click', toggleSidebar);
+}
         
-        document.getElementById('cobrar-check').addEventListener('change', (e) => {
-          cobrarFieldContainer.classList.toggle('hidden', !e.target.checked);
-        });
+       const cobrarCheck = document.getElementById('cobrar-check');
+if (cobrarCheck) {
+  cobrarCheck.addEventListener('change', (e) => {
+    cobrarFieldContainer.classList.toggle('hidden', !e.target.checked);
+  });
+}
         
-        document.getElementById('service-form').addEventListener('submit', handleServiceSubmit);
-        document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
-        document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
-        document.getElementById('btn-google').addEventListener('click', signInWithGoogle);
-        
+const serviceForm = document.getElementById('service-form');
+if (serviceForm) {
+  serviceForm.addEventListener('submit', handleServiceSubmit);
+}
+
+const profileForm = document.getElementById('profile-form');
+if (profileForm) {
+  profileForm.addEventListener('submit', handleProfileUpdate);
+}
+
+const btnLogout = document.getElementById('btn-logout');
+if (btnLogout) {
+  btnLogout.addEventListener('click', () => auth.signOut());
+}
+
+const btnGoogle = document.getElementById('btn-google');
+if (btnGoogle) {
+  btnGoogle.addEventListener('click', signInWithGoogle);
+}     
+
         // Lógica para instalación PWA
         window.addEventListener('beforeinstallprompt', (e) => {
           e.preventDefault();
@@ -1293,25 +1319,61 @@
           installButton.classList.remove('hidden');
         });
         
-        installButton.addEventListener('click', async () => {
-          if (!deferredPrompt) return;
-          
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          
-          if (outcome === 'accepted') {
-            installButton.classList.add('hidden');
-          }
-          deferredPrompt = null;
-        });
-        
-        // Observador de autenticación (central)
-        auth.onAuthStateChanged(handleAuthStateChange);
+        if (installButton) {
+  installButton.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      installButton.classList.add('hidden');
+    }
+    
+    deferredPrompt = null;
+  });
+}
 
-      // Registrar Service Worker
-  
+// Observador de autenticación (central)
+auth.onAuthStateChanged(handleAuthStateChange);
 
-      }
+const captureBtn = document.getElementById('capture-btn');
+if (captureBtn) {
+  captureBtn.addEventListener('click', () => {
+    const video = document.getElementById('videoElement');
+    const canvas = document.getElementById('canvasElement');
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
+    document.getElementById('captured-image-container').classList.remove('hidden');
+    document.getElementById('videoElement').classList.add('hidden');
+    document.getElementById('capture-btn').classList.add('hidden');
+    document.getElementById('confirm-delivery').disabled = false;
+  });
+}
+
+const retakeBtn = document.getElementById('retake-btn');
+if (retakeBtn) {
+  retakeBtn.addEventListener('click', () => {
+    document.getElementById('captured-image-container').classList.add('hidden');
+    document.getElementById('videoElement').classList.remove('hidden');
+    document.getElementById('capture-btn').classList.remove('hidden');
+    document.getElementById('confirm-delivery').disabled = true;
+  });
+}
+
+const confirmDelivery = document.getElementById('confirm-delivery');
+if (confirmDelivery) {
+  confirmDelivery.addEventListener('click', async () => {
+    const evidencia = document.getElementById('capturedImage').src;
+    // tu lógica de confirmación original
+  });
+}
+
+}
 
 
       // Función para iniciar sesión con Google (Popup con fallback a Redirect)
@@ -2332,26 +2394,10 @@
         document.getElementById('confirm-delivery').disabled = true;
       }
 
-      document.getElementById('capture-btn').addEventListener('click', () => {
-        const video = document.getElementById('videoElement');
-        const canvas = document.getElementById('canvasElement');
-        const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
-        document.getElementById('captured-image-container').classList.remove('hidden');
-        document.getElementById('videoElement').classList.add('hidden');
-        document.getElementById('capture-btn').classList.add('hidden');
-        stopCamera();
-      });
 
-      document.getElementById('retake-btn').addEventListener('click', () => {
-        document.getElementById('captured-image-container').classList.add('hidden');
-        document.getElementById('videoElement').classList.remove('hidden');
-        document.getElementById('capture-btn').classList.remove('hidden');
-        startCamera();
-      });
+      
+
+
 
       function selectPaymentMethod(method) {
         selectedPaymentMethod = method;
@@ -2363,7 +2409,7 @@
       }
       window.selectPaymentMethod = selectPaymentMethod;
 
-      document.getElementById('confirm-delivery').addEventListener('click', async () => {
+       {
         if (!selectedPaymentMethod) {
           alert('Por favor selecciona un método de pago');
           return;
@@ -2382,7 +2428,7 @@
           console.error('Error confirmando entrega:', error);
           alert('Error al confirmar la entrega');
         }
-      });
+      };
 
   function showSection(section) {
   console.log("Mostrando sección:", section);
