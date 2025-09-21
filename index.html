@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -920,242 +920,132 @@
     </div>
 
     <div id="app" class="app-container hidden">
-      <div class="app-header">
-        <div class="header-left">
-          <button id="sidebar-toggle" class="menu-btn">
-            <i class="fas fa-bars"></i>
-          </button>
-          <div class="header-logo">
-            <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo">
-            <span class="header-title">Ray Mess Co</span>
-          </div>
-          <span id="role-badge" class="role-badge">CLIENTE</span>
-        </div>
-        
-        <div class="header-right">
-          <span id="user-name" class="user-name"></span>
-          <button id="btn-logout" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Salir
-          </button>
-        </div>
+  <div class="app-header">
+    <div class="header-left">
+      <button id="sidebar-toggle" class="menu-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="header-logo">
+        <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo">
+        <span class="header-title">Ray Mess Co</span>
       </div>
-
-      <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
-
-      <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-          <h2 class="sidebar-title">Menú</h2>
-          <button class="close-sidebar">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        
-<!-- Servicios -->
-<div class="menu-item" onclick="showSection('services')">
-  <i class="fas fa-clipboard-list"></i>
-  <span class="menu-item-text">Servicios</span>
-</div>
-
-<!-- Costos -->
-<div id="menu-costos" class="menu-item hidden" onclick="showSection('costos')">
-  <i class="fas fa-dollar-sign"></i>
-  <span class="menu-item-text">Costos por empresa</span>
-</div>
-
-<!-- Cobros -->
-<div id="menu-cobros" class="menu-item hidden" onclick="showSection('cobros')">
-  <i class="fas fa-cash-register"></i>
-  <span class="menu-item-text">Cobros contra entrega</span>
-</div>
-
-<!-- Solicitudes de mensajero -->
-<div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
-  <i class="fas fa-user-clock"></i>
-  <span class="menu-item-text">Solicitudes mensajero</span>
-</div>
-
-<!-- Finanzas mensajero -->
-<div id="menu-finanzas-mensajero" class="menu-item hidden" onclick="showSection('financial')">
-  <i class="fas fa-chart-line"></i>
-  <span class="menu-item-text">Mis Finanzas</span>
-</div>
-
-
-
-
-
-          
-          <div class="menu-item" onclick="openEditProfile()">
-            <i class="fas fa-user-edit"></i>
-            <span class="menu-item-text">Editar perfil</span>
-          </div>
-        </div>
-      </div>
-
-      </div>
-
-      <div class="main-content">
-        
-        <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
-          <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
-        </div>
-
-        <div id="filters" class="filters-container">
-            <button onclick="setFilter('all', this)" class="filter-btn">Todos</button>
-            <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
-            <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
-            <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
-            <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
-        </div>
-
-        <div id="services-section" class="services-grid"></div>
-
-        <div id="financial-section" class="hidden">
-            <h2 class="section-title">Resumen financiero</h2>
-            <div class="financial-card">
-                <div class="financial-item">
-                    <span>Total ganado:</span>
-                    <span id="total-earned" class="text-gold">$0</span>
-                </div>
-                <div class="financial-item">
-                    <span>Total pendiente de pago:</span>
-                    <span id="total-pending" class="text-gold">$0</span>
-                </div>
-                <div class="financial-item">
-                    <span>Total pagado:</span>
-                    <span id="total-paid" class="text-gold">$0</span>
-                </div>
-            </div>
-            <h3 class="section-title">Detalle de servicios por día</h3>
-            <div id="financial-list"></div>
-        </div>
-
-        <div id="pending-container" class="hidden">
-            <h2 class="section-title">Solicitudes de mensajero</h2>
-            <div id="pending-list"></div> </div>
-
-        <div id="pending-mensajeros-section" class="hidden p-4">
-            <h2 class="section-title">Solicitudes de Mensajeros</h2>
-            <div id="pending-mensajeros-list"></div>
-        </div>
-
-        <div id="costos-section" class="hidden p-6">
-            <h2 class="text-2xl font-bold text-gold mb-4">Costos por empresa</h2>
-            <div id="costos-empresas" class="space-y-8"></div>
-        </div>
-
-        <div id="cobros-section" class="hidden">
-            <h2 class="section-title">Cobros contra entrega</h2>
-            <div id="cobros-body"></div>
-        </div>
-
-        <div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
-            <i class="fas fa-user-clock"></i>
-            <span class="menu-item-text">Solicitudes mensajero</span>
-        </div>
-
-    </div> <div id="modal" class="modal-backdrop hidden">
-
-      <div class="modal-content">
-        <button class="modal-close" onclick="closeModal()">
-          <i class="fas fa-times"></i>
-        </button>
-        
-        <div class="modal-header">
-          <img src="https://raymessco.github.io/app_raymessco/icon-192.png" alt="Logo" style="width: 60px; height: 60px; margin-bottom: 15px;">
-          <h2 class="modal-title">Registrar servicio</h2>
-        </div>
-
-        <form id="service-form">
-          <div class="form-group">
-            <label class="form-label">Empresa o cliente</label>
-            <input type="text" name="empresaCliente" class="form-input" placeholder="Nombre de la empresa or cliente" required>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Nombre de contacto receptor</label>
-            <input type="text" name="contacto" class="form-input" placeholder="Persona que recibirá" required>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Teléfono de contacto</label>
-            <input type="tel" name="telefono" class="form-input" placeholder="Número de teléfono">
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Dirección de recogida</label>
-            <input type="text" name="recoger" class="form-input" placeholder="Donde se recogerá el paquete" required>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Dirección de entrega</label>
-            <input type="text" name="entregar" class="form-input" placeholder="Donde se entregará el paquete" required>
-          </div>
-          
-          <!-- Campo para Barrio o Municipio -->
-  <div class="mb-4">
-    <label for="barrioMunicipio" class="block text-gold font-semibold">Barrio o Municipio</label>
-    <input 
-      type="text" 
-      id="barrioMunicipio" 
-      name="barrioMunicipio" 
-      placeholder="Ej: La Candelaria, Medellín" 
-      class="w-full p-2 rounded border border-gray-700 bg-black text-white"
-    >
+      <span id="role-badge" class="role-badge">CLIENTE</span>
+    </div>
+    
+    <div class="header-right">
+      <span id="user-name" class="user-name"></span>
+      <button id="btn-logout" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Salir
+      </button>
+    </div>
   </div>
 
-          <div class="form-group">
-            <label class="form-label">Volumen (cantidad/medidas)</label>
-            <input type="text" name="volumen" class="form-input" placeholder="Descripción del volumen">
-          </div>
-          
-          <div id="field-costo-cliente-container" class="form-group hidden">
-            <label class="form-label">Costo de mensajería</label>
-            <input type="number" name="costoCliente" class="form-input" placeholder="Costo del servicio" min="0">
-          </div>
-          
-          <div id="admin-fields" class="hidden">
-            <div class="form-group">
-              <label class="form-label">Asignar mensajero</label>
-              <select name="uidMensajero" class="form-input" id="field-mensajero">
-                <option value="">Seleccionar mensajero</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label">Pago al mensajero</label>
-              <input type="number" name="pagoMensajero" class="form-input" placeholder="Pago al mensajero" min="0" id="field-pago">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <div class="form-checkbox">
-              <input type="checkbox" id="cobrar-check" name="cobrarCheck">
-              <label for="cobrar-check">¿Cobrar producto a la entrega?</label>
-            </div>
-          </div>
-          
-          <div id="cobrar-field-container" class="form-group hidden">
-            <label class="form-label">Valor a cobrar (producto)</label>
-            <input type="number" name="cobrarProducto" class="form-input" placeholder="Valor a cobrar" min="0">
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Observaciones</label>
-            <textarea name="observaciones" class="form-input" placeholder="Observaciones adicionales" rows="3"></textarea>
-          </div>
-          
-          <div class="form-actions">
-            <button type="submit" class="btn-submit">
-              <i class="fas fa-check"></i> Registrar
-            </button>
-            <button type="button" onclick="closeModal()" class="btn-cancel">
-              <i class="fas fa-times"></i> Cancelar
-            </button>
-          </div>
-        </form>
-      </div>
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">Menú</h2>
+      <button class="close-sidebar">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
+    
+    <!-- Servicios -->
+    <div class="menu-item" onclick="showSection('services')">
+      <i class="fas fa-clipboard-list"></i>
+      <span class="menu-item-text">Servicios</span>
+    </div>
+
+    <!-- Costos -->
+    <div id="menu-costos" class="menu-item hidden" onclick="showSection('costos')">
+      <i class="fas fa-dollar-sign"></i>
+      <span class="menu-item-text">Costos por empresa</span>
+    </div>
+
+    <!-- Cobros -->
+    <div id="menu-cobros" class="menu-item hidden" onclick="showSection('cobros')">
+      <i class="fas fa-cash-register"></i>
+      <span class="menu-item-text">Cobros contra entrega</span>
+    </div>
+
+    <!-- Solicitudes de mensajero -->
+    <div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
+      <i class="fas fa-user-clock"></i>
+      <span class="menu-item-text">Solicitudes mensajero</span>
+    </div>
+
+    <!-- Finanzas mensajero -->
+    <div id="menu-finanzas-mensajero" class="menu-item hidden" onclick="showSection('financial')">
+      <i class="fas fa-chart-line"></i>
+      <span class="menu-item-text">Mis Finanzas</span>
+    </div>
+
+    <div class="menu-item" onclick="openEditProfile()">
+      <i class="fas fa-user-edit"></i>
+      <span class="menu-item-text">Editar perfil</span>
+    </div>
+  </div> <!-- 🔥 cierre correcto del sidebar -->
+
+  <!-- ⚡ main-content queda dentro de #app -->
+  <div class="main-content">
+
+    <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+      <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
+    </div>
+
+    <div id="filters" class="filters-container">
+      <button onclick="setFilter('all', this)" class="filter-btn">Todos</button>
+      <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
+      <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
+      <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
+      <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
+    </div>
+
+    <div id="services-section" class="services-grid"></div>
+
+    <div id="financial-section" class="hidden">
+      <h2 class="section-title">Resumen financiero</h2>
+      <div class="financial-card">
+        <div class="financial-item">
+          <span>Total ganado:</span>
+          <span id="total-earned" class="text-gold">$0</span>
+        </div>
+        <div class="financial-item">
+          <span>Total pendiente de pago:</span>
+          <span id="total-pending" class="text-gold">$0</span>
+        </div>
+        <div class="financial-item">
+          <span>Total pagado:</span>
+          <span id="total-paid" class="text-gold">$0</span>
+        </div>
+      </div>
+      <h3 class="section-title">Detalle de servicios por día</h3>
+      <div id="financial-list"></div>
+    </div>
+
+    <div id="pending-container" class="hidden">
+      <h2 class="section-title">Solicitudes de mensajero</h2>
+      <div id="pending-list"></div>
+    </div>
+
+    <div id="pending-mensajeros-section" class="hidden p-4">
+      <h2 class="section-title">Solicitudes de Mensajeros</h2>
+      <div id="pending-mensajeros-list"></div>
+    </div>
+
+    <div id="costos-section" class="hidden p-6">
+      <h2 class="text-2xl font-bold text-gold mb-4">Costos por empresa</h2>
+      <div id="costos-empresas" class="space-y-8"></div>
+    </div>
+
+    <div id="cobros-section" class="hidden">
+      <h2 class="section-title">Cobros contra entrega</h2>
+      <div id="cobros-body"></div>
+    </div>
+
+  </div> <!-- 🔥 cierre de main-content -->
+</div> <!-- 🔥 cierre de #app -->
+
 
     <div id="evidence-modal" class="modal-backdrop hidden">
       <div class="modal-content">
