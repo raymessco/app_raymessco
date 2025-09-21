@@ -1255,125 +1255,111 @@
       const mensajeroSelect = document.getElementById('field-mensajero');
 
       // Inicializar la aplicación
-      function initApp() {
-        // Manejar el resultado de la autenticación después de la redirección
-        auth.getRedirectResult()
-          .then((result) => {
-            if (result.user) {
-              console.log("Autenticación exitosa tras redirección:", result.user.email);
-              showAuthStatus("¡Autenticación exitosa!", false);
-            }
-          }).catch((error) => {
-            console.error("Error en getRedirectResult:", error);
-            let errorMessage = "Error de autenticación";
-            if (error.code) {
-              errorMessage = `Error: ${error.message}`;
-            }
-            showAuthStatus(errorMessage, true);
-          });
+     function initApp() {
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const closeSidebarBtn = document.querySelector('.close-sidebar');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const sidebar = document.getElementById('sidebar');
+  const installButton = document.getElementById('install-button');
 
-        // Event listeners para la interfaz
-       if (sidebarToggle) {
-  sidebarToggle.addEventListener('click', toggleSidebar);
-}
+  // Sidebar
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', toggleSidebar);
+  }
+  if (closeSidebarBtn) {
+    closeSidebarBtn.addEventListener('click', toggleSidebar);
+  }
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', toggleSidebar);
+  }
 
-if (closeSidebarBtn) {
-  closeSidebarBtn.addEventListener('click', toggleSidebar);
-}
+  // Cobrar producto
+  const cobrarCheck = document.getElementById('cobrar-check');
+  const cobrarFieldContainer = document.getElementById('cobrar-field-container');
+  if (cobrarCheck) {
+    cobrarCheck.addEventListener('change', (e) => {
+      cobrarFieldContainer.classList.toggle('hidden', !e.target.checked);
+    });
+  }
 
-if (sidebarBackdrop) {
-  sidebarBackdrop.addEventListener('click', toggleSidebar);
-}
-        
-       const cobrarCheck = document.getElementById('cobrar-check');
-if (cobrarCheck) {
-  cobrarCheck.addEventListener('change', (e) => {
-    cobrarFieldContainer.classList.toggle('hidden', !e.target.checked);
-  });
-}
-        
-const serviceForm = document.getElementById('service-form');
-if (serviceForm) {
-  serviceForm.addEventListener('submit', handleServiceSubmit);
-}
+  // Formularios
+  const serviceForm = document.getElementById('service-form');
+  if (serviceForm) {
+    serviceForm.addEventListener('submit', handleServiceSubmit);
+  }
 
-const profileForm = document.getElementById('profile-form');
-if (profileForm) {
-  profileForm.addEventListener('submit', handleProfileUpdate);
-}
+  const profileForm = document.getElementById('profile-form');
+  if (profileForm) {
+    profileForm.addEventListener('submit', handleProfileUpdate);
+  }
 
-const btnLogout = document.getElementById('btn-logout');
-if (btnLogout) {
-  btnLogout.addEventListener('click', () => auth.signOut());
-}
+  // Botón logout
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => auth.signOut());
+  }
 
-const btnGoogle = document.getElementById('btn-google');
-if (btnGoogle) {
-  btnGoogle.addEventListener('click', signInWithGoogle);
-}     
+  // Botón Google
+  const googleBtn = document.getElementById('btn-google');
+  if (googleBtn) {
+    googleBtn.addEventListener('click', signInWithGoogle);
+  }
 
-        // Lógica para instalación PWA
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          installButton.classList.remove('hidden');
-        });
-        
-        if (installButton) {
-  installButton.addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      installButton.classList.add('hidden');
-    }
-    
-    deferredPrompt = null;
-  });
-}
+  // Instalar PWA
+  if (installButton) {
+    installButton.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
 
-// Observador de autenticación (central)
-auth.onAuthStateChanged(handleAuthStateChange);
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
 
-const captureBtn = document.getElementById('capture-btn');
-if (captureBtn) {
-  captureBtn.addEventListener('click', () => {
-    const video = document.getElementById('videoElement');
-    const canvas = document.getElementById('canvasElement');
-    const context = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      if (outcome === 'accepted') {
+        installButton.classList.add('hidden');
+      }
+      deferredPrompt = null;
+    });
+  }
 
-    document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
-    document.getElementById('captured-image-container').classList.remove('hidden');
-    document.getElementById('videoElement').classList.add('hidden');
-    document.getElementById('capture-btn').classList.add('hidden');
-    document.getElementById('confirm-delivery').disabled = false;
-  });
-}
+  // Capturar evidencia
+  const captureBtn = document.getElementById('capture-btn');
+  if (captureBtn) {
+    captureBtn.addEventListener('click', () => {
+      const video = document.getElementById('videoElement');
+      const canvas = document.getElementById('canvasElement');
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-const retakeBtn = document.getElementById('retake-btn');
-if (retakeBtn) {
-  retakeBtn.addEventListener('click', () => {
-    document.getElementById('captured-image-container').classList.add('hidden');
-    document.getElementById('videoElement').classList.remove('hidden');
-    document.getElementById('capture-btn').classList.remove('hidden');
-    document.getElementById('confirm-delivery').disabled = true;
-  });
-}
+      document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
+      document.getElementById('captured-image-container').classList.remove('hidden');
+      document.getElementById('videoElement').classList.add('hidden');
+      document.getElementById('capture-btn').classList.add('hidden');
+      document.getElementById('confirm-delivery').disabled = false;
+    });
+  }
 
-const confirmDelivery = document.getElementById('confirm-delivery');
-if (confirmDelivery) {
-  confirmDelivery.addEventListener('click', async () => {
-    const evidencia = document.getElementById('capturedImage').src;
-    // tu lógica de confirmación original
-  });
-}
+  const retakeBtn = document.getElementById('retake-btn');
+  if (retakeBtn) {
+    retakeBtn.addEventListener('click', () => {
+      document.getElementById('captured-image-container').classList.add('hidden');
+      document.getElementById('videoElement').classList.remove('hidden');
+      document.getElementById('capture-btn').classList.remove('hidden');
+      document.getElementById('confirm-delivery').disabled = true;
+    });
+  }
 
-}
+  const confirmDelivery = document.getElementById('confirm-delivery');
+  if (confirmDelivery) {
+    confirmDelivery.addEventListener('click', async () => {
+      const evidencia = document.getElementById('capturedImage').src;
+      // tu lógica de confirmación original
+    });
+  }
+} // ✅ cierre correcto de initApp()
+
+
+
 
 
       // Función para iniciar sesión con Google (Popup con fallback a Redirect)
