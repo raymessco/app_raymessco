@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -1350,13 +1350,30 @@
   }
 
   const confirmDelivery = document.getElementById('confirm-delivery');
-  if (confirmDelivery) {
-    confirmDelivery.addEventListener('click', async () => {
-      const evidencia = document.getElementById('capturedImage').src;
-      // tu lógica de confirmación original
-    });
-  }
-} // ✅ cierre correcto de initApp()
+if (confirmDelivery) {
+  confirmDelivery.addEventListener('click', async () => {
+    if (!selectedPaymentMethod) {
+      alert('Por favor selecciona un método de pago');
+      return;
+    }
+
+    try {
+      await db.collection('services').doc(currentServiceIdForEvidence).update({
+        estado: 'entregado',
+        evidenciaEntrega: document.getElementById('capturedImage').src,
+        metodoPago: selectedPaymentMethod,
+        fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert('Entrega confirmada con éxito');
+      closeEvidenceModal();
+    } catch (error) {
+      console.error('Error confirmando entrega:', error);
+      alert('Error al confirmar la entrega');
+    }
+  });
+}
+}
+ // ✅ cierre correcto de initApp()
 
 
 
@@ -2395,26 +2412,7 @@
       }
       window.selectPaymentMethod = selectPaymentMethod;
 
-       {
-        if (!selectedPaymentMethod) {
-          alert('Por favor selecciona un método de pago');
-          return;
-        }
-        
-        try {
-          await db.collection('services').doc(currentServiceIdForEvidence).update({
-            estado: 'entregado',
-            evidenciaEntrega: document.getElementById('capturedImage').src,
-            metodoPago: selectedPaymentMethod,
-            fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          alert('Entrega confirmada con éxito');
-          closeEvidenceModal();
-        }  catch (error) {
-          console.error('Error confirmando entrega:', error);
-          alert('Error al confirmar la entrega');
-        }
-      }
+     
 
   function showSection(section) {
   console.log("Mostrando sección:", section);
