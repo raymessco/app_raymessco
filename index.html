@@ -1214,7 +1214,32 @@
         appId: "1:829091900185:web:1c61887780ff2639a5f388",
         measurementId: "G-38Q9K6CV7D"
       };
-// Observador de autenticación central
+
+
+      // Inicializar Firebase
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      console.log("Firebase v8 inicializado correctamente");
+
+function handleAuthStateChange(user) {
+    const loginView = document.getElementById("login-view");
+    const appView = document.getElementById("app");
+    const userNameEl = document.getElementById("user-name");
+
+    if (user) {
+      console.log("✅ Usuario autenticado:", user.email);
+      if (loginView) loginView.classList.add("hidden");
+      if (appView) appView.classList.remove("hidden");
+      if (userNameEl) userNameEl.textContent = user.displayName || user.email;
+    } else {
+      console.log("⚠️ Usuario no autenticado");
+      if (loginView) loginView.classList.remove("hidden");
+      if (appView) appView.classList.add("hidden");
+    }
+  }
+
+  // Observador de autenticación central
 auth.onAuthStateChanged(user => {
   if (user) {
     console.log("✅ Usuario autenticado:", user.email);
@@ -1242,11 +1267,6 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-      // Inicializar Firebase
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-      const db = firebase.firestore();
-      console.log("Firebase v8 inicializado correctamente");
 
       // Estado global
       let currentUser = null;
