@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -992,77 +992,70 @@
         </div>
       </div>
 
+      </div>
+
       <div class="main-content">
+        
         <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
           <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
         </div>
 
-  </div>
-      <div id="filters" class="filters-container">
-    <button onclick="setFilter('all', this)" class="filter-btn">Todos</button>
-    <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
-    <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
-    <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
-    <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
-  </div>
+        <div id="filters" class="filters-container">
+            <button onclick="setFilter('all', this)" class="filter-btn">Todos</button>
+            <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
+            <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
+            <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
+            <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
+        </div>
 
+        <div id="services-section" class="services-grid"></div>
 
-<!-- Sección de servicios -->
-<div id="services-section" class="services-grid"></div>
+        <div id="financial-section" class="hidden">
+            <h2 class="section-title">Resumen financiero</h2>
+            <div class="financial-card">
+                <div class="financial-item">
+                    <span>Total ganado:</span>
+                    <span id="total-earned" class="text-gold">$0</span>
+                </div>
+                <div class="financial-item">
+                    <span>Total pendiente de pago:</span>
+                    <span id="total-pending" class="text-gold">$0</span>
+                </div>
+                <div class="financial-item">
+                    <span>Total pagado:</span>
+                    <span id="total-paid" class="text-gold">$0</span>
+                </div>
+            </div>
+            <h3 class="section-title">Detalle de servicios por día</h3>
+            <div id="financial-list"></div>
+        </div>
 
-<!-- Sección financiera -->
-<div id="financial-section" class="hidden">
-  <h2 class="section-title">Resumen financiero</h2>
-  <div class="financial-card">
-    <div class="financial-item">
-      <span>Total ganado:</span>
-      <span id="total-earned" class="text-gold">$0</span>
-    </div>
-    <div class="financial-item">
-      <span>Total pendiente de pago:</span>
-      <span id="total-pending" class="text-gold">$0</span>
-    </div>
-    <div class="financial-item">
-      <span>Total pagado:</span>
-      <span id="total-paid" class="text-gold">$0</span>
-    </div>
-  </div>
-  <h3 class="section-title">Detalle de servicios por día</h3>
-  <div id="financial-list"></div>
-</div>
+        <div id="pending-container" class="hidden">
+            <h2 class="section-title">Solicitudes de mensajero</h2>
+            <div id="pending-list"></div> </div>
 
-<!-- Solicitudes de mensajeros antiguas -->
-<div id="pending-container" class="hidden">
-  <h2 class="section-title">Solicitudes de mensajero</h2>
-  <div id="pending-list"></div> <!-- 👈 este ID es importante -->
-</div>
+        <div id="pending-mensajeros-section" class="hidden p-4">
+            <h2 class="section-title">Solicitudes de Mensajeros</h2>
+            <div id="pending-mensajeros-list"></div>
+        </div>
 
-<!-- Nueva sección para solicitudes de mensajeros -->
-<div id="pending-mensajeros-section" class="hidden p-4">
-  <h2 class="section-title">Solicitudes de Mensajeros</h2>
-  <div id="pending-mensajeros-list"></div>
-</div>
+        <div id="costos-section" class="hidden p-6">
+            <h2 class="text-2xl font-bold text-gold mb-4">Costos por empresa</h2>
+            <div id="costos-empresas" class="space-y-8"></div>
+        </div>
 
-<!-- Costos por empresa -->
-<div id="costos-section" class="hidden p-6">
-  <h2 class="text-2xl font-bold text-gold mb-4">Costos por empresa</h2>
-  <div id="costos-empresas" class="space-y-8"></div>
-</div>
+        <div id="cobros-section" class="hidden">
+            <h2 class="section-title">Cobros contra entrega</h2>
+            <div id="cobros-body"></div>
+        </div>
 
-<!-- Cobros contra entrega -->
-<div id="cobros-section" class="hidden">
-  <h2 class="section-title">Cobros contra entrega</h2>
-  <div id="cobros-body"></div>
-</div>
+        <div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
+            <i class="fas fa-user-clock"></i>
+            <span class="menu-item-text">Solicitudes mensajero</span>
+        </div>
 
-<!-- Botón de menú para solicitudes -->
-<div id="menu-pendientes" class="menu-item hidden" onclick="showSection('pending-mensajeros')">
-  <i class="fas fa-user-clock"></i>
-  <span class="menu-item-text">Solicitudes mensajero</span>
-</div>
+    </div> <div id="modal" class="modal-backdrop hidden">
 
-
-    <div id="modal" class="modal-backdrop hidden">
       <div class="modal-content">
         <button class="modal-close" onclick="closeModal()">
           <i class="fas fa-times"></i>
