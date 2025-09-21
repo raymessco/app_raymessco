@@ -1214,6 +1214,33 @@
         appId: "1:829091900185:web:1c61887780ff2639a5f388",
         measurementId: "G-38Q9K6CV7D"
       };
+// Observador de autenticación central
+auth.onAuthStateChanged(user => {
+  if (user) {
+    console.log("✅ Usuario autenticado:", user.email);
+
+    // Ocultar vista de login
+    document.getElementById("login-view").classList.add("hidden");
+
+    // Mostrar vista principal
+    document.getElementById("app").classList.remove("hidden");
+
+    // Mostrar nombre del usuario (si tienes este elemento)
+    const userNameEl = document.getElementById("user-name");
+    if (userNameEl) {
+      userNameEl.textContent = user.displayName || user.email;
+    }
+
+  } else {
+    console.log("⚠️ Usuario no autenticado");
+
+    // Mostrar login
+    document.getElementById("login-view").classList.remove("hidden");
+
+    // Ocultar app
+    document.getElementById("app").classList.add("hidden");
+  }
+});
 
       // Inicializar Firebase
       firebase.initializeApp(firebaseConfig);
