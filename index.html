@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
   <html lang="es">
   <head>
     <meta charset="utf-8" />
@@ -1552,8 +1552,13 @@ if (confirmDelivery) {
                 currentRole.toUpperCase().replace("_", " ");
               
               // 5. Configurar la visibilidad de los menús y funciones según el rol
-              updateUIByRole();
-              subscribeServicesByRole();
+            updateUIByRole();
+subscribeServicesByRole();
+// 6. Mostrar la sección de servicios por defecto
+showSection('services');
+
+// 7. Activar el filtro "Todos"
+setFilter('all', document.querySelector('.filter-btn'));
               
               console.log("🎯 Rol detectado:", currentRole);
               
@@ -1580,6 +1585,92 @@ if (confirmDelivery) {
         }
       });
 
+// ✅ FUNCIÓN CORREGIDA PARA ACTUALIZAR LA INTERFAZ SEGÚN EL ROL
+function updateUIByRole() {
+  console.log("🔄 Actualizando UI para rol:", currentRole);
+  
+  // Referencias a los elementos del DOM
+  const menuCostos = document.getElementById("menu-costos");
+  const menuCobros = document.getElementById("menu-cobros");
+  const menuPendientes = document.getElementById("menu-pendientes");
+  const menuFinanzasMensajero = document.getElementById("menu-finanzas-mensajero");
+  const roleBadge = document.getElementById("role-badge");
+  const pendingBanner = document.getElementById("pending-banner");
+  const adminActions = document.getElementById("admin-actions");
+  const filters = document.getElementById("filters");
+
+  // Función auxiliar para mostrar/ocultar elementos
+  const hide = (el) => el && el.classList.add("hidden");
+  const show = (el) => el && el.classList.remove("hidden");
+
+  // Ocultar todos los elementos primero
+  hide(menuCostos);
+  hide(menuCobros);
+  hide(menuPendientes);
+  hide(menuFinanzasMensajero);
+  hide(pendingBanner);
+  hide(adminActions);
+
+  // Mostrar filtros por defecto (para la sección de servicios)
+  if (filters) {
+    show(filters);
+  }
+
+  // Configurar según el rol
+  switch (currentRole) {
+    case "admin":
+      console.log("🔓 Configurando interfaz ADMIN");
+      show(menuCostos);
+      show(menuCobros);
+      show(menuPendientes);
+      show(adminActions);
+      break;
+
+    case "mensajero":
+      console.log("🚴 Configurando interfaz MENSAJERO");
+      show(menuFinanzasMensajero);
+      break;
+
+    case "pending_mensajero":
+      console.log("⏳ Configurando interfaz MENSAJERO PENDIENTE");
+      show(pendingBanner);
+      break;
+
+    default: // cliente
+      console.log("👤 Configurando interfaz CLIENTE");
+      // Los clientes solo ven servicios por defecto
+      break;
+  }
+
+  // Actualizar el badge del rol
+  if (roleBadge) {
+    roleBadge.textContent = currentRole.toUpperCase().replace("_", " ");
+    console.log("🏷️ Badge actualizado:", roleBadge.textContent);
+  }
+}
+
+// Hacerla disponible globalmente
+window.updateUIByRole = updateUIByRole;
+
+// Agrega esta función de diagnóstico al final de tu script
+function diagnoseUI() {
+  console.log("🔍 DIAGNÓSTICO DE INTERFAZ:");
+  console.log("currentRole:", currentRole);
+  console.log("currentUser:", currentUser ? currentUser.email : "null");
+  
+  const elementsToCheck = [
+    'menu-costos', 'menu-cobros', 'menu-pendientes', 
+    'menu-finanzas-mensajero', 'admin-actions', 'role-badge'
+  ];
+  
+  elementsToCheck.forEach(id => {
+    const el = document.getElementById(id);
+    console.log(`${id}:`, el ? (el.classList.contains('hidden') ? 'OCULTO' : 'VISIBLE') : 'NO ENCONTRADO');
+  });
+}
+
+// Llama a esta función después de updateUIByRole() en el observador
+diagnoseUI();
 
       function toggleSidebar() {
         sidebar.classList.toggle('open');
