@@ -2518,40 +2518,50 @@ diagnoseUI();
   function showSection(section) {
   console.log("Mostrando sección:", section);
 
+  // Ocultar todas las secciones
   const allSections = document.querySelectorAll(
     '#services-section, #financial-section, #pending-container, #pending-mensajeros-section, #costos-section, #cobros-section'
   );
-
   allSections.forEach(div => div.classList.add('hidden'));
 
-  const targetSection =
-    document.getElementById(`${section}-section`) ||
-    document.getElementById(`${section}-container`);
-
+  // Mostrar la sección objetivo
+  const targetSection = document.getElementById(`${section}-section`) || 
+                       document.getElementById(`${section}-container`);
   if (targetSection) targetSection.classList.remove('hidden');
 
-  // 👇 Filtros SOLO aquí
-  if (typeof filtersEl !== "undefined" && filtersEl) {
+  // Mostrar/ocultar filtros solo para servicios
+  const filtersEl = document.getElementById('filters');
+  if (filtersEl) {
     filtersEl.classList.toggle('hidden', section !== 'services');
   }
 
-  // 👇 Switch SOLO aquí
+  // 👇 EJECUTAR LA LÓGICA ESPECÍFICA DE CADA SECCIÓN
   switch (section) {
     case 'services':
-      console.log("➡️ Mostrando lógica de servicios");
+      console.log("➡️ Mostrando servicios");
+      subscribeServicesByRole(); // Recargar servicios
       break;
+      
     case 'financial':
       console.log("➡️ Mostrando lógica financiera");
+      renderFinancialSummary();
       break;
+      
     case 'pending-mensajeros':
       console.log("➡️ Mostrando solicitudes de mensajeros");
+      subscribePendingMensajeros();
       break;
+      
     case 'costos':
       console.log("➡️ Mostrando costos");
+      renderCostos(); // ✅ ESTA ES LA LÍNEA QUE FALTABA
       break;
+      
     case 'cobros':
       console.log("➡️ Mostrando cobros");
+      renderCobros();
       break;
+      
     default:
       console.log("⚠️ No hay lógica definida para:", section);
   }
@@ -2809,93 +2819,130 @@ window.showSection = showSection;
       window.rejectMensajero = rejectMensajero;
 
     
-  async function renderCostos() {
-    const section = document.getElementById('costos-section');
-    const empresasContainer = document.getElementById('costos-empresas');
+ async function renderCostos() {
+  console.log("📊 Iniciando renderCostos...");
+  
+  const section = document.getElementById('costos-section');
+  const empresasContainer = document.getElementById('costos-empresas');
 
-    section.classList.remove('hidden');
-    empresasContainer.innerHTML = '<p class="text-center text-gold">Cargando datos...</p>';
-
-    try {
-      const snapshot = await db.collection('services').get();
-
-      if (snapshot.empty) {
-        empresasContainer.innerHTML = '<p class="text-center text-gold">No hay servicios registrados.</p>';
-        return;
-      }
-
-      // Procesar datos por empresa
-      const dataPorEmpresa = {};
-
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const empresa = data.empresa || "Sin empresa";
-        const costo = parseFloat(data.costo || 0);
-
-        if (!dataPorEmpresa[empresa]) {
-          dataPorEmpresa[empresa] = {
-            total: 0,
-            servicios: [],
-          };
-        }
-
-        dataPorEmpresa[empresa].total += costo;
-        dataPorEmpresa[empresa].servicios.push({
-          direccion: data.entregar,
-          fecha: data.fechaCreacion?.toDate().toLocaleString('es-CO') || 'Sin fecha',
-          costo,
-        });
-      });
-
-      // Renderizar empresas
-      empresasContainer.innerHTML = '';
-
-      for (const [empresa, datos] of Object.entries(dataPorEmpresa)) {
-        let rows = '';
-        datos.servicios.forEach(serv => {
-          rows += `
-            <tr class="border-b border-gray-700">
-              <td class="p-2 whitespace-nowrap">${serv.direccion}</td>
-              <td class="p-2 whitespace-nowrap">${serv.fecha}</td>
-              <td class="p-2 text-right whitespace-nowrap">$${serv.costo.toLocaleString('es-CO')}</td>
-            </tr>
-          `;
-        });
-
-        empresasContainer.innerHTML += `
-          <div class="bg-gray-900 text-white rounded-lg shadow p-4">
-            <h3 class="text-xl font-semibold text-gold mb-4">${empresa}</h3>
-
-            <!-- Contenedor con scroll horizontal en móvil -->
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead>
-                  <tr class="bg-gray-800 text-gray-400">
-                    <th class="p-2 whitespace-nowrap">Dirección de Entrega</th>
-                    <th class="p-2 whitespace-nowrap">Fecha de Entrega</th>
-                    <th class="p-2 whitespace-nowrap text-right">Costo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${rows}
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Total por empresa -->
-            <div class="text-right text-gold font-bold mt-3">
-              Total: $${datos.total.toLocaleString('es-CO')}
-            </div>
-          </div>
-        `;
-      }
-    } catch (error) {
-      console.error("❌ Error cargando costos:", error);
-      empresasContainer.innerHTML = `<p class="text-center text-red-500">Error cargando datos</p>`;
-    }
+  if (!section || !empresasContainer) {
+    console.error("❌ No se encontraron los elementos del DOM para costos");
+    return;
   }
 
+  // Mostrar mensaje de carga
+  empresasContainer.innerHTML = '<p class="text-center text-gold">Cargando datos de costos...</p>';
 
+  try {
+    const snapshot = await db.collection('services').get();
+    console.log("📦 Servicios obtenidos:", snapshot.size);
+
+    if (snapshot.empty) {
+      empresasContainer.innerHTML = '<p class="text-center text-gold">No hay servicios registrados.</p>';
+      return;
+    }
+
+    // Procesar datos por empresa
+    const dataPorEmpresa = {};
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const empresa = data.empresa || "Sin empresa";
+      const costo = parseFloat(data.costo || 0);
+
+      if (!dataPorEmpresa[empresa]) {
+        dataPorEmpresa[empresa] = {
+          total: 0,
+          servicios: [],
+        };
+      }
+
+      dataPorEmpresa[empresa].total += costo;
+      dataPorEmpresa[empresa].servicios.push({
+        direccion: data.entregar || "No especificada",
+        fecha: data.fechaCreacion?.toDate()?.toLocaleString('es-CO') || 'Sin fecha',
+        costo,
+      });
+    });
+
+    console.log("🏢 Empresas procesadas:", Object.keys(dataPorEmpresa));
+
+    // Renderizar empresas
+    empresasContainer.innerHTML = '';
+
+    if (Object.keys(dataPorEmpresa).length === 0) {
+      empresasContainer.innerHTML = '<p class="text-center text-gold">No hay datos de costos para mostrar.</p>';
+      return;
+    }
+
+    for (const [empresa, datos] of Object.entries(dataPorEmpresa)) {
+      let rows = '';
+      datos.servicios.forEach(serv => {
+        rows += `
+          <tr class="border-b border-gray-700">
+            <td class="p-2 whitespace-nowrap">${serv.direccion}</td>
+            <td class="p-2 whitespace-nowrap">${serv.fecha}</td>
+            <td class="p-2 text-right whitespace-nowrap">$${serv.costo.toLocaleString('es-CO')}</td>
+          </tr>
+        `;
+      });
+
+      empresasContainer.innerHTML += `
+        <div class="bg-gray-900 text-white rounded-lg shadow p-4 mb-6">
+          <h3 class="text-xl font-semibold text-gold mb-4">${empresa}</h3>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-800 text-gray-400">
+                  <th class="p-2 whitespace-nowrap">Dirección de Entrega</th>
+                  <th class="p-2 whitespace-nowrap">Fecha</th>
+                  <th class="p-2 text-right whitespace-nowrap">Costo</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-right text-gold font-bold mt-3 text-lg">
+            Total: $${datos.total.toLocaleString('es-CO')}
+          </div>
+        </div>
+      `;
+    }
+
+    console.log("✅ Costos renderizados correctamente");
+
+  } catch (error) {
+    console.error("❌ Error cargando costos:", error);
+    empresasContainer.innerHTML = `
+      <p class="text-center text-red-500">
+        Error cargando datos de costos. Revisa la consola para más detalles.
+      </p>
+    `;
+  }
+}
+
+window.renderCostos = renderCostos;
+
+function diagnoseCostos() {
+  console.log("🔍 DIAGNÓSTICO COSTOS:");
+  console.log("currentRole:", currentRole);
+  console.log("Elemento costos-section:", document.getElementById('costos-section'));
+  console.log("Elemento costos-empresas:", document.getElementById('costos-empresas'));
+  console.log("¿Costos section visible?", !document.getElementById('costos-section').classList.contains('hidden'));
+}
+
+// Llama a esta función en showSection() dentro del case 'costos':
+switch(section) {
+  case 'costos':
+    console.log("➡️ Mostrando costos");
+    diagnoseCostos(); // 🔍 Diagnóstico
+    renderCostos();
+    break;
+}
 
   // También necesitamos implementar renderCobros() para la sección de cobros:
   async function renderCobros() {
