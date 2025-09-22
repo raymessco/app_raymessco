@@ -2572,53 +2572,50 @@ window.showSection = showSection;
 
 
 
-  function setFilter(filter, element) {
-    console.log("Filtro seleccionado:", filter);
-    console.log("Botón clickeado:", element);
 
-    // Actualizamos la variable global
-    currentFilter = filter;
+// Función para filtrar y actualizar servicios
+function renderServices() {
+  const container = document.getElementById('services-list');
+  container.innerHTML = ''; // Limpiar lista
 
-    // Quitar 'active' de todos los botones
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
+  // Filtrar servicios según currentFilter
+  const filtered = services.filter(service => {
+    if (currentFilter === 'all') return true;
+    return service.status === currentFilter;
+  });
 
-    // Agregar 'active' al botón que se clickeó
-    if (element instanceof HTMLElement) {
-      element.classList.add('active');
-    }
+  // Mostrar servicios filtrados
+  filtered.forEach(service => {
+    const div = document.createElement('div');
+    div.className = 'service-item';
+    div.textContent = `Servicio: ${service.name} - Estado: ${service.status}`;
+    container.appendChild(div);
+  });
+}
 
+
+function setFilter(filter, element) {
+  currentFilter = filter; // solo asignamos, no redeclaramos
+
+  // Quitar 'active' de todos los botones
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+
+  // Agregar 'active' al botón clickeado
+  if (element instanceof HTMLElement) {
+    element.classList.add('active');
   }
 
-    // Guardar el filtro seleccionado
+  // Actualizar lista de servicios según el filtro
+  renderServices();
+
+  console.log("Filtro actual:", currentFilter);
+}
+
+// Hacer la función global
+window.setFilter = setFilter;
 
 
-    // Quitar la clase 'active' de todos los botones
-    document.querySelectorAll('#filters .mobile-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-  function setActiveFilter(element) {
-    // Quitar 'active' de todos los botones
-    document.querySelectorAll('.filter-button').forEach(btn => {
-      btn.classList.remove('active');
-    });
 
-    // Agregar 'active' al botón clickeado
-    if (element instanceof HTMLElement) {
-      element.classList.add('active');
-    }
-  }
-
-
-    // Actualizar la lista según el filtro seleccionado
-    renderServices();
-
-  console.log("Valor actual de currentFilter:", currentFilter);
-  console.log("Servicios disponibles:", services);
-
-  // Hacer que setFilter esté disponible globalmente
-  window.setFilter = setFilter;
 
 
 
