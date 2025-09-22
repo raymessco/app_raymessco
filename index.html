@@ -1222,52 +1222,6 @@
       const db = firebase.firestore();
       console.log("Firebase v8 inicializado correctamente");
 
-function handleAuthStateChange(user) {
-    const loginView = document.getElementById("login-view");
-    const appView = document.getElementById("app");
-    const userNameEl = document.getElementById("user-name");
-
-    if (user) {
-      console.log("✅ Usuario autenticado:", user.email);
-      if (loginView) loginView.classList.add("hidden");
-      if (appView) appView.classList.remove("hidden");
-      if (userNameEl) userNameEl.textContent = user.displayName || user.email;
-    } else {
-      console.log("⚠️ Usuario no autenticado");
-      if (loginView) loginView.classList.remove("hidden");
-      if (appView) appView.classList.add("hidden");
-    }
-  }
-
-  // Observador de autenticación central
-auth.onAuthStateChanged(user => {
-  if (user) {
-    console.log("✅ Usuario autenticado:", user.email);
-
-    // Ocultar vista de login
-    document.getElementById("login-view").classList.add("hidden");
-
-    // Mostrar vista principal
-    document.getElementById("app").classList.remove("hidden");
-
-    // Mostrar nombre del usuario (si tienes este elemento)
-    const userNameEl = document.getElementById("user-name");
-    if (userNameEl) {
-      userNameEl.textContent = user.displayName || user.email;
-    }
-
-  } else {
-    console.log("⚠️ Usuario no autenticado");
-
-    // Mostrar login
-    document.getElementById("login-view").classList.remove("hidden");
-
-    // Ocultar app
-    document.getElementById("app").classList.add("hidden");
-  }
-});
-
-
       // Estado global
       let currentUser = null;
       let currentRole = null;
@@ -1569,53 +1523,62 @@ if (confirmDelivery) {
         }, err => console.error('Error en listener de perfil:', err));
       }
 
-     function updateUIByRole() {
-  const menuRegistrar = document.getElementById("menu-registrar");
-  const menuCostos = document.getElementById("menu-costos");
-  const menuCobros = document.getElementById("menu-cobros");
-  const menuPendientes = document.getElementById("menu-pendientes");
-  const menuFinanzasMensajero = document.getElementById("menu-finanzas-mensajero");
-  const fieldCostoClienteContainer = document.getElementById("field-costo-cliente-container");
-  const adminFields = document.getElementById("admin-fields");
-  const roleBadge = document.getElementById("role-badge");
-  const pendingBanner = document.getElementById("pending-banner");
+     // OBSERVADOR DE AUTENTICACIÓN CORREGIDO
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          console.log("✅ Usuario autenticado:", user.email);
 
-  const hide = el => el && el.classList.add("hidden");
-  const show = el => el && el.classList.remove("hidden");
+          try {
+            // 1. Ocultar login, mostrar app
+            document.getElementById("login-view").classList.add("hidden");
+            document.getElementById("app").classList.remove("hidden");
 
-  // Ocultar todo por defecto
-  hide(menuRegistrar);
-  hide(menuCostos);
-  hide(menuCobros);
-  hide(menuPendientes);
-  hide(menuFinanzasMensajero);
-  hide(fieldCostoClienteContainer);
-  hide(adminFields);
-  hide(pendingBanner);
+            // 2. Buscar datos del usuario en Firestore por UID (IMPORTANTE)
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            
+            if (userDoc.exists) {
+              const userData = userDoc.data();
+              console.log("📋 Datos de usuario:", userData);
+              
+              // 3. Establecer rol y nombre globales
+              currentRole = userData.role || 'cliente'; // Default to 'cliente' if role is missing
+              currentUser = user;
+              
+              // 4. Actualizar la interfaz de usuario
+              document.getElementById("user-name").textContent = 
+                userData.displayName || user.displayName || user.email;
+              
+              document.getElementById("role-badge").textContent = 
+                currentRole.toUpperCase().replace("_", " ");
+              
+              // 5. Configurar la visibilidad de los menús y funciones según el rol
+              updateUIByRole();
+              subscribeServicesByRole();
+              
+              console.log("🎯 Rol detectado:", currentRole);
+              
+            } else {
+              // Si el documento no existe, es un usuario nuevo, mostrar selector de rol
+              console.log("👤 Usuario nuevo, mostrando selector de rol");
+              showRoleSelection();
+            }
+            
+          } catch (error) {
+            console.error("❌ Error cargando datos de usuario:", error);
+            // Si hay un error, mostrar la app como cliente para evitar que se bloquee
+            currentRole = 'cliente';
+            updateUIByRole();
+          }
 
-  // Mostrar según el rol
-  if (currentRole === "admin") {
-    show(menuRegistrar);
-    show(menuCostos);
-    show(menuCobros);
-    show(menuPendientes);
-    show(adminFields);
-  } else if (currentRole === "mensajero") {
-    show(menuFinanzasMensajero);
-  } else if (currentRole === "pending_mensajero") {
-    show(pendingBanner);
-  } else {
-    show(menuRegistrar);
-    show(fieldCostoClienteContainer);
-  }
-
-  // Actualizar badge de rol
-  if (roleBadge) {
-    roleBadge.textContent = currentRole.toUpperCase().replace("_", " ");
-  } else {
-    console.warn("⚠️ No se encontró el elemento #role-badge");
-  }
-}
+        } else {
+          // Usuario no autenticado
+          console.log("⚠️ Usuario no autenticado");
+          document.getElementById("login-view").classList.remove("hidden");
+          document.getElementById("app").classList.add("hidden");
+          currentUser = null;
+          currentRole = null;
+        }
+      });
 
 
       function toggleSidebar() {
