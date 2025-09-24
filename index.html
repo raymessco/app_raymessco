@@ -980,6 +980,13 @@
       </div>
 
       <div id="filters" class="filters-container">
+        <div class="flex justify-between items-center mb-4">
+  <h2 class="section-title">Servicios</h2>
+  <button onclick="openModal()" 
+          class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg shadow">
+    ➕ Nuevo registro
+  </button>
+</div>
         <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
         <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
         <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
