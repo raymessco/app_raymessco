@@ -889,9 +889,6 @@
 <!-- Field costo cliente wrapper -->
 <div id="field-costo-cliente-container" class="hidden"></div>
 
-<!-- Select mensajero vacío (para que loadMensajerosList no tire) -->
-<select id="field-mensajero" class="hidden" name="uidMensajero"></select>
-
 <!-- Modal mínimo para crear/editar servicios -->
 <div id="modal" class="modal-backdrop hidden">
   <div class="modal-content">
@@ -908,16 +905,15 @@
         <input name="contacto" class="form-input" />
       </div>
       <div class="form-group">
-  <label for="field-mensajero">Mensajero</label>
-  <select id="field-mensajero" name="uidMensajero" class="form-input">
-    <option value="">Seleccionar mensajero</option>
-  </select>
-</div>
+        <label for="field-mensajero">Mensajero</label>
+        <select id="field-mensajero" name="uidMensajero" class="form-input">
+          <option value="">Seleccionar mensajero</option>
+        </select>
+      </div>
       <div class="form-group">
         <label>Teléfono</label>
         <input name="telefono" id="telefonoInput" class="form-input" />
       </div>
-
       <div class="form-group">
         <label>Recoger</label>
         <input name="recoger" class="form-input" />
@@ -944,6 +940,7 @@
     </form>
   </div>
 </div>
+
 <!-- =================== FIN PLACEHOLDERS =================== -->
 
    
@@ -1020,6 +1017,13 @@
         <i class="fas fa-times"></i>
       </button>
     </div>
+
+    <!-- 🔽 Aquí empieza la lista de opciones -->
+    <div id="menu-registrar" class="menu-item hidden" onclick="openModal(null)">
+  <i class="fas fa-plus-circle"></i>
+  <span class="menu-item-text">Registrar servicio</span>
+</div>
+
     
     <!-- Servicios -->
     <div class="menu-item" onclick="showSection('services')">
@@ -1649,11 +1653,11 @@ setFilter('all', document.querySelector('.filter-btn'));
         }
       });
 
-// ✅ FUNCIÓN CORREGIDA PARA ACTUALIZAR LA INTERFAZ SEGÚN EL ROL
+// ✅ FUNCIÓN CORREGIDA Y EXTENDIDA PARA ACTUALIZAR LA INTERFAZ SEGÚN EL ROL
 function updateUIByRole() {
   console.log("🔄 Actualizando UI para rol:", currentRole);
   
-  // Referencias a los elementos del DOM
+  // Referencias a los elementos del DOM existentes
   const menuCostos = document.getElementById("menu-costos");
   const menuCobros = document.getElementById("menu-cobros");
   const menuPendientes = document.getElementById("menu-pendientes");
@@ -1662,6 +1666,11 @@ function updateUIByRole() {
   const pendingBanner = document.getElementById("pending-banner");
   const adminActions = document.getElementById("admin-actions");
   const filters = document.getElementById("filters");
+
+  // ✅ Nuevos elementos
+  const menuRegistrar = document.getElementById("menu-registrar");
+  const adminFields = document.getElementById("admin-fields");
+  const costoClienteField = document.getElementById("field-costo-cliente-container");
 
   // Función auxiliar para mostrar/ocultar elementos
   const hide = (el) => el && el.classList.add("hidden");
@@ -1674,6 +1683,11 @@ function updateUIByRole() {
   hide(menuFinanzasMensajero);
   hide(pendingBanner);
   hide(adminActions);
+
+  // 🔽 También ocultamos los nuevos por defecto
+  hide(menuRegistrar);
+  hide(adminFields);
+  hide(costoClienteField);
 
   // Mostrar filtros por defecto (para la sección de servicios)
   if (filters) {
@@ -1688,11 +1702,15 @@ function updateUIByRole() {
       show(menuCobros);
       show(menuPendientes);
       show(adminActions);
+      show(menuRegistrar);       // 👈 admin puede registrar
+      show(adminFields);         // 👈 admin ve campos extra
+      show(costoClienteField);   // 👈 admin ve costo cliente
       break;
 
     case "mensajero":
       console.log("🚴 Configurando interfaz MENSAJERO");
       show(menuFinanzasMensajero);
+      // los mensajeros no ven registrar ni campos admin
       break;
 
     case "pending_mensajero":
@@ -1702,7 +1720,8 @@ function updateUIByRole() {
 
     default: // cliente
       console.log("👤 Configurando interfaz CLIENTE");
-      // Los clientes solo ven servicios por defecto
+      show(menuRegistrar);  // 👈 cliente puede registrar
+      // cliente no ve admin fields ni costo cliente
       break;
   }
 
@@ -1715,6 +1734,7 @@ function updateUIByRole() {
 
 // Hacerla disponible globalmente
 window.updateUIByRole = updateUIByRole;
+
 
 // Agrega esta función de diagnóstico al final de tu script
 function diagnoseUI() {
