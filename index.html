@@ -979,7 +979,8 @@
         <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
       </div>
 
-<div class="flex justify-between items-center mb-4">
+<!-- Encabezado Servicios -->
+<div id="services-header" class="flex justify-between items-center mb-4">
   <h2 class="section-title">Servicios</h2>
   <button onclick="openModal()" 
           class="bg-gold text-black font-bold py-2 px-4 rounded-lg hover:bg-gold-light transition duration-200 flex items-center gap-2">
@@ -987,16 +988,18 @@
   </button>
 </div>
 
-      <div id="filters" class="filters-container">
-                <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
-        <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
-        <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
-        <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
-        <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
-      </div>
+<!-- Filtros -->
+<div id="filters" class="filters-container">
+  <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
+  <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
+  <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
+  <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
+  <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
+</div>
 
-      
-      <div id="services-section" class="services-grid"></div>
+<!-- Contenedor donde se renderizan los servicios -->
+<div id="services-section" class="services-grid"></div>
+
 
       <div id="financial-section" class="hidden">
         <h2 class="section-title">Resumen financiero</h2>
@@ -1117,6 +1120,109 @@
       </form>
     </div>
   </div>
+
+<!-- Modal de Nuevo Servicio -->
+<div id="modal" class="modal-backdrop hidden">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">
+      <i class="fas fa-times"></i>
+    </button>
+    
+    <div class="modal-header">
+      <h2 class="modal-title">Nuevo Servicio de Mensajería</h2>
+    </div>
+    
+    <form id="service-form">
+      <!-- Empresa / Cliente -->
+      <div class="form-group">
+        <label class="form-label">Empresa / Cliente</label>
+        <input type="text" name="empresaCliente" class="form-input" placeholder="Ej. Mi Empresa S.A." required>
+      </div>
+
+      <!-- Contacto -->
+      <div class="form-group">
+        <label class="form-label">Contacto</label>
+        <input type="text" name="contacto" class="form-input" placeholder="Nombre de contacto">
+      </div>
+
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label class="form-label">Teléfono</label>
+        <input type="text" name="telefono" class="form-input" placeholder="+57...">
+      </div>
+
+      <!-- Dirección de recogida -->
+      <div class="form-group">
+        <label class="form-label">Dirección de recogida</label>
+        <input type="text" name="recoger" class="form-input" placeholder="Lugar de recogida">
+      </div>
+
+      <!-- Dirección de entrega -->
+      <div class="form-group">
+        <label class="form-label">Dirección de entrega</label>
+        <input type="text" name="entregar" class="form-input" placeholder="Lugar de entrega">
+      </div>
+
+      <!-- Barrio / Municipio -->
+      <div class="form-group">
+        <label class="form-label">Barrio / Municipio</label>
+        <input type="text" name="barrioMunicipio" class="form-input" placeholder="Barrio o municipio">
+      </div>
+
+      <!-- Volumen -->
+      <div class="form-group">
+        <label class="form-label">Volumen</label>
+        <input type="text" name="volumen" class="form-input" placeholder="Tamaño / Peso">
+      </div>
+
+      <!-- Observaciones -->
+      <div class="form-group">
+        <label class="form-label">Observaciones</label>
+        <textarea name="observaciones" class="form-input" placeholder="Notas adicionales"></textarea>
+      </div>
+
+      <!-- Costo -->
+      <div class="form-group">
+        <label class="form-label">Costo del servicio</label>
+        <input type="number" step="0.01" name="costoCliente" class="form-input" placeholder="$0">
+      </div>
+
+      <!-- Cobro contra entrega -->
+      <div class="form-group form-checkbox">
+        <input type="checkbox" id="cobrar-check">
+        <label for="cobrar-check">Cobrar producto contra entrega</label>
+      </div>
+      <div id="cobrar-field-container" class="form-group hidden">
+        <label class="form-label">Monto a cobrar</label>
+        <input type="number" step="0.01" name="cobrarProducto" class="form-input" placeholder="$0">
+      </div>
+
+      <!-- Asignar mensajero (visible a todos, editable por admin) -->
+      <div class="form-group">
+        <label class="form-label">Asignar Mensajero</label>
+        <select id="field-mensajero" name="uidMensajero" class="form-input"></select>
+      </div>
+
+      <!-- Pago al mensajero -->
+      <div class="form-group">
+        <label class="form-label">Pago al Mensajero</label>
+        <input type="number" step="0.01" name="pagoMensajero" class="form-input" placeholder="$0">
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+        <button type="button" onclick="closeModal()" class="btn-cancel">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
 
   <div id="roleChoiceModal" class="modal-backdrop hidden">
     <div class="modal-content" style="max-width: 500px;">
