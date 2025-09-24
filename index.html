@@ -1718,5 +1718,117 @@
 
     document.addEventListener('DOMContentLoaded', initApp);
   </script>
-</body>
+
+<!-- 📋 Modal Formulario de Servicio -->
+<div id="service-modal" class="modal-backdrop hidden">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="modal-header">
+      <h2 class="modal-title" id="service-modal-title">Nuevo servicio</h2>
+    </div>
+    <form id="service-form" onsubmit="handleServiceSubmit(event)">
+      
+      <!-- Empresa / Cliente -->
+      <div class="form-group">
+        <label class="form-label" for="empresaCliente">Empresa / Cliente</label>
+        <input type="text" id="empresaCliente" name="empresaCliente" class="form-input" placeholder="Ej: Farmacia Central">
+      </div>
+      
+      <!-- Contacto -->
+      <div class="form-group">
+        <label class="form-label" for="contacto">Contacto</label>
+        <input type="text" id="contacto" name="contacto" class="form-input" placeholder="Nombre del contacto">
+      </div>
+      
+      <!-- Teléfono -->
+      <div class="form-group">
+        <label class="form-label" for="telefono">Teléfono</label>
+        <input type="tel" id="telefono" name="telefono" class="form-input" placeholder="3101234567">
+      </div>
+      
+      <!-- Dirección de recogida -->
+      <div class="form-group">
+        <label class="form-label" for="recoger">Dirección de recogida</label>
+        <input type="text" id="recoger" name="recoger" class="form-input" placeholder="Calle 10 #20-30">
+      </div>
+      
+      <!-- Dirección de entrega -->
+      <div class="form-group">
+        <label class="form-label" for="entregar">Dirección de entrega</label>
+        <input type="text" id="entregar" name="entregar" class="form-input" placeholder="Carrera 15 #45-60">
+      </div>
+      
+      <!-- Barrio / Municipio -->
+      <div class="form-group">
+        <label class="form-label" for="barrioMunicipio">Barrio / Municipio</label>
+        <input type="text" id="barrioMunicipio" name="barrioMunicipio" class="form-input" placeholder="Ej: Suba, Bogotá">
+      </div>
+      
+      <!-- Volumen -->
+      <div class="form-group">
+        <label class="form-label" for="volumen">Volumen</label>
+        <input type="text" id="volumen" name="volumen" class="form-input" placeholder="Ej: Caja mediana, 2kg">
+      </div>
+      
+      <!-- Observaciones -->
+      <div class="form-group">
+        <label class="form-label" for="observaciones">Observaciones</label>
+        <textarea id="observaciones" name="observaciones" class="form-input" placeholder="Instrucciones adicionales"></textarea>
+      </div>
+      
+      <!-- Costo -->
+      <div class="form-group">
+        <label class="form-label" for="costo">Costo de la mensajería</label>
+        <input type="number" id="costo" name="costo" class="form-input" placeholder="Ej: 8000">
+      </div>
+      
+      <!-- Cobro contra entrega -->
+      <div class="form-group form-checkbox">
+        <input type="checkbox" id="cobrar-check" onchange="toggleCobrarField(this)">
+        <label for="cobrar-check">¿Cobrar producto contra entrega?</label>
+      </div>
+      <div id="cobrar-field-container" class="form-group hidden">
+        <label class="form-label" for="cobrarProducto">Monto a cobrar</label>
+        <input type="number" id="cobrarProducto" name="cobrarProducto" class="form-input" placeholder="Ej: 50000">
+      </div>
+      
+      <!-- Seleccionar mensajero -->
+      <div class="form-group">
+        <label class="form-label" for="uidMensajero">Mensajero asignado</label>
+        <select id="uidMensajero" name="uidMensajero" class="form-input">
+          <option value="">-- Seleccionar --</option>
+        </select>
+      </div>
+      
+      <!-- Pago al mensajero -->
+      <div class="form-group">
+        <label class="form-label" for="pagoMensajero">Pago al mensajero</label>
+        <input type="number" id="pagoMensajero" name="pagoMensajero" class="form-input" placeholder="Ej: 6000">
+      </div>
+      
+      <!-- Botones -->
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+        <button type="button" onclick="closeModal()" class="btn-cancel">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Mostrar / ocultar campo de cobro
+  function toggleCobrarField(checkbox) {
+    const field = document.getElementById('cobrar-field-container');
+    field.classList.toggle('hidden', !checkbox.checked);
+  }
+</script>
+
+
+</body> 
 </html>
