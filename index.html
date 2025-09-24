@@ -979,21 +979,23 @@
         <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
       </div>
 
-      <div id="filters" class="filters-container">
-        <div class="flex justify-between items-center mb-4">
+<div class="flex justify-between items-center mb-4">
   <h2 class="section-title">Servicios</h2>
   <button onclick="openModal()" 
-          class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded-lg shadow">
-    ➕ Nuevo registro
+          class="bg-gold text-black font-bold py-2 px-4 rounded-lg hover:bg-gold-light transition duration-200 flex items-center gap-2">
+    <i class="fas fa-plus"></i> Nuevo registro
   </button>
 </div>
-        <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
+
+      <div id="filters" class="filters-container">
+                <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
         <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
         <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
         <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
         <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
       </div>
 
+      
       <div id="services-section" class="services-grid"></div>
 
       <div id="financial-section" class="hidden">
