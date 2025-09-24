@@ -875,6 +875,77 @@
   </head>
   <body>
 
+
+    <!-- =================== PLACEHOLDERS MÍNIMOS PARA EVITAR ERRORES =================== -->
+<!-- Menu registrar (sidebar) -->
+<div id="menu-registrar" class="menu-item hidden" onclick="openModal(null)">
+  <i class="fas fa-plus-circle"></i>
+  <span class="menu-item-text">Registrar</span>
+</div>
+
+<!-- Admin fields placeholder -->
+<div id="admin-fields" class="hidden"></div>
+
+<!-- Field costo cliente wrapper -->
+<div id="field-costo-cliente-container" class="hidden"></div>
+
+<!-- Select mensajero vacío (para que loadMensajerosList no tire) -->
+<select id="field-mensajero" class="hidden" name="uidMensajero"></select>
+
+<!-- Modal mínimo para crear/editar servicios -->
+<div id="modal" class="modal-backdrop hidden">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">✖</button>
+    <h2 class="modal-title">Servicio (placeholder)</h2>
+
+    <form id="service-form">
+      <div class="form-group">
+        <label>Empresa / Cliente</label>
+        <input name="empresaCliente" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label>Contacto</label>
+        <input name="contacto" class="form-input" />
+      </div>
+      <div class="form-group">
+  <label for="field-mensajero">Mensajero</label>
+  <select id="field-mensajero" name="uidMensajero" class="form-input">
+    <option value="">Seleccionar mensajero</option>
+  </select>
+</div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input name="telefono" id="telefonoInput" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label>Recoger</label>
+        <input name="recoger" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label>Entregar</label>
+        <input name="entregar" class="form-input" />
+      </div>
+
+      <div class="form-checkbox">
+        <input type="checkbox" id="cobrar-check" />
+        <label for="cobrar-check">Cobrar contra entrega</label>
+      </div>
+
+      <div id="cobrar-field-container" class="hidden">
+        <label>Monto a cobrar</label>
+        <input name="cobrarProducto" class="form-input" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">Guardar</button>
+        <button type="button" onclick="closeModal()" class="btn-cancel">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- =================== FIN PLACEHOLDERS =================== -->
+
    
   <!-- Botón visible solo para el administrador -->
   <div id="admin-actions" class="mt-4 hidden text-right">
@@ -994,12 +1065,12 @@
     </div>
 
     <div id="filters" class="filters-container">
-      <button onclick="setFilter('all', this)" class="filter-btn">Todos</button>
-      <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
-      <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
-      <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
-      <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
-    </div>
+    <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
+    <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
+    <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
+    <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
+    <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
+</div>
 
     <div id="services-section" class="services-grid"></div>
 
@@ -1197,13 +1268,7 @@
         servicesEl.innerHTML = skeletonHTML;
       }
 
-      // Modificar la función subscribeServicesByRole
-      function subscribeServicesByRole() {
-        const servicesEl = document.getElementById('services-section');
-        
-        // Mostrar esqueleto de carga inmediatamente
-        showServicesSkeleton(); }
-
+      
       // Configuración de Firebase
       const firebaseConfig = {
         apiKey: "AIzaSyCkjLdn1NYI5eApE4N5ylkGJnlYsmO5hq4",
@@ -1214,6 +1279,7 @@
         appId: "1:829091900185:web:1c61887780ff2639a5f388",
         measurementId: "G-38Q9K6CV7D"
       };
+
 
       // Inicializar Firebase
       firebase.initializeApp(firebaseConfig);
@@ -1255,63 +1321,127 @@
       const mensajeroSelect = document.getElementById('field-mensajero');
 
       // Inicializar la aplicación
-      function initApp() {
-        // Manejar el resultado de la autenticación después de la redirección
-        auth.getRedirectResult()
-          .then((result) => {
-            if (result.user) {
-              console.log("Autenticación exitosa tras redirección:", result.user.email);
-              showAuthStatus("¡Autenticación exitosa!", false);
-            }
-          }).catch((error) => {
-            console.error("Error en getRedirectResult:", error);
-            let errorMessage = "Error de autenticación";
-            if (error.code) {
-              errorMessage = `Error: ${error.message}`;
-            }
-            showAuthStatus(errorMessage, true);
-          });
+     function initApp() {
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const closeSidebarBtn = document.querySelector('.close-sidebar');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const sidebar = document.getElementById('sidebar');
+  const installButton = document.getElementById('install-button');
 
-        // Event listeners para la interfaz
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        closeSidebarBtn.addEventListener('click', toggleSidebar);
-        sidebarBackdrop.addEventListener('click', toggleSidebar);
-        
-        document.getElementById('cobrar-check').addEventListener('change', (e) => {
-          cobrarFieldContainer.classList.toggle('hidden', !e.target.checked);
-        });
-        
-        document.getElementById('service-form').addEventListener('submit', handleServiceSubmit);
-        document.getElementById('profile-form').addEventListener('submit', handleProfileUpdate);
-        document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
-        document.getElementById('btn-google').addEventListener('click', signInWithGoogle);
-        
-        // Lógica para instalación PWA
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          installButton.classList.remove('hidden');
-        });
-        
-        installButton.addEventListener('click', async () => {
-          if (!deferredPrompt) return;
-          
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          
-          if (outcome === 'accepted') {
-            installButton.classList.add('hidden');
-          }
-          deferredPrompt = null;
-        });
-        
-        // Observador de autenticación (central)
-        auth.onAuthStateChanged(handleAuthStateChange);
+  // Sidebar
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', toggleSidebar);
+  }
+  if (closeSidebarBtn) {
+    closeSidebarBtn.addEventListener('click', toggleSidebar);
+  }
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', toggleSidebar);
+  }
 
-      // Registrar Service Worker
-  
+  // Cobrar producto
+  const cobrarCheck = document.getElementById('cobrar-check');
+  const cobrarFieldContainer = document.getElementById('cobrar-field-container');
+  if (cobrarCheck) {
+    cobrarCheck.addEventListener('change', (e) => {
+      cobrarFieldContainer.classList.toggle('hidden', !e.target.checked);
+    });
+  }
 
-      }
+  // Formularios
+  const serviceForm = document.getElementById('service-form');
+if (serviceForm) {
+  serviceForm.addEventListener('submit', handleServiceSubmit);
+}
+
+  const profileForm = document.getElementById('profile-form');
+if (profileForm) {
+  profileForm.addEventListener('submit', handleProfileUpdate);
+}
+
+
+  // Botón logout
+ const logoutBtn = document.getElementById('btn-logout');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => auth.signOut());
+}
+
+  // Botón Google
+  const googleBtn = document.getElementById('btn-google');
+if (googleBtn) {
+  googleBtn.addEventListener('click', signInWithGoogle);
+}
+
+  // Instalar PWA
+  if (installButton) {
+  installButton.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      installButton.classList.add('hidden');
+    }
+    deferredPrompt = null;
+  });
+}
+
+  // Capturar evidencia
+  const captureBtn = document.getElementById('capture-btn');
+  if (captureBtn) {
+    captureBtn.addEventListener('click', () => {
+      const video = document.getElementById('videoElement');
+      const canvas = document.getElementById('canvasElement');
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
+      document.getElementById('captured-image-container').classList.remove('hidden');
+      document.getElementById('videoElement').classList.add('hidden');
+      document.getElementById('capture-btn').classList.add('hidden');
+      document.getElementById('confirm-delivery').disabled = false;
+    });
+  }
+
+  const retakeBtn = document.getElementById('retake-btn');
+  if (retakeBtn) {
+    retakeBtn.addEventListener('click', () => {
+      document.getElementById('captured-image-container').classList.add('hidden');
+      document.getElementById('videoElement').classList.remove('hidden');
+      document.getElementById('capture-btn').classList.remove('hidden');
+      document.getElementById('confirm-delivery').disabled = true;
+    });
+  }
+
+  const confirmDelivery = document.getElementById('confirm-delivery');
+if (confirmDelivery) {
+  confirmDelivery.addEventListener('click', async () => {
+    if (!selectedPaymentMethod) {
+      alert('Por favor selecciona un método de pago');
+      return;
+    }
+
+    try {
+      await db.collection('services').doc(currentServiceIdForEvidence).update({
+        estado: 'entregado',
+        evidenciaEntrega: document.getElementById('capturedImage').src,
+        metodoPago: selectedPaymentMethod,
+        fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert('Entrega confirmada con éxito');
+      closeEvidenceModal();
+    } catch (error) {
+      console.error('Error confirmando entrega:', error);
+      alert('Error al confirmar la entrega');
+    }
+  });
+}
+}
+ // ✅ cierre correcto de initApp()
+
+
+
 
 
       // Función para iniciar sesión con Google (Popup con fallback a Redirect)
@@ -1457,54 +1587,154 @@
         }, err => console.error('Error en listener de perfil:', err));
       }
 
-     function updateUIByRole() {
-  const menuRegistrar = document.getElementById("menu-registrar");
+     // OBSERVADOR DE AUTENTICACIÓN CORREGIDO
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          console.log("✅ Usuario autenticado:", user.email);
+
+          try {
+            // 1. Ocultar login, mostrar app
+            document.getElementById("login-view").classList.add("hidden");
+            document.getElementById("app").classList.remove("hidden");
+
+            // 2. Buscar datos del usuario en Firestore por UID (IMPORTANTE)
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            
+            if (userDoc.exists) {
+              const userData = userDoc.data();
+              console.log("📋 Datos de usuario:", userData);
+              
+              // 3. Establecer rol y nombre globales
+              currentRole = userData.role || 'cliente'; // Default to 'cliente' if role is missing
+              currentUser = user;
+              
+              // 4. Actualizar la interfaz de usuario
+              document.getElementById("user-name").textContent = 
+                userData.displayName || user.displayName || user.email;
+              
+              document.getElementById("role-badge").textContent = 
+                currentRole.toUpperCase().replace("_", " ");
+              
+              // 5. Configurar la visibilidad de los menús y funciones según el rol
+            updateUIByRole();
+subscribeServicesByRole();
+// 6. Mostrar la sección de servicios por defecto
+showSection('services');
+
+// 7. Activar el filtro "Todos"
+setFilter('all', document.querySelector('.filter-btn'));
+              
+              console.log("🎯 Rol detectado:", currentRole);
+              
+            } else {
+              // Si el documento no existe, es un usuario nuevo, mostrar selector de rol
+              console.log("👤 Usuario nuevo, mostrando selector de rol");
+              showRoleSelection();
+            }
+            
+          } catch (error) {
+            console.error("❌ Error cargando datos de usuario:", error);
+            // Si hay un error, mostrar la app como cliente para evitar que se bloquee
+            currentRole = 'cliente';
+            updateUIByRole();
+          }
+
+        } else {
+          // Usuario no autenticado
+          console.log("⚠️ Usuario no autenticado");
+          document.getElementById("login-view").classList.remove("hidden");
+          document.getElementById("app").classList.add("hidden");
+          currentUser = null;
+          currentRole = null;
+        }
+      });
+
+// ✅ FUNCIÓN CORREGIDA PARA ACTUALIZAR LA INTERFAZ SEGÚN EL ROL
+function updateUIByRole() {
+  console.log("🔄 Actualizando UI para rol:", currentRole);
+  
+  // Referencias a los elementos del DOM
   const menuCostos = document.getElementById("menu-costos");
   const menuCobros = document.getElementById("menu-cobros");
   const menuPendientes = document.getElementById("menu-pendientes");
   const menuFinanzasMensajero = document.getElementById("menu-finanzas-mensajero");
-  const fieldCostoClienteContainer = document.getElementById("field-costo-cliente-container");
-  const adminFields = document.getElementById("admin-fields");
   const roleBadge = document.getElementById("role-badge");
   const pendingBanner = document.getElementById("pending-banner");
+  const adminActions = document.getElementById("admin-actions");
+  const filters = document.getElementById("filters");
 
-  const hide = el => el && el.classList.add("hidden");
-  const show = el => el && el.classList.remove("hidden");
+  // Función auxiliar para mostrar/ocultar elementos
+  const hide = (el) => el && el.classList.add("hidden");
+  const show = (el) => el && el.classList.remove("hidden");
 
-  // Ocultar todo por defecto
-  hide(menuRegistrar);
+  // Ocultar todos los elementos primero
   hide(menuCostos);
   hide(menuCobros);
   hide(menuPendientes);
   hide(menuFinanzasMensajero);
-  hide(fieldCostoClienteContainer);
-  hide(adminFields);
   hide(pendingBanner);
+  hide(adminActions);
 
-  // Mostrar según el rol
-  if (currentRole === "admin") {
-    show(menuRegistrar);
-    show(menuCostos);
-    show(menuCobros);
-    show(menuPendientes);
-    show(adminFields);
-  } else if (currentRole === "mensajero") {
-    show(menuFinanzasMensajero);
-  } else if (currentRole === "pending_mensajero") {
-    show(pendingBanner);
-  } else {
-    show(menuRegistrar);
-    show(fieldCostoClienteContainer);
+  // Mostrar filtros por defecto (para la sección de servicios)
+  if (filters) {
+    show(filters);
   }
 
-  // Actualizar badge de rol
+  // Configurar según el rol
+  switch (currentRole) {
+    case "admin":
+      console.log("🔓 Configurando interfaz ADMIN");
+      show(menuCostos);
+      show(menuCobros);
+      show(menuPendientes);
+      show(adminActions);
+      break;
+
+    case "mensajero":
+      console.log("🚴 Configurando interfaz MENSAJERO");
+      show(menuFinanzasMensajero);
+      break;
+
+    case "pending_mensajero":
+      console.log("⏳ Configurando interfaz MENSAJERO PENDIENTE");
+      show(pendingBanner);
+      break;
+
+    default: // cliente
+      console.log("👤 Configurando interfaz CLIENTE");
+      // Los clientes solo ven servicios por defecto
+      break;
+  }
+
+  // Actualizar el badge del rol
   if (roleBadge) {
     roleBadge.textContent = currentRole.toUpperCase().replace("_", " ");
-  } else {
-    console.warn("⚠️ No se encontró el elemento #role-badge");
+    console.log("🏷️ Badge actualizado:", roleBadge.textContent);
   }
 }
 
+// Hacerla disponible globalmente
+window.updateUIByRole = updateUIByRole;
+
+// Agrega esta función de diagnóstico al final de tu script
+function diagnoseUI() {
+  console.log("🔍 DIAGNÓSTICO DE INTERFAZ:");
+  console.log("currentRole:", currentRole);
+  console.log("currentUser:", currentUser ? currentUser.email : "null");
+  
+  const elementsToCheck = [
+    'menu-costos', 'menu-cobros', 'menu-pendientes', 
+    'menu-finanzas-mensajero', 'admin-actions', 'role-badge'
+  ];
+  
+  elementsToCheck.forEach(id => {
+    const el = document.getElementById(id);
+    console.log(`${id}:`, el ? (el.classList.contains('hidden') ? 'OCULTO' : 'VISIBLE') : 'NO ENCONTRADO');
+  });
+}
+
+// Llama a esta función después de updateUIByRole() en el observador
+diagnoseUI();
 
       function toggleSidebar() {
         sidebar.classList.toggle('open');
@@ -1722,31 +1952,38 @@
 
 
 
-      async function loadMensajerosList() {
-        try {
-          const mensajerosSnapshot = await db.collection('users')
-            .where('role', 'in', ['mensajero', 'admin'])
-            .get();
-          
-          mensajerosList = [];
-          mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
-          
-          mensajerosSnapshot.forEach(doc => {
-            const data = doc.data();
-            mensajerosList.push({
-              id: doc.id,
-              displayName: data.displayName || data.email || doc.id
-            });
-            
-            const option = document.createElement('option');
-            option.value = doc.id;
-            option.textContent = data.displayName || data.email || doc.id;
-            mensajeroSelect.appendChild(option);
-          });
-        } catch (error) {
-          console.error('Error cargando mensajeros:', error);
-        }
-      }
+  async function loadMensajerosList() {
+  // Verificar si el select existe en el DOM
+  if (!mensajeroSelect) {
+    console.warn("⚠️ No se encontró #field-mensajero en el DOM. loadMensajerosList cancelado.");
+    return;
+  }
+
+  try {
+    const mensajerosSnapshot = await db.collection('users')
+      .where('role', 'in', ['mensajero', 'admin'])
+      .get();
+
+    mensajerosList = [];
+    mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
+
+    mensajerosSnapshot.forEach(doc => {
+      const data = doc.data();
+      mensajerosList.push({
+        id: doc.id,
+        displayName: data.displayName || data.email || doc.id
+      });
+
+      const option = document.createElement('option');
+      option.value = doc.id;
+      option.textContent = data.displayName || data.email || doc.id;
+      mensajeroSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('❌ Error cargando mensajeros:', error);
+  }
+}
+
 
       function subscribeServicesByRole() {
     const servicesEl = document.getElementById('services-section');
@@ -1862,231 +2099,223 @@
     servicesEl.innerHTML = '<div class="text-center text-gold">Rol no reconocido</div>';
   }
 
-  function renderServices(data) {
-  // 🔹 Contenedor donde se mostrarán los servicios
-   const servicesEl = document.getElementById('services-section');
-        if (!servicesEl) return;
+function renderServices(data) {
+    const servicesEl = document.getElementById('services-section');
+    if (!servicesEl) return;
 
-        // Si no hay datos o está vacío, mantener el esqueleto hasta que lleguen datos reales
-        if (!data || data.length === 0) {
-          // No actualizamos la UI, mantenemos el esqueleto
-          // para evitar el parpadeo entre "cargando" y "no hay servicios"
-          return;
+    // Si se pasan datos nuevos, actualizar la lista global
+    if (data !== undefined) {
+        services = data;
+    }
+
+    // Si no hay servicios, mostrar mensaje
+    if (!services || services.length === 0) {
+        servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
+        return;
+    }
+
+    // 🔥 FILTRAR SERVICIOS SEGÚN currentFilter
+    let filteredServices = services;
+    
+    if (currentFilter && currentFilter !== 'all') {
+        filteredServices = services.filter(service => {
+            const estado = (service.estado || '').toLowerCase();
+            const filtro = currentFilter.toLowerCase();
+            return estado === filtro;
+        });
+    }
+
+    console.log(`Filtro aplicado: ${currentFilter}`);
+    console.log(`Servicios totales: ${services.length}, Filtrados: ${filteredServices.length}`);
+
+    // Si el filtro no tiene resultados
+    if (filteredServices.length === 0) {
+        servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con estado '${currentFilter}'</div>`;
+        return;
+    }
+
+    // Limpiar el contenedor antes de renderizar
+    servicesEl.innerHTML = '';
+
+    // Renderizar servicios filtrados
+    filteredServices.forEach(service => {
+        const serviceCard = document.createElement('div');
+        serviceCard.className = 'service-card';
+
+        let actionsHTML = '';
+        let statusClass = `status-${(service.estado || '').replace('_', '')}`;
+
+        // --- Fecha de creación ---
+        let fechaCreacion = 'Fecha no disponible';
+        if (service.fechaCreacion && typeof service.fechaCreacion.toDate === 'function') {
+            fechaCreacion = service.fechaCreacion.toDate().toLocaleString('es-CO');
         }
 
-  console.log("Datos recibidos en renderServices:", data);
+        // --- Fecha de entrega ---
+        let fechaEntregaHTML = '';
+        if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
+            fechaEntregaHTML = `
+                <div class="service-date">
+                    <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
+                </div>
+            `;
+        }
 
-  // Actualiza la variable global `services` solo si recibimos nuevos datos
-  if (data !== undefined) {
-    services = data;
-  }
+        // --- Evidencia y método de pago ---
+        let evidenciaHTML = '';
+        if (service.estado === 'entregado' && currentRole === 'cliente') {
+            if (service.evidenciaEntrega) {
+                evidenciaHTML = `
+                    <div class="service-detail">
+                        <i class="fas fa-image"></i>
+                        <div class="service-detail-content">
+                            <strong>Evidencia de entrega:</strong><br>
+                            <button onclick="openEvidenceView('${service.evidenciaEntrega}')"
+                                    class="text-blue-600 underline hover:text-blue-800">
+                                Ver foto de evidencia
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
 
-  // Si no hay servicios, mostrar mensaje
-  if (!services || services.length === 0) {
-    servicesEl.innerHTML = '<div class="text-center text-gold">No hay servicios para mostrar</div>';
-    return;
-  }
+            if (service.metodoPago) {
+                evidenciaHTML += `
+                    <div class="service-detail">
+                        <i class="fas fa-credit-card"></i>
+                        <div class="service-detail-content">
+                            <strong>Método de pago:</strong> ${service.metodoPago}
+                        </div>
+                    </div>
+                `;
+            }
+        }
 
-  services.forEach(s => console.log("Estado desde Firebase:", s.estado));
+        // --- Acciones según estado y rol ---
+        switch (service.estado) {
+            case 'pendiente':
+                if (currentRole === 'mensajero') {
+                    actionsHTML = `<button class="btn-primary action-btn" onclick="takeService('${service.id}')">Tomar servicio</button>`;
+                } else if (currentRole === 'admin' || currentRole === 'cliente') {
+                    actionsHTML = `
+                        <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
+                        <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
+                    `;
+                }
+                break;
 
-  // Filtrar por estado actual
-  let filteredServices = services;
-  if ((currentFilter || '').toLowerCase() !== 'all') {
-    filteredServices = services.filter(s =>
-      (s.estado || '').toLowerCase() === (currentFilter || '').toLowerCase()
-    );
-  }
+            case 'en_ruta':
+                if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
+                    actionsHTML = `
+                        <button class="btn-primary action-btn" onclick="openEvidenceModal('${service.id}')">Tomar evidencia</button>
+                        <button class="btn-success action-btn" onclick="changeEstado('${service.id}', 'entregado')">Marcar como entregado</button>
+                        <button class="btn-danger action-btn" onclick="changeEstado('${service.id}', 'cancelado')">Cancelar</button>
+                    `;
+                } else if (currentRole === 'admin') {
+                    actionsHTML = `
+                        <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
+                        <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
+                    `;
+                }
+                break;
 
-  console.log("Servicios después del filtro:", filteredServices);
+            case 'entregado':
+                if (currentRole === 'admin') {
+                    actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
+                } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
+                    actionsHTML = `<span class="text-green-700 font-semibold">Servicio entregado</span>`;
+                } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
+                    actionsHTML = `<span class="text-green-700 font-semibold">Has completado este servicio</span>`;
+                }
+                break;
 
-  // Si el filtro no tiene resultados
-  if (filteredServices.length === 0) {
-    servicesEl.innerHTML = `<div class="text-center text-gold">No hay servicios con el filtro '${currentFilter}'</div>`;
-    return;
-  }
+            case 'cancelado':
+                if (currentRole === 'admin') {
+                    actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
+                } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
+                    actionsHTML = `<span class="text-red-600 font-semibold">Servicio cancelado</span>`;
+                } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
+                    actionsHTML = `<span class="text-red-600 font-semibold">Has cancelado este servicio</span>`;
+                }
+                break;
+        }
 
-  // Limpiar el contenedor antes de renderizar
-  servicesEl.innerHTML = '';
+        // --- Plantilla final del servicio ---
+        const telefono = service.telefono || '';
+        const telefonoNormalized = normalizeColombiaPhone(telefono);
 
-  // Recorrer los servicios filtrados
-  filteredServices.forEach(service => {
-    const serviceCard = document.createElement('div');
-    serviceCard.className = 'service-card';
-
-    let actionsHTML = '';
-    let statusClass = `status-${(service.estado || '').replace('_', '')}`;
-
-    // --- Fecha de creación ---
-    let fechaCreacion = 'Fecha no disponible';
-    if (service.fechaCreacion && typeof service.fechaCreacion.toDate === 'function') {
-      fechaCreacion = service.fechaCreacion.toDate().toLocaleString('es-CO');
-    }
-
-    // --- Fecha de entrega ---
-    let fechaEntregaHTML = '';
-    if (service.fechaEntrega && typeof service.fechaEntrega.toDate === 'function') {
-      fechaEntregaHTML = `
-        <div class="service-date">
-          <i class="fas fa-calendar-check"></i> Entregado: ${service.fechaEntrega.toDate().toLocaleString('es-CO')}
-        </div>
-      `;
-    }
-
-    // --- Evidencia y método de pago ---
-    let evidenciaHTML = '';
-    if (service.estado === 'entregado' && currentRole === 'cliente') {
-      if (service.evidenciaEntrega) {
-        evidenciaHTML = `
-          <div class="service-detail">
-            <i class="fas fa-image"></i>
-            <div class="service-detail-content">
-              <strong>Evidencia de entrega:</strong><br>
-              <button onclick="openEvidenceView('${service.evidenciaEntrega}')"
-                      class="text-blue-600 underline hover:text-blue-800">
-                Ver foto de evidencia
-              </button>
+        serviceCard.innerHTML = `
+            <div class="service-header">
+                <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
+                <div class="service-status ${statusClass}">${(service.estado || '').replace('_', ' ')}</div>
             </div>
-          </div>
-        `;
-      }
 
-      if (service.metodoPago) {
-        evidenciaHTML += `
-          <div class="service-detail">
-            <i class="fas fa-credit-card"></i>
-            <div class="service-detail-content">
-              <strong>Método de pago:</strong> ${service.metodoPago}
+            <div class="service-detail">
+                <i class="fas fa-user"></i>
+                <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
             </div>
-          </div>
+
+            <!-- Teléfono con WhatsApp y llamada -->
+            <div class="service-detail flex items-center gap-4 mt-2">
+                <i class="fas fa-phone text-xl text-gold"></i>
+                <div class="service-detail-content flex items-center gap-4">
+                    <span class="font-medium">${service.telefono}</span>
+
+                    <!-- WhatsApp -->
+                    <a href="https://wa.me/${telefonoNormalized}" 
+                        target="_blank" 
+                        aria-label="Chatear por WhatsApp"
+                        class="flex items-center justify-center w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
+                        <i class="fab fa-whatsapp text-2xl"></i>
+                    </a>
+
+                    <!-- Llamar -->
+                    <a href="tel:${service.telefono}" 
+                        aria-label="Llamar por teléfono"
+                        class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
+                        <i class="fas fa-phone-alt text-2xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="service-detail">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="service-detail-content">
+                    <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
+                    <div class="flex items-center gap-2">
+                        <strong>Entregar:</strong> 
+                        <span>${service.entregar || 'No especificado'}</span>
+                        ${service.entregar ? `
+                            <button 
+                                onclick="openInGoogleMaps('${service.entregar}')"
+                                class="btn-maps ml-2 flex items-center justify-center w-10 h-10 rounded-full bg-gold hover:bg-yellow-500 text-black shadow"
+                                title="Abrir en Google Maps">
+                                <i class="fas fa-map-marked-alt text-xl"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+
+            ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
+            ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
+            ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
+            ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
+
+            <div class="service-date">
+                <i class="fas fa-calendar"></i> Creado: ${fechaCreacion}
+            </div>
+
+            ${fechaEntregaHTML}
+            ${evidenciaHTML}
+            ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
         `;
-      }
-    }
 
-    // --- Acciones según estado y rol ---
-    switch (service.estado) {
-      case 'pendiente':
-        if (currentRole === 'mensajero') {
-          actionsHTML = `<button class="btn-primary action-btn" onclick="takeService('${service.id}')">Tomar servicio</button>`;
-        } else if (currentRole === 'admin' || currentRole === 'cliente') {
-          actionsHTML = `
-            <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
-            <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
-          `;
-        }
-        break;
+        console.log("Pintando servicio:", service);
+        servicesEl.appendChild(serviceCard);
+    });
 
-      case 'en_ruta':
-        if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-          actionsHTML = `
-            <button class="btn-primary action-btn" onclick="openEvidenceModal('${service.id}')">Tomar evidencia</button>
-            <button class="btn-success action-btn" onclick="changeEstado('${service.id}', 'entregado')">Marcar como entregado</button>
-            <button class="btn-danger action-btn" onclick="changeEstado('${service.id}', 'cancelado')">Cancelar</button>
-          `;
-        } else if (currentRole === 'admin') {
-          actionsHTML = `
-            <button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Editar</button>
-            <button class="btn-danger action-btn" onclick="deleteService('${service.id}')">Eliminar</button>
-          `;
-        }
-        break;
-
-      case 'entregado':
-        if (currentRole === 'admin') {
-          actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
-        } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
-          actionsHTML = `<span class="text-green-700 font-semibold">Servicio entregado</span>`;
-        } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-          actionsHTML = `<span class="text-green-700 font-semibold">Has completado este servicio</span>`;
-        }
-        break;
-
-      case 'cancelado':
-        if (currentRole === 'admin') {
-          actionsHTML = `<button class="btn-secondary action-btn" onclick="openModal('${service.id}')">Ver detalles</button>`;
-        } else if (currentRole === 'cliente' && service.uidCliente === currentUser.uid) {
-          actionsHTML = `<span class="text-red-600 font-semibold">Servicio cancelado</span>`;
-        } else if (currentRole === 'mensajero' && service.uidMensajero === currentUser.uid) {
-          actionsHTML = `<span class="text-red-600 font-semibold">Has cancelado este servicio</span>`;
-        }
-        break;
-    }
-
-    // --- Plantilla final del servicio ---
-    const telefono = service.telefono || '';
-    const telefonoNormalized = normalizeColombiaPhone(telefono);
-
-    serviceCard.innerHTML = `
-      <div class="service-header">
-        <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
-        <div class="service-status ${statusClass}">${(service.estado || '').replace('_', ' ')}</div>
-      </div>
-
-      <div class="service-detail">
-        <i class="fas fa-user"></i>
-        <div class="service-detail-content">${service.contacto || 'No especificado'}</div>
-      </div>
-
-      <!-- Teléfono con WhatsApp y llamada -->
-      <div class="service-detail flex items-center gap-4 mt-2">
-        <i class="fas fa-phone text-xl text-gold"></i>
-        <div class="service-detail-content flex items-center gap-4">
-          <span class="font-medium">${service.telefono}</span>
-
-          <!-- WhatsApp -->
-          <a href="https://wa.me/${telefonoNormalized}" 
-            target="_blank" 
-            aria-label="Chatear por WhatsApp"
-            class="flex items-center justify-center w-10 h-10 rounded-full bg-green-600 hover:bg-green-700 text-white shadow">
-            <i class="fab fa-whatsapp text-2xl"></i>
-          </a>
-
-          <!-- Llamar -->
-          <a href="tel:${service.telefono}" 
-            aria-label="Llamar por teléfono"
-            class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow">
-            <i class="fas fa-phone-alt text-2xl"></i>
-          </a>
-        </div>
-      </div>
-
-      <div class="service-detail">
-        <i class="fas fa-map-marker-alt"></i>
-        <div class="service-detail-content">
-          <div><strong>Recoger:</strong> ${service.recoger || 'No especificado'}</div>
-          <div class="flex items-center gap-2">
-            <strong>Entregar:</strong> 
-            <span>${service.entregar || 'No especificado'}</span>
-            ${service.entregar ? `
-              <button 
-                onclick="openInGoogleMaps('${service.entregar}')"
-                class="btn-maps ml-2 flex items-center justify-center w-10 h-10 rounded-full bg-gold hover:bg-yellow-500 text-black shadow"
-                title="Abrir en Google Maps">
-                <i class="fas fa-map-marked-alt text-xl"></i>
-              </button>
-            ` : ''}
-          </div>
-        </div>
-      </div>
-
-      ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
-      ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
-      ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
-      ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
-
-      <div class="service-date">
-        <i class="fas fa-calendar"></i> Creado: ${fechaCreacion}
-      </div>
-
-      ${fechaEntregaHTML}
-      ${evidenciaHTML}
-      ${actionsHTML ? `<div class="service-actions">${actionsHTML}</div>` : ''}
-    `;
-
-    console.log("Pintando servicio:", service);
-    servicesEl.appendChild(serviceCard);
-  });
-
-  console.log("📦 Contenido actual de #services-section:", servicesEl.innerHTML);
+    console.log("📦 Contenido actual de #services-section:", servicesEl.innerHTML);
 }
 
 // Inicializar el esqueleto al cargar la aplicación
@@ -2332,26 +2561,10 @@
         document.getElementById('confirm-delivery').disabled = true;
       }
 
-      document.getElementById('capture-btn').addEventListener('click', () => {
-        const video = document.getElementById('videoElement');
-        const canvas = document.getElementById('canvasElement');
-        const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
-        document.getElementById('captured-image-container').classList.remove('hidden');
-        document.getElementById('videoElement').classList.add('hidden');
-        document.getElementById('capture-btn').classList.add('hidden');
-        stopCamera();
-      });
 
-      document.getElementById('retake-btn').addEventListener('click', () => {
-        document.getElementById('captured-image-container').classList.add('hidden');
-        document.getElementById('videoElement').classList.remove('hidden');
-        document.getElementById('capture-btn').classList.remove('hidden');
-        startCamera();
-      });
+      
+
+
 
       function selectPaymentMethod(method) {
         selectedPaymentMethod = method;
@@ -2363,26 +2576,7 @@
       }
       window.selectPaymentMethod = selectPaymentMethod;
 
-      document.getElementById('confirm-delivery').addEventListener('click', async () => {
-        if (!selectedPaymentMethod) {
-          alert('Por favor selecciona un método de pago');
-          return;
-        }
-        
-        try {
-          await db.collection('services').doc(currentServiceIdForEvidence).update({
-            estado: 'entregado',
-            evidenciaEntrega: document.getElementById('capturedImage').src,
-            metodoPago: selectedPaymentMethod,
-            fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          alert('Entrega confirmada con éxito');
-          closeEvidenceModal();
-        } catch (error) {
-          console.error('Error confirmando entrega:', error);
-          alert('Error al confirmar la entrega');
-        }
-      });
+     
 
   function showSection(section) {
   console.log("Mostrando sección:", section);
@@ -2431,7 +2625,7 @@ window.showSection = showSection;
 
 
 
-  function setFilter(filter, element) {
+ function setFilter(filter, element) {
     console.log("Filtro seleccionado:", filter);
     console.log("Botón clickeado:", element);
 
@@ -2440,44 +2634,18 @@ window.showSection = showSection;
 
     // Quitar 'active' de todos los botones
     document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.classList.remove('active');
+        btn.classList.remove('active');
     });
 
     // Agregar 'active' al botón que se clickeó
     if (element instanceof HTMLElement) {
-      element.classList.add('active');
+        element.classList.add('active');
     }
 
-  }
-
-    // Guardar el filtro seleccionado
-
-
-    // Quitar la clase 'active' de todos los botones
-    document.querySelectorAll('#filters .mobile-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-  function setActiveFilter(element) {
-    // Quitar 'active' de todos los botones
-    document.querySelectorAll('.filter-button').forEach(btn => {
-      btn.classList.remove('active');
-    });
-
-    // Agregar 'active' al botón clickeado
-    if (element instanceof HTMLElement) {
-      element.classList.add('active');
-    }
-  }
-
-
-    // Actualizar la lista según el filtro seleccionado
+    // 🔥 IMPORTANTE: Volver a renderizar los servicios con el nuevo filtro
     renderServices();
-
-  console.log("Valor actual de currentFilter:", currentFilter);
-  console.log("Servicios disponibles:", services);
-
-  // Hacer que setFilter esté disponible globalmente
-  window.setFilter = setFilter;
+}
+window.setFilter = setFilter;
 
 
 
