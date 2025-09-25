@@ -2302,6 +2302,12 @@ function renderServices(data) {
 
             ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
             ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
+            
+            <!-- 💰 Pago al mensajero -->
+            ${(service.pagoMensajero && service.pagoMensajero > 0) ? 
+              `<div class="service-detail"><i class="fas fa-motorcycle"></i><div class="service-detail-content">Pago al mensajero: ${service.pagoMensajero.toLocaleString()}</div></div>` 
+              : ''}
+
             ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
             ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
 
@@ -2320,6 +2326,7 @@ function renderServices(data) {
 
     console.log("📦 Contenido actual de #services-section:", servicesEl.innerHTML);
 }
+
 
 // Inicializar el esqueleto al cargar la aplicación
       document.addEventListener('DOMContentLoaded', function() {
@@ -2346,6 +2353,7 @@ function renderServices(data) {
         // Inicializar la app como antes
         initApp();
       });
+
   // Abre el modal y muestra la foto
   function openEvidenceView(imageUrl) {
     document.getElementById('evidence-view-img').src = imageUrl;
