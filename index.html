@@ -892,51 +892,67 @@
     <button class="modal-close" onclick="closeModal()">✖</button>
     <h2 class="modal-title">Servicio (placeholder)</h2>
 
-    <form id="service-form">
-      <div class="form-group">
-        <label>Empresa / Cliente</label>
-        <input name="empresaCliente" class="form-input" />
-      </div>
-      <div class="form-group">
-        <label>Contacto</label>
-        <input name="contacto" class="form-input" />
-      </div>
-      <div class="form-group">
-        <label for="field-mensajero">Mensajero</label>
-        <select id="field-mensajero" name="uidMensajero" class="form-input">
-          <option value="">Seleccionar mensajero</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Teléfono</label>
-        <input name="telefono" id="telefonoInput" class="form-input" />
-      </div>
-      <div class="form-group">
-        <label>Recoger</label>
-        <input name="recoger" class="form-input" />
-      </div>
-      <div class="form-group">
-        <label>Entregar</label>
-        <input name="entregar" class="form-input" />
-      </div>
-
-      <div class="form-checkbox">
-        <input type="checkbox" id="cobrar-check" />
-        <label for="cobrar-check">Cobrar contra entrega</label>
-      </div>
-
-      <div id="cobrar-field-container" class="hidden">
-        <label>Monto a cobrar</label>
-        <input name="cobrarProducto" class="form-input" />
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn-submit">Guardar</button>
-        <button type="button" onclick="closeModal()" class="btn-cancel">Cancelar</button>
-      </div>
-    </form>
+   <form id="service-form">
+  <div class="form-group">
+    <label>Empresa / Cliente</label>
+    <input name="empresaCliente" class="form-input" />
   </div>
-</div>
+
+  <div class="form-group">
+    <label>Contacto</label>
+    <input name="contacto" class="form-input" />
+  </div>
+
+  <div class="form-group">
+    <label for="field-mensajero">Mensajero</label>
+    <select id="field-mensajero" name="uidMensajero" class="form-input">
+      <option value="">Seleccionar mensajero</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label>Teléfono</label>
+    <input name="telefono" id="telefonoInput" class="form-input" />
+  </div>
+
+  <div class="form-group">
+    <label>Recoger</label>
+    <input name="recoger" class="form-input" />
+  </div>
+
+  <div class="form-group">
+    <label>Entregar</label>
+    <input name="entregar" class="form-input" />
+  </div>
+
+  <div class="form-checkbox">
+    <input type="checkbox" id="cobrar-check" />
+    <label for="cobrar-check">Cobrar contra entrega</label>
+  </div>
+
+  <div id="cobrar-field-container" class="hidden">
+    <label>Monto a cobrar</label>
+    <input name="cobrarProducto" class="form-input" />
+  </div>
+
+  <!-- 💰 Nuevo: Valor a pagar al mensajero -->
+  <div class="form-group">
+    <label>Valor a pagar al mensajero</label>
+    <input name="pagoMensajero" type="number" class="form-input" placeholder="Ej: 15000" />
+  </div>
+
+  <!-- 📝 Nuevo: Observaciones -->
+  <div class="form-group">
+    <label>Observaciones</label>
+    <textarea name="observaciones" class="form-input" rows="3" placeholder="Notas adicionales..."></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn-submit">Guardar</button>
+    <button type="button" onclick="closeModal()" class="btn-cancel">Cancelar</button>
+  </div>
+</form>
+
 
 <!-- =================== FIN PLACEHOLDERS =================== -->
 
@@ -1843,28 +1859,29 @@ diagnoseUI();
   }
 
 
-    async function handleServiceSubmit(e) {
-    e.preventDefault();
+   async function handleServiceSubmit(e) {
+  e.preventDefault();
 
-    if (!(currentRole === 'admin' || currentRole === 'cliente')) {
-      alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
-      return;
-    }
+  if (!(currentRole === 'admin' || currentRole === 'cliente')) {
+    alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+    return;
+  }
 
-    const form = e.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-    const docId = form.dataset.editId || null;
+  const form = e.target;
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+  const docId = form.dataset.editId || null;
 
-    const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
+  const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
 
+  // Payload base común
   const payload = {
     empresa: data.empresaCliente || "",
     cliente: currentUser.displayName || currentUser.email || "Sin nombre",
     contacto: data.contacto || "",
     recoger: data.recoger || "",
     entregar: data.entregar || "",
-    barrioMunicipio: data.barrioMunicipio || "", // ✅ Nuevo campo
+    barrioMunicipio: data.barrioMunicipio || "",
     telefono: telefonoNormalizado || "",
     volumen: data.volumen || "",
     observaciones: data.observaciones || "",
@@ -1875,90 +1892,58 @@ diagnoseUI();
     fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
   };
 
+  // Configuración según rol
+  if (currentRole === 'admin') {
+    payload.uidMensajero = data.uidMensajero || "";
+    payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+    payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
+  } else if (currentRole === 'cliente') {
+    payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0; // ✅ cliente también lo guarda
+    payload.costo = parseFloat(data.costoCliente || 0) || 0;
+  }
 
-    if (currentRole === 'admin') {
-      payload.uidMensajero = data.uidMensajero || "";
-      payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
-      payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
-    } else {
-      payload.costo = parseFloat(data.costoCliente || 0) || 0;
-      payload.pagoMensajero = 0;
-    }
-    console.log("FieldValue timestamp:", firebase.firestore.FieldValue.serverTimestamp);
-    console.log("fechaCreacion:", payload.fechaCreacion);
-    console.log("fechaActualizacion:", payload.fechaActualizacion);
-    console.log("Payload inicial:", JSON.stringify(payload, null, 2));
+  console.log("FieldValue timestamp:", firebase.firestore.FieldValue.serverTimestamp);
+  console.log("fechaCreacion:", payload.fechaCreacion);
+  console.log("Payload inicial:", JSON.stringify(payload, null, 2));
 
-    try {
+  try {
     if (docId) {
-    console.log("📝 Actualizando servicio");
+      console.log("📝 Actualizando servicio");
 
-    try {
-      // Crear un objeto de actualización sin el campo problemático
-      const updateData = {...payload};
+      const updateData = { ...payload };
       delete updateData.fechaCreacion;
-      
-      // Convertir a objeto simple para asegurar la compatibilidad
+
       const simpleUpdateData = {};
       Object.keys(updateData).forEach(key => {
         if (updateData[key] !== undefined && updateData[key] !== null) {
           simpleUpdateData[key] = updateData[key];
         }
       });
-      
-      // 🔹 Actualizar documento
+
       await db.collection('services').doc(docId).update(simpleUpdateData);
-      
-      // 🔹 Obtener documento actualizado
+
       const updatedDoc = await db.collection('services').doc(docId).get();
       const updatedDataResult = { id: updatedDoc.id, ...updatedDoc.data() };
 
-      // 🔹 Actualizar lista local y re-renderizar
       services = services.map(s => (s.id === updatedDataResult.id ? updatedDataResult : s));
       renderServices(services);
 
       console.log("✅ Servicio actualizado correctamente:", updatedDataResult.id);
-    } catch (error) {
-      console.error("❌ Error en update:", error);
-      alert("Error al actualizar el servicio: " + error.message);
-      
-      // Intentar una solución alternativa sin el campo de fecha
-      try {
-        const updateDataWithoutDate = {...payload};
-        delete updateDataWithoutDate.fechaCreacion;
-        delete updateDataWithoutDate.fechaActualizacion;
-        
-        await db.collection('services').doc(docId).update(updateDataWithoutDate);
-        console.log("✅ Servicio actualizado sin campo de fecha");
-      } catch (fallbackError) {
-        console.error("❌ Error incluso en actualización alternativa:", fallbackError);
-      }
+
+    } else {
+      console.log("➕ Creando nuevo servicio");
+      payload.estado = "pendiente";
+      payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+
+      const docRef = await db.collection('services').add(payload);
+      const newDoc = await docRef.get();
+      const newData = { id: newDoc.id, ...newDoc.data() };
+
+      services.unshift(newData);
+
+      console.log("✅ Servicio creado correctamente:", newData.id);
     }
-  }
 
-
-    else {
-    // --- CREATE ---
-    console.log("📝 Creando nuevo servicio. Payload:", JSON.stringify(payload, null, 2));
-
-    payload.estado = "pendiente";
-    payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
-
-    // Crear en Firestore
-    const docRef = await db.collection('services').add(payload);
-
-    // Obtener el nuevo documento
-    const newDoc = await docRef.get();
-    const newData = { id: newDoc.id, ...newDoc.data() };
-
-    // Agregar a la lista en pantalla
-    services.unshift(newData);
-    
-    console.log("✅ Servicio creado correctamente:", newData.id);
-  }
-
-
-    // ✅ Cerrar modal y resetear formulario
     closeModal();
     form.reset();
 
@@ -1966,8 +1951,7 @@ diagnoseUI();
     console.error("❌ Error guardando servicio:", error);
     alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
   }
-
-  }
+}
 
 
 
