@@ -877,7 +877,7 @@
 
 
     <!-- =================== PLACEHOLDERS MÍNIMOS PARA EVITAR ERRORES =================== -->
-<!-- Menu registrar (sidebar) -->
+
 
 
 <!-- Admin fields placeholder -->
@@ -892,51 +892,107 @@
     <button class="modal-close" onclick="closeModal()">✖</button>
     <h2 class="modal-title">Servicio (placeholder)</h2>
 
-    <form id="service-form">
-      <div class="form-group">
-        <label>Empresa / Cliente</label>
-        <input name="empresaCliente" class="form-input" />
-      </div>
-      <div class="form-group">
-        <label>Contacto</label>
-        <input name="contacto" class="form-input" />
-      </div>
-      <div class="form-group">
-        <label for="field-mensajero">Mensajero</label>
-        <select id="field-mensajero" name="uidMensajero" class="form-input">
-          <option value="">Seleccionar mensajero</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Teléfono</label>
-        <input name="telefono" id="telefonoInput" class="form-input" />
-      </div>
-      <div class="form-group">
-        <label>Recoger</label>
-        <input name="recoger" class="form-input" />
-      </div>
-      <div class="form-group">
-        <label>Entregar</label>
-        <input name="entregar" class="form-input" />
-      </div>
-
-      <div class="form-checkbox">
-        <input type="checkbox" id="cobrar-check" />
-        <label for="cobrar-check">Cobrar contra entrega</label>
-      </div>
-
-      <div id="cobrar-field-container" class="hidden">
-        <label>Monto a cobrar</label>
-        <input name="cobrarProducto" class="form-input" />
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn-submit">Guardar</button>
-        <button type="button" onclick="closeModal()" class="btn-cancel">Cancelar</button>
-      </div>
-    </form>
+  <!-- el formulario actual: -->
+<form id="service-form" onsubmit="handleServiceSubmit(event)" class="space-y-4">
+  <!-- Empresa -->
+  <div class="form-group">
+    <label for="empresaCliente" class="form-label">Empresa</label>
+    <input type="text" id="empresaCliente" name="empresaCliente" 
+           class="form-input" placeholder="Nombre de la empresa" />
   </div>
-</div>
+
+  <!-- Contacto -->
+  <div class="form-group">
+    <label for="contacto" class="form-label">Contacto</label>
+    <input type="text" id="contacto" name="contacto"
+           class="form-input" placeholder="Persona de contacto" />
+  </div>
+
+  <!-- Teléfono -->
+  <div class="form-group">
+    <label for="telefono" class="form-label">Teléfono</label>
+    <input type="text" id="telefono" name="telefono"
+           class="form-input" placeholder="Número de teléfono" />
+  </div>
+
+  <!-- Recoger -->
+  <div class="form-group">
+    <label for="recoger" class="form-label">Dirección de recogida</label>
+    <input type="text" id="recoger" name="recoger"
+           class="form-input" placeholder="Dirección donde se recoge" />
+  </div>
+
+  <!-- Entregar -->
+  <div class="form-group">
+    <label for="entregar" class="form-label">Dirección de entrega</label>
+    <input type="text" id="entregar" name="entregar"
+           class="form-input" placeholder="Dirección de entrega" />
+  </div>
+
+  <!-- Volumen -->
+  <div class="form-group">
+    <label for="volumen" class="form-label">Volumen/Descripción</label>
+    <input type="text" id="volumen" name="volumen"
+           class="form-input" placeholder="Descripción del paquete" />
+  </div>
+
+  <!-- ✅ OBSERVACIONES (NUEVO CAMPO) -->
+  <div class="form-group">
+    <label for="observaciones" class="form-label">Observaciones</label>
+    <textarea id="observaciones" name="observaciones" rows="3"
+              class="form-input" placeholder="Observaciones adicionales"></textarea>
+  </div>
+
+  <!-- ✅ PAGO AL MENSAJERO (NUEVO CAMPO) -->
+  <div class="form-group">
+    <label for="pagoMensajero" class="form-label">Pago al mensajero</label>
+    <input type="number" id="pagoMensajero" name="pagoMensajero" 
+           step="100" min="0" class="form-input" placeholder="Valor a pagar al mensajero" />
+  </div>
+
+  <!-- Costo Cliente (solo para clientes) -->
+  <div id="field-costo-cliente-container" class="form-group hidden">
+    <label for="costoCliente" class="form-label">Costo (Cliente)</label>
+    <input type="number" id="costoCliente" name="costoCliente" 
+           step="100" min="0" class="form-input" placeholder="Costo para el cliente" />
+  </div>
+
+  <!-- Campos de admin (solo para administradores) -->
+  <div id="admin-fields" class="hidden">
+    <div class="form-group">
+      <label for="uidMensajero" class="form-label">Asignar mensajero</label>
+      <select id="uidMensajero" name="uidMensajero" class="form-input">
+        <option value="">Seleccionar mensajero</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Cobrar Producto -->
+  <div class="form-group">
+    <div class="form-checkbox">
+      <input type="checkbox" id="cobrar-check" name="cobrarCheck">
+      <label for="cobrar-check">Cobrar por producto</label>
+    </div>
+  </div>
+
+  <div id="cobrar-field-container" class="form-group hidden">
+    <label for="cobrarProducto" class="form-label">Valor a cobrar</label>
+    <input type="number" id="cobrarProducto" name="cobrarProducto" 
+           step="100" min="0" class="form-input" placeholder="Valor a cobrar al cliente" />
+  </div>
+
+  <!-- Botones -->
+  <div class="form-actions">
+    <button type="submit" class="btn-submit">
+      <i class="fas fa-save"></i> Guardar servicio
+    </button>
+    <button type="button" onclick="closeModal()" class="btn-cancel">
+      <i class="fas fa-times"></i> Cancelar
+    </button>
+  </div>
+</form>
+
+
 
 <!-- =================== FIN PLACEHOLDERS =================== -->
 
@@ -1773,43 +1829,47 @@ diagnoseUI();
       }
 
       function openModal(editId = null) {
-        const modal = document.getElementById('modal');
-        const form = document.getElementById('service-form');
-        form.reset();
-        form.dataset.editId = editId || '';
-        
-        if (currentRole === 'mensajero' || currentRole === 'pending_mensajero') return;
-        
-        if (editId) {
-          const service = services.find(x => x.id === editId);
-          if (service) {
-            form.empresaCliente.value = service.empresa || service.cliente || '';
-            form.contacto.value = service.contacto || '';
-            form.telefono.value = service.telefono || '';
-            form.recoger.value = service.recoger || '';
-            form.entregar.value = service.entregar || '';
-            form.volumen.value = service.volumen || '';
-            
-            if (currentRole === 'admin') {
-              form.uidMensajero.value = service.uidMensajero || '';
-              form.pagoMensajero.value = service.pagoMensajero || 0;
-            } else {
-              form.costoCliente.value = service.costo || 0;
-            }
-            
-            if (service.cobrarProducto && service.cobrarProducto > 0) {
-              document.getElementById('cobrar-check').checked = true;
-              cobrarFieldContainer.classList.remove('hidden');
-              form.cobrarProducto.value = service.cobrarProducto;
-            } else {
-              document.getElementById('cobrar-check').checked = false;
-              cobrarFieldContainer.classList.add('hidden');
-            }
-          }
-        }
-        
-        modal.classList.remove('hidden');
+  const modal = document.getElementById('modal');
+  const form = document.getElementById('service-form');
+  form.reset();
+  form.dataset.editId = editId || '';
+  
+  if (currentRole === 'mensajero' || currentRole === 'pending_mensajero') return;
+  
+  if (editId) {
+    const service = services.find(x => x.id === editId);
+    if (service) {
+      // Campos existentes
+      form.empresaCliente.value = service.empresa || service.cliente || '';
+      form.contacto.value = service.contacto || '';
+      form.telefono.value = service.telefono || '';
+      form.recoger.value = service.recoger || '';
+      form.entregar.value = service.entregar || '';
+      form.volumen.value = service.volumen || '';
+      
+      // ✅ NUEVOS CAMPOS
+      form.observaciones.value = service.observaciones || '';
+      form.pagoMensajero.value = service.pagoMensajero || 0;
+      
+      if (currentRole === 'admin') {
+        form.uidMensajero.value = service.uidMensajero || '';
+      } else {
+        form.costoCliente.value = service.costo || 0;
       }
+      
+      if (service.cobrarProducto && service.cobrarProducto > 0) {
+        document.getElementById('cobrar-check').checked = true;
+        cobrarFieldContainer.classList.remove('hidden');
+        form.cobrarProducto.value = service.cobrarProducto;
+      } else {
+        document.getElementById('cobrar-check').checked = false;
+        cobrarFieldContainer.classList.add('hidden');
+      }
+    }
+  }
+  
+  modal.classList.remove('hidden');
+}
       window.openModal = openModal;
 
       function closeModal() {
@@ -1843,122 +1903,92 @@ diagnoseUI();
   }
 
 
-    async function handleServiceSubmit(e) {
-    e.preventDefault();
+   async function handleServiceSubmit(e) {
+  e.preventDefault();
 
-    if (!(currentRole === 'admin' || currentRole === 'cliente')) {
-      alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
-      return;
-    }
+  if (!(currentRole === 'admin' || currentRole === 'cliente')) {
+    alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+    return;
+  }
 
-    const form = e.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-    const docId = form.dataset.editId || null;
+  const form = e.target;
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+  const docId = form.dataset.editId || null;
 
-    const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
+  const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
 
+  // Payload base común
   const payload = {
     empresa: data.empresaCliente || "",
-    cliente: currentUser.displayName || currentUser.email || "Sin nombre",
-    contacto: data.contacto || "",
-    recoger: data.recoger || "",
-    entregar: data.entregar || "",
-    barrioMunicipio: data.barrioMunicipio || "", // ✅ Nuevo campo
-    telefono: telefonoNormalizado || "",
-    volumen: data.volumen || "",
-    observaciones: data.observaciones || "",
-    cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-    uidCliente: currentUser.uid,
-    emailCliente: currentUser.email || "",
-    estado: "pendiente",
-    fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
-  };
+  cliente: currentUser.displayName || currentUser.email || "Sin nombre",
+  contacto: data.contacto || "",
+  recoger: data.recoger || "",
+  entregar: data.entregar || "",
+  barrioMunicipio: data.barrioMunicipio || "",
+  telefono: telefonoNormalizado || "",
+  volumen: data.volumen || "",
+  observaciones: data.observaciones || "",   // 👈 ya capturado
+  cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+  pagoMensajero: parseFloat(data.pagoMensajero || 0) || 0, // 👈 nuevo campo
+  uidCliente: currentUser.uid,
+  emailCliente: currentUser.email || "",
+  estado: "pendiente",
+  fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+};
 
+  // Configuración según rol
+  if (currentRole === 'admin') {
+    payload.uidMensajero = data.uidMensajero || "";
+    payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+    payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
+  } else if (currentRole === 'cliente') {
+    payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0; // ✅ cliente también lo guarda
+    payload.costo = parseFloat(data.costoCliente || 0) || 0;
+  }
 
-    if (currentRole === 'admin') {
-      payload.uidMensajero = data.uidMensajero || "";
-      payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
-      payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
-    } else {
-      payload.costo = parseFloat(data.costoCliente || 0) || 0;
-      payload.pagoMensajero = 0;
-    }
-    console.log("FieldValue timestamp:", firebase.firestore.FieldValue.serverTimestamp);
-    console.log("fechaCreacion:", payload.fechaCreacion);
-    console.log("fechaActualizacion:", payload.fechaActualizacion);
-    console.log("Payload inicial:", JSON.stringify(payload, null, 2));
+  console.log("FieldValue timestamp:", firebase.firestore.FieldValue.serverTimestamp);
+  console.log("fechaCreacion:", payload.fechaCreacion);
+  console.log("Payload inicial:", JSON.stringify(payload, null, 2));
 
-    try {
+  try {
     if (docId) {
-    console.log("📝 Actualizando servicio");
+      console.log("📝 Actualizando servicio");
 
-    try {
-      // Crear un objeto de actualización sin el campo problemático
-      const updateData = {...payload};
+      const updateData = { ...payload };
       delete updateData.fechaCreacion;
-      
-      // Convertir a objeto simple para asegurar la compatibilidad
+
       const simpleUpdateData = {};
       Object.keys(updateData).forEach(key => {
         if (updateData[key] !== undefined && updateData[key] !== null) {
           simpleUpdateData[key] = updateData[key];
         }
       });
-      
-      // 🔹 Actualizar documento
+
       await db.collection('services').doc(docId).update(simpleUpdateData);
-      
-      // 🔹 Obtener documento actualizado
+
       const updatedDoc = await db.collection('services').doc(docId).get();
       const updatedDataResult = { id: updatedDoc.id, ...updatedDoc.data() };
 
-      // 🔹 Actualizar lista local y re-renderizar
       services = services.map(s => (s.id === updatedDataResult.id ? updatedDataResult : s));
       renderServices(services);
 
       console.log("✅ Servicio actualizado correctamente:", updatedDataResult.id);
-    } catch (error) {
-      console.error("❌ Error en update:", error);
-      alert("Error al actualizar el servicio: " + error.message);
-      
-      // Intentar una solución alternativa sin el campo de fecha
-      try {
-        const updateDataWithoutDate = {...payload};
-        delete updateDataWithoutDate.fechaCreacion;
-        delete updateDataWithoutDate.fechaActualizacion;
-        
-        await db.collection('services').doc(docId).update(updateDataWithoutDate);
-        console.log("✅ Servicio actualizado sin campo de fecha");
-      } catch (fallbackError) {
-        console.error("❌ Error incluso en actualización alternativa:", fallbackError);
-      }
+
+    } else {
+      console.log("➕ Creando nuevo servicio");
+      payload.estado = "pendiente";
+      payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+
+      const docRef = await db.collection('services').add(payload);
+      const newDoc = await docRef.get();
+      const newData = { id: newDoc.id, ...newDoc.data() };
+
+      services.unshift(newData);
+
+      console.log("✅ Servicio creado correctamente:", newData.id);
     }
-  }
 
-
-    else {
-    // --- CREATE ---
-    console.log("📝 Creando nuevo servicio. Payload:", JSON.stringify(payload, null, 2));
-
-    payload.estado = "pendiente";
-    payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
-
-    // Crear en Firestore
-    const docRef = await db.collection('services').add(payload);
-
-    // Obtener el nuevo documento
-    const newDoc = await docRef.get();
-    const newData = { id: newDoc.id, ...newDoc.data() };
-
-    // Agregar a la lista en pantalla
-    services.unshift(newData);
-    
-    console.log("✅ Servicio creado correctamente:", newData.id);
-  }
-
-
-    // ✅ Cerrar modal y resetear formulario
     closeModal();
     form.reset();
 
@@ -1966,8 +1996,7 @@ diagnoseUI();
     console.error("❌ Error guardando servicio:", error);
     alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
   }
-
-  }
+}
 
 
 
@@ -2318,6 +2347,15 @@ function renderServices(data) {
 
             ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
             ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
+
+            <!-- 💰 Pago al mensajero siempre mostrado -->
+            <div class="service-detail">
+                <i class="fas fa-motorcycle"></i>
+                <div class="service-detail-content">
+                    Pago al mensajero: ${Number(service.pagoMensajero || 0).toLocaleString()}
+                </div>
+            </div>
+
             ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
             ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
 
@@ -2336,6 +2374,7 @@ function renderServices(data) {
 
     console.log("📦 Contenido actual de #services-section:", servicesEl.innerHTML);
 }
+
 
 // Inicializar el esqueleto al cargar la aplicación
       document.addEventListener('DOMContentLoaded', function() {
@@ -2362,6 +2401,7 @@ function renderServices(data) {
         // Inicializar la app como antes
         initApp();
       });
+
   // Abre el modal y muestra la foto
   function openEvidenceView(imageUrl) {
     document.getElementById('evidence-view-img').src = imageUrl;
