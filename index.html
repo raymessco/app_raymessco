@@ -877,7 +877,7 @@
 
 
     <!-- =================== PLACEHOLDERS MÍNIMOS PARA EVITAR ERRORES =================== -->
-<!-- Menu registrar (sidebar) -->
+
 
 
 <!-- Admin fields placeholder -->
@@ -892,66 +892,80 @@
     <button class="modal-close" onclick="closeModal()">✖</button>
     <h2 class="modal-title">Servicio (placeholder)</h2>
 
-   <form id="service-form">
-  <div class="form-group">
-    <label>Empresa / Cliente</label>
-    <input name="empresaCliente" class="form-input" />
+   <form id="service-form" class="space-y-4">
+  
+    <form id="service-form" onsubmit="handleServiceSubmit(event)" class="space-y-4">
+  <!-- Empresa -->
+  <div>
+    <label for="empresaCliente" class="block text-sm font-medium text-gray-200">Empresa</label>
+    <input type="text" id="empresaCliente" name="empresaCliente" 
+           class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600" />
   </div>
 
-  <div class="form-group">
-    <label>Contacto</label>
-    <input name="contacto" class="form-input" />
+  <!-- Contacto -->
+  <div>
+    <label for="contacto" class="block text-sm font-medium text-gray-200">Contacto</label>
+    <input type="text" id="contacto" name="contacto"
+           class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600" />
   </div>
 
-  <div class="form-group">
-    <label for="field-mensajero">Mensajero</label>
-    <select id="field-mensajero" name="uidMensajero" class="form-input">
-      <option value="">Seleccionar mensajero</option>
-    </select>
+  <!-- Teléfono -->
+  <div>
+    <label for="telefono" class="block text-sm font-medium text-gray-200">Teléfono</label>
+    <input type="text" id="telefono" name="telefono"
+           class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600" />
   </div>
 
-  <div class="form-group">
-    <label>Teléfono</label>
-    <input name="telefono" id="telefonoInput" class="form-input" />
+  <!-- Recoger -->
+  <div>
+    <label for="recoger" class="block text-sm font-medium text-gray-200">Dirección de recogida</label>
+    <input type="text" id="recoger" name="recoger"
+           class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600" />
   </div>
 
-  <div class="form-group">
-    <label>Recoger</label>
-    <input name="recoger" class="form-input" />
+  <!-- Entregar -->
+  <div>
+    <label for="entregar" class="block text-sm font-medium text-gray-200">Dirección de entrega</label>
+    <input type="text" id="entregar" name="entregar"
+           class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600" />
   </div>
 
-  <div class="form-group">
-    <label>Entregar</label>
-    <input name="entregar" class="form-input" />
+  <!-- Observaciones -->
+  <div>
+    <label for="observaciones" class="block text-sm font-medium text-gray-200">Observaciones</label>
+    <textarea id="observaciones" name="observaciones" rows="3"
+              class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"></textarea>
   </div>
 
-  <div class="form-checkbox">
-    <input type="checkbox" id="cobrar-check" />
-    <label for="cobrar-check">Cobrar contra entrega</label>
+  <!-- Costo Cliente -->
+  <div>
+    <label for="costoCliente" class="block text-sm font-medium text-gray-200">Costo (Cliente)</label>
+    <input type="number" id="costoCliente" name="costoCliente" step="100" min="0"
+           class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600" />
   </div>
 
-  <div id="cobrar-field-container" class="hidden">
-    <label>Monto a cobrar</label>
-    <input name="cobrarProducto" class="form-input" />
+  <!-- Pago Mensajero -->
+  <div>
+    <label for="pagoMensajero" class="block text-sm font-medium text-gray-200">Pago al mensajero</label>
+    <input type="number" id="pagoMensajero" name="pagoMensajero" step="100" min="0"
+           class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600" />
   </div>
 
-  <!-- 💰 Nuevo: Valor a pagar al mensajero -->
-  <div class="form-group">
-    <label>Valor a pagar al mensajero</label>
-    <input name="pagoMensajero" type="number" class="form-input" placeholder="Ej: 15000" />
+  <!-- Cobrar Producto -->
+  <div>
+    <label for="cobrarProducto" class="block text-sm font-medium text-gray-200">Cobrar por producto</label>
+    <input type="number" id="cobrarProducto" name="cobrarProducto" step="100" min="0"
+           class="w-full p-2 rounded bg-gray-800 text-white border border-gray-600" />
   </div>
 
-  <!-- 📝 Nuevo: Observaciones -->
-  <div class="form-group">
-    <label>Observaciones</label>
-    <textarea name="observaciones" class="form-input" rows="3" placeholder="Notas adicionales..."></textarea>
-  </div>
-
-  <div class="form-actions">
-    <button type="submit" class="btn-submit">Guardar</button>
-    <button type="button" onclick="closeModal()" class="btn-cancel">Cancelar</button>
+  <!-- Botón -->
+  <div class="text-right">
+    <button type="submit" class="px-4 py-2 rounded bg-gold text-black font-semibold shadow hover:bg-yellow-500">
+      Guardar servicio
+    </button>
   </div>
 </form>
+
 
 
 <!-- =================== FIN PLACEHOLDERS =================== -->
@@ -1877,20 +1891,21 @@ diagnoseUI();
   // Payload base común
   const payload = {
     empresa: data.empresaCliente || "",
-    cliente: currentUser.displayName || currentUser.email || "Sin nombre",
-    contacto: data.contacto || "",
-    recoger: data.recoger || "",
-    entregar: data.entregar || "",
-    barrioMunicipio: data.barrioMunicipio || "",
-    telefono: telefonoNormalizado || "",
-    volumen: data.volumen || "",
-    observaciones: data.observaciones || "",
-    cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-    uidCliente: currentUser.uid,
-    emailCliente: currentUser.email || "",
-    estado: "pendiente",
-    fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
-  };
+  cliente: currentUser.displayName || currentUser.email || "Sin nombre",
+  contacto: data.contacto || "",
+  recoger: data.recoger || "",
+  entregar: data.entregar || "",
+  barrioMunicipio: data.barrioMunicipio || "",
+  telefono: telefonoNormalizado || "",
+  volumen: data.volumen || "",
+  observaciones: data.observaciones || "",   // 👈 ya capturado
+  cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+  pagoMensajero: parseFloat(data.pagoMensajero || 0) || 0, // 👈 nuevo campo
+  uidCliente: currentUser.uid,
+  emailCliente: currentUser.email || "",
+  estado: "pendiente",
+  fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+};
 
   // Configuración según rol
   if (currentRole === 'admin') {
@@ -2302,11 +2317,14 @@ function renderServices(data) {
 
             ${service.volumen ? `<div class="service-detail"><i class="fas fa-box"></i><div class="service-detail-content">${service.volumen}</div></div>` : ''}
             ${service.observaciones ? `<div class="service-detail"><i class="fas fa-sticky-note"></i><div class="service-detail-content">${service.observaciones}</div></div>` : ''}
-            
-            <!-- 💰 Pago al mensajero -->
-            ${(service.pagoMensajero && service.pagoMensajero > 0) ? 
-              `<div class="service-detail"><i class="fas fa-motorcycle"></i><div class="service-detail-content">Pago al mensajero: ${service.pagoMensajero.toLocaleString()}</div></div>` 
-              : ''}
+
+            <!-- 💰 Pago al mensajero siempre mostrado -->
+            <div class="service-detail">
+                <i class="fas fa-motorcycle"></i>
+                <div class="service-detail-content">
+                    Pago al mensajero: ${Number(service.pagoMensajero || 0).toLocaleString()}
+                </div>
+            </div>
 
             ${(service.costo && service.costo > 0) ? `<div class="service-detail"><i class="fas fa-dollar-sign"></i><div class="service-detail-content">Costo: ${service.costo.toLocaleString()}</div></div>` : ''}
             ${(service.cobrarProducto && service.cobrarProducto > 0) ? `<div class="service-detail"><i class="fas fa-cash-register"></i><div class="service-detail-content">Cobrar: ${service.cobrarProducto.toLocaleString()}</div></div>` : ''}
