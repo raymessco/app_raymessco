@@ -1676,47 +1676,78 @@ diagnoseUI();
         }, 5000);
       }
 
-      function openModal(editId = null) {
-  const modal = document.getElementById('modal');
-  const form = document.getElementById('service-form');
-  form.reset();
-  form.dataset.editId = editId || '';
-  
-  if (currentRole === 'mensajero' || currentRole === 'pending_mensajero') return;
-  
-  if (editId) {
-    const service = services.find(x => x.id === editId);
-    if (service) {
-      // Campos existentes
-      form.empresaCliente.value = service.empresa || service.cliente || '';
-      form.contacto.value = service.contacto || '';
-      form.telefono.value = service.telefono || '';
-      form.recoger.value = service.recoger || '';
-      form.entregar.value = service.entregar || '';
-      form.volumen.value = service.volumen || '';
-      
-      // ✅ NUEVOS CAMPOS
-      form.observaciones.value = service.observaciones || '';
-      form.pagoMensajero.value = service.pagoMensajero || 0;
-      
-      if (currentRole === 'admin') {
-        form.uidMensajero.value = service.uidMensajero || '';
-      } else {
-        form.costoCliente.value = service.costo || 0;
-      }
-      
-      if (service.cobrarProducto && service.cobrarProducto > 0) {
-        document.getElementById('cobrar-check').checked = true;
-        cobrarFieldContainer.classList.remove('hidden');
-        form.cobrarProducto.value = service.cobrarProducto;
-      } else {
-        document.getElementById('cobrar-check').checked = false;
-        cobrarFieldContainer.classList.add('hidden');
-      }
+     function openModal(editId = null) {
+    console.log("🎯 openModal() INICIADO - editId:", editId);
+    
+    const modal = document.getElementById('modal');
+    const form = document.getElementById('service-form');
+    
+    if (!modal || !form) {
+        console.error("❌ No se encontró el modal o el formulario");
+        return;
     }
-  }
-  
-  modal.classList.remove('hidden');
+    
+    form.reset();
+    form.dataset.editId = editId || '';
+    
+    // Actualizar título del modal
+    const modalTitle = document.querySelector('.modal-title');
+    if (modalTitle) {
+        modalTitle.textContent = editId ? 'Editar Servicio' : 'Nuevo Servicio';
+    }
+    
+    if (currentRole === 'mensajero' || currentRole === 'pending_mensajero') {
+        console.log("⏩ Usuario no autorizado para abrir modal");
+        return;
+    }
+    
+    // ✅ CORREGIDO: LLAMAR EXPLÍCITAMENTE loadMensajerosList() para admin
+    console.log("🔍 Rol actual al abrir modal:", currentRole);
+    if (currentRole === 'admin') {
+        console.log("🎯 Ejecutando loadMensajerosList() para admin");
+        loadMensajerosList(); // 👈 ESTA LÍNEA DEBE EJECUTARSE
+    } else {
+        console.log("👤 Usuario no admin, no se cargan mensajeros");
+    }
+    
+    if (editId) {
+        console.log("📝 Editando servicio:", editId);
+        const service = services.find(x => x.id === editId);
+        if (service) {
+            console.log("✅ Servicio encontrado para editar:", service);
+            // ... resto del código de edición
+            form.empresaCliente.value = service.empresa || service.cliente || '';
+            form.contacto.value = service.contacto || '';
+            form.telefono.value = service.telefono || '';
+            form.recoger.value = service.recoger || '';
+            form.entregar.value = service.entregar || '';
+            form.volumen.value = service.volumen || '';
+            form.observaciones.value = service.observaciones || '';
+            form.pagoMensajero.value = service.pagoMensajero || 0;
+            
+            if (currentRole === 'admin') {
+                // Esperar a que se carguen los mensajeros antes de seleccionar
+                setTimeout(() => {
+                    const mensajeroSelect = document.getElementById('uidMensajero');
+                    if (mensajeroSelect) {
+                        mensajeroSelect.value = service.uidMensajero || '';
+                        console.log("🎯 Mensajero seleccionado:", service.uidMensajero);
+                    }
+                }, 1000);
+            } else {
+                form.costoCliente.value = service.costo || 0;
+            }
+            
+            if (service.cobrarProducto && service.cobrarProducto > 0) {
+                document.getElementById('cobrar-check').checked = true;
+                document.getElementById('cobrar-field-container').classList.remove('hidden');
+                form.cobrarProducto.value = service.cobrarProducto;
+            }
+        }
+    }
+    
+    modal.classList.remove('hidden');
+    console.log("✅ Modal abierto correctamente");
 }
       window.openModal = openModal;
 
@@ -3195,25 +3226,35 @@ window.setFilter = setFilter;
     }
   }
 
- // Agrega esto temporalmente después de tu función loadMensajerosList
-console.log("=== DIAGNÓSTICO DE CARGA DE MENSAJEROS ===");
+// Agrega esto DESPUÉS de tu función loadMensajerosList
+console.log("=== DIAGNÓSTICO EXTRA ===");
 
-// Verificar si la función se está llamando
-const originalLoadMensajeros = loadMensajerosList;
-loadMensajerosList = function() {
-    console.log("🎯 ¡loadMensajerosList() SE ESTÁ LLAMANDO!");
-    return originalLoadMensajeros.apply(this, arguments);
-};
+// 1. Verificar que la función existe
+console.log("¿loadMensajerosList existe?", typeof loadMensajerosList);
 
-// Verificar cuando se abre el modal
-const originalOpenModal = openModal;
-openModal = function(editId) {
-    console.log("🎯 openModal() llamado, rol actual:", currentRole);
+// 2. Verificar que currentRole es 'admin' cuando se abre el modal
+console.log("currentRole global:", currentRole);
+
+// 3. Probar la función manualmente
+function probarCargaMensajeros() {
+    console.log("🔧 Probando carga manual de mensajeros...");
     if (currentRole === 'admin') {
-        console.log("🎯 Debería cargar mensajeros...");
+        loadMensajerosList();
     }
-    return originalOpenModal.apply(this, arguments);
-};
+}
+
+// 4. Agregar botón de prueba temporal (quitar después)
+const testButton = document.createElement('button');
+testButton.textContent = '🔧 Probar Carga Mensajeros';
+testButton.style.position = 'fixed';
+testButton.style.top = '10px';
+testButton.style.right = '10px';
+testButton.style.zIndex = '10000';
+testButton.style.background = 'red';
+testButton.style.color = 'white';
+testButton.style.padding = '10px';
+testButton.onclick = probarCargaMensajeros;
+document.body.appendChild(testButton);
 
 
   </script>
