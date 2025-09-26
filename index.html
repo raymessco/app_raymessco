@@ -1847,54 +1847,46 @@ diagnoseUI();
 }
 
 
-
-  async function loadMensajerosList() {
+async function loadMensajerosList() {
     try {
-        console.log("🔍 Cargando lista de mensajeros...");
+        console.log("🔍 EJECUTANDO loadMensajerosList() - ¿Se llama esta función?");
         
-        // ✅ CORREGIDO: Obtener el elemento dentro de la función
         const mensajeroSelect = document.getElementById('uidMensajero');
+        console.log("✅ Elemento select encontrado:", mensajeroSelect);
+        
         if (!mensajeroSelect) {
-            console.error("❌ No se encontró el select #uidMensajero en el DOM");
+            console.error("❌ No se encontró el select #uidMensajero");
             return;
         }
 
-        // Mostrar estado de carga
-        mensajeroSelect.innerHTML = '<option value="">Buscando mensajeros...</option>';
-
+        console.log("🔍 Buscando mensajeros en Firestore...");
         const mensajerosSnapshot = await db.collection('users')
             .where('role', 'in', ['mensajero', 'admin'])
             .get();
 
         console.log(`📋 Mensajeros encontrados: ${mensajerosSnapshot.size}`);
         
+        mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
+
         if (mensajerosSnapshot.empty) {
-            console.log("⚠️ No hay mensajeros registrados en la base de datos");
-            mensajeroSelect.innerHTML = '<option value="">No hay mensajeros disponibles</option>';
+            console.log("⚠️ No hay mensajeros (pero la consulta funcionó)");
             return;
         }
 
-        // Limpiar y cargar opciones
-        mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
-        
         mensajerosSnapshot.forEach(doc => {
             const data = doc.data();
-            console.log(`👤 Encontrado: ${data.displayName || data.email} - Rol: ${data.role}`);
+            console.log(`👤 Agregando mensajero: ${data.displayName} (${data.role})`);
             
             const option = document.createElement('option');
             option.value = doc.id;
-            option.textContent = data.displayName || data.email || `Usuario ${doc.id.substring(0, 6)}`;
+            option.textContent = data.displayName || data.email || doc.id;
             mensajeroSelect.appendChild(option);
         });
 
-        console.log("✅ Lista de mensajeros cargada correctamente");
+        console.log("✅ loadMensajerosList() completado correctamente");
 
     } catch (error) {
-        console.error('❌ Error cargando mensajeros:', error);
-        const mensajeroSelect = document.getElementById('uidMensajero');
-        if (mensajeroSelect) {
-            mensajeroSelect.innerHTML = '<option value="">Error al cargar mensajeros</option>';
-        }
+        console.error('❌ Error en loadMensajerosList():', error);
     }
 }
 
@@ -3203,27 +3195,25 @@ window.setFilter = setFilter;
     }
   }
 
-  // Función temporal de diagnóstico - agregar al final de tu script
-function verificarBaseDeDatos() {
-    console.log("🔍 VERIFICANDO BASE DE DATOS...");
-    
-    // Verificar si hay algún usuario en la colección
-    db.collection('users').get().then(snapshot => {
-        console.log(`📊 Total de usuarios en la BD: ${snapshot.size}`);
-        snapshot.forEach(doc => {
-            console.log(`👤 Usuario ${doc.id}:`, doc.data());
-        });
-    }).catch(error => {
-        console.error("❌ Error accediendo a la BD:", error);
-    });
-}
+ // Agrega esto temporalmente después de tu función loadMensajerosList
+console.log("=== DIAGNÓSTICO DE CARGA DE MENSAJEROS ===");
 
-// Ejecutar después de iniciar sesión como admin
-setTimeout(() => {
+// Verificar si la función se está llamando
+const originalLoadMensajeros = loadMensajerosList;
+loadMensajerosList = function() {
+    console.log("🎯 ¡loadMensajerosList() SE ESTÁ LLAMANDO!");
+    return originalLoadMensajeros.apply(this, arguments);
+};
+
+// Verificar cuando se abre el modal
+const originalOpenModal = openModal;
+openModal = function(editId) {
+    console.log("🎯 openModal() llamado, rol actual:", currentRole);
     if (currentRole === 'admin') {
-        verificarBaseDeDatos();
+        console.log("🎯 Debería cargar mensajeros...");
     }
-}, 2000);
+    return originalOpenModal.apply(this, arguments);
+};
 
 
   </script>
