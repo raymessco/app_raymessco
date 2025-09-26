@@ -881,7 +881,7 @@
     font-size: 16px;
 }
 
-/* Estilos específicos para selects */
+/* Estilos específicos para selects - IDÉNTICO a otros inputs */
 select.form-input {
     appearance: none;
     -webkit-appearance: none;
@@ -891,55 +891,28 @@ select.form-input {
     background-position: right 15px center;
     background-size: 16px;
     padding-right: 40px;
+    /* Mismo estilo exacto que los demás inputs */
+    background: rgba(207, 149, 36, 0.1);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    color: var(--text-light);
 }
 
-/* Estilos para las opciones del select */
+/* Opciones con estilo coherente */
 select.form-input option {
     background: var(--bg-dark);
     color: var(--text-light);
-    padding: 10px;
-    border: none;
+    padding: 12px;
 }
 
-/* Estilos cuando el select está enfocado */
+/* Efecto hover igual que los inputs */
+select.form-input:hover {
+    background: rgba(207, 149, 36, 0.15);
+}
+
 select.form-input:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(207, 149, 36, 0.3);
-}
-
-/* Estilos para hover de las opciones */
-select.form-input option:hover {
-    background: var(--gold);
-    color: #000;
-}
-
-/* Estilos específicos para el select de mensajeros */
-#uidMensajero {
-    background-color: rgba(20, 20, 20, 0.9);
-}
-
-#uidMensajero option {
-    background-color: rgba(20, 20, 20, 0.9);
-    color: var(--text-light);
-    border-bottom: 1px solid rgba(207, 149, 36, 0.3);
-}
-
-#uidMensajero option:hover,
-#uidMensajero option:focus {
-    background-color: var(--gold);
-    color: #000;
-}
-
-    /* Enfatizar más el color dorado de tu marca */
-select.form-input {
-    background: rgba(207, 149, 36, 0.1) !important;
-    color: #FFFFFF !important;
-    border: 2px solid var(--gold) !important;
-}
-
-select.form-input:focus {
-    background: rgba(207, 149, 36, 0.2) !important;
-    box-shadow: 0 0 0 3px rgba(207, 149, 36, 0.3) !important;
 }
     
     </style>
