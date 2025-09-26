@@ -894,6 +894,133 @@
     padding: 10px !important;
     margin: 5px !important;
 }
+
+/* Agrega estos estilos al final de tu CSS */
+
+/* Estilos específicos para la sección de archivar */
+.archive-container {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid var(--gold);
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.archive-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.archive-icon {
+    font-size: 48px;
+    color: var(--gold);
+    margin-bottom: 15px;
+}
+
+.archive-stats {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.archive-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(207, 149, 36, 0.1);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+}
+
+.archive-stat-total {
+    background: rgba(207, 149, 36, 0.2);
+    font-weight: bold;
+}
+
+.archive-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.archive-btn {
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 160px;
+    justify-content: center;
+}
+
+.archive-btn-primary {
+    background: var(--gold);
+    color: #000;
+}
+
+.archive-btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+}
+
+.archive-btn-secondary {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93C5FD;
+    border: 1px solid rgba(59, 130, 246, 0.5);
+}
+
+.archive-btn-secondary:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+/* Progress bar styles */
+.archive-progress {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.progress-bar-container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-bar {
+    background: var(--gold);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .archive-actions {
+        flex-direction: column;
+    }
+    
+    .archive-btn {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .archive-stat {
+        flex-direction: column;
+        text-align: center;
+        gap: 5px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -1075,40 +1202,63 @@
     <div id="archivar-section" class="hidden">
     <h2 class="section-title">Archivar servicios antiguos</h2>
     
-    <div class="financial-card">
-        <div class="text-center mb-4">
-            <i class="fas fa-archive text-4xl text-gold mb-3"></i>
+    <div class="archive-container">
+        <div class="archive-header">
+            <i class="fas fa-archive archive-icon"></i>
             <p class="text-gray-300">Archiva automáticamente servicios completados con más de 24 horas</p>
         </div>
         
-        <div class="financial-item">
-            <span>Servicios entregados:</span>
-            <span id="count-entregados" class="text-gold">0</span>
-        </div>
-        <div class="financial-item">
-            <span>Servicios cancelados:</span>
-            <span id="count-cancelados" class="text-gold">0</span>
-        </div>
-        <div class="financial-item">
-            <span>Total a archivar:</span>
-            <span id="count-total" class="text-gold font-bold">0</span>
+        <div class="archive-stats">
+            <div class="archive-stat">
+                <span>Servicios entregados:</span>
+                <span id="count-entregados" class="text-gold font-bold">0</span>
+            </div>
+            <div class="archive-stat">
+                <span>Servicios cancelados:</span>
+                <span id="count-cancelados" class="text-gold font-bold">0</span>
+            </div>
+            <div class="archive-stat archive-stat-total">
+                <span>Total a archivar:</span>
+                <span id="count-total" class="text-gold font-bold text-lg">0</span>
+            </div>
         </div>
         
-        <div class="mt-6 text-center">
-            <button onclick="loadArchivableServices()" class="btn-secondary action-btn mr-2">
+        <div class="archive-actions">
+            <button onclick="loadArchivableServices()" class="archive-btn archive-btn-secondary">
                 <i class="fas fa-sync"></i> Actualizar conteo
             </button>
-            <button onclick="confirmArchive()" class="btn-primary action-btn">
+            <button onclick="confirmArchive()" class="archive-btn archive-btn-primary">
                 <i class="fas fa-archive"></i> Archivar ahora
             </button>
         </div>
         
-        <div id="archive-progress" class="hidden mt-4 text-center">
-            <div class="text-gold mb-2">Archivando...</div>
-            <div class="bg-gray-700 rounded-full h-2">
-                <div id="progress-bar" class="bg-gold h-2 rounded-full" style="width: 0%"></div>
+        <div id="archive-progress" class="archive-progress hidden">
+            <div class="text-center mb-3">
+                <i class="fas fa-spinner fa-spin text-gold mr-2"></i>
+                <span class="text-gold font-semibold">Archivando servicios...</span>
             </div>
-            <div id="progress-text" class="text-sm text-gray-300 mt-1">0/0</div>
+            
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            
+            <div class="flex justify-between text-sm text-gray-300">
+                <span id="progress-text">0/0</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            
+            <div class="text-center mt-3">
+                <button onclick="cancelArchive()" class="text-red-400 hover:text-red-300 text-sm">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-center">
+            <p class="text-xs text-gray-500">
+                <i class="fas fa-info-circle"></i> 
+                Solo se archivan servicios en estado "entregado" o "cancelado" con más de 24 horas de antigüedad
+            </p>
         </div>
     </div>
 </div>
