@@ -2541,45 +2541,82 @@ function renderServices(data) {
      
 
   function showSection(section) {
-  console.log("Mostrando sección:", section);
+    console.log("🎯 Mostrando sección:", section);
 
-  const allSections = document.querySelectorAll(
-    '#services-section, #financial-section, #pending-container, #pending-mensajeros-section, #costos-section, #cobros-section'
-  );
+    // Ocultar todas las secciones
+    const allSections = document.querySelectorAll(
+        '#services-section, #financial-section, #pending-container, #pending-mensajeros-section, #costos-section, #cobros-section'
+    );
 
-  allSections.forEach(div => div.classList.add('hidden'));
+    allSections.forEach(div => {
+        if (div) div.classList.add('hidden');
+    });
 
-  const targetSection =
-    document.getElementById(`${section}-section`) ||
-    document.getElementById(`${section}-container`);
+    // Mostrar la sección target
+    const targetSection = document.getElementById(`${section}-section`) ||
+                         document.getElementById(`${section}-container`);
 
-  if (targetSection) targetSection.classList.remove('hidden');
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+        console.log("✅ Sección mostrada:", targetSection.id);
+    } else {
+        console.error("❌ No se encontró la sección:", section);
+        // Fallback: mostrar servicios por defecto
+        const fallbackSection = document.getElementById('services-section');
+        if (fallbackSection) {
+            fallbackSection.classList.remove('hidden');
+            console.log("🔄 Mostrando servicios por defecto");
+        }
+    }
 
-  // 👇 Filtros SOLO aquí
-  if (typeof filtersEl !== "undefined" && filtersEl) {
-    filtersEl.classList.toggle('hidden', section !== 'services');
-  }
+    // ✅ CORREGIDO: Obtener filtersEl correctamente
+    const filtersEl = document.getElementById('filters');
+    if (filtersEl) {
+        filtersEl.classList.toggle('hidden', section !== 'services');
+        console.log("🎛️ Filtros:", section === 'services' ? 'VISIBLES' : 'OCULTOS');
+    }
 
-  // 👇 Switch SOLO aquí
-  switch (section) {
-    case 'services':
-      console.log("➡️ Mostrando lógica de servicios");
-      break;
-    case 'financial':
-      console.log("➡️ Mostrando lógica financiera");
-      break;
-    case 'pending-mensajeros':
-      console.log("➡️ Mostrando solicitudes de mensajeros");
-      break;
-    case 'costos':
-      console.log("➡️ Mostrando costos");
-      break;
-    case 'cobros':
-      console.log("➡️ Mostrando cobros");
-      break;
-    default:
-      console.log("⚠️ No hay lógica definida para:", section);
-  }
+    // Lógica específica de cada sección
+    switch (section) {
+        case 'services':
+            console.log("➡️ Mostrando lógica de servicios");
+            // Asegurar que se muestren los servicios actuales
+            if (services && services.length > 0) {
+                renderServices();
+            }
+            break;
+        case 'financial':
+            console.log("➡️ Mostrando lógica financiera");
+            if (currentRole === 'mensajero') {
+                renderFinancialSummary();
+            }
+            break;
+        case 'pending-mensajeros':
+            console.log("➡️ Mostrando solicitudes de mensajeros");
+            if (currentRole === 'admin') {
+                subscribePendingMensajeros();
+            }
+            break;
+        case 'costos':
+            console.log("➡️ Mostrando costos");
+            if (currentRole === 'admin') {
+                renderCostos();
+            }
+            break;
+        case 'cobros':
+            console.log("➡️ Mostrando cobros");
+            if (currentRole === 'admin') {
+                renderCobros();
+            }
+            break;
+        default:
+            console.log("⚠️ No hay lógica definida para:", section);
+    }
+
+    // Cerrar sidebar en móvil
+    if (window.innerWidth <= 768) {
+        toggleSidebar();
+    }
 }
 
 window.showSection = showSection;
