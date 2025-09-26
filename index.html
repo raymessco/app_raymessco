@@ -870,68 +870,29 @@
             margin-top: 0;
         }
 
-/* ESTILO GENERAL PARA INPUTS - CORREGIR COLOR */
-.form-input {
-    width: 100%;
-    background: rgba(207, 149, 36, 0.1);
-    border: 1px solid var(--gold);
-    border-radius: 8px;
-    padding: 12px 15px;
-    color: var(--text-light); /* 👈 CAMBIAR de var(--gold) a var(--text-light) */
-    font-size: 16px;
-}
-
-/* ESTILOS ESPECÍFICOS PARA SELECTS - CON !important */
-select.form-input {
+/* ESTILO MUY ESPECÍFICO Y AGRESIVO */
+#uidMensajero {
     appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
+    width: 100% !important;
     background: rgba(207, 149, 36, 0.1) !important;
-    border: 1px solid var(--gold) !important;
+    border: 1px solid #CF9524 !important;
     border-radius: 8px !important;
-    color: var(--text-light) !important;
+    padding: 12px 15px !important;
+    color: #F5F5F5 !important;
+    font-size: 16px !important;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23CF9524' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
     background-repeat: no-repeat !important;
     background-position: right 15px center !important;
     background-size: 16px !important;
-    padding-right: 40px !important;
-}
-
-/* OPCIONES DEL SELECT */
-select.form-input option {
-    background: var(--bg-dark) !important;
-    color: var(--text-light) !important;
-    padding: 12px !important;
-    font-size: 14px !important;
-}
-
-/* HOVER Y FOCUS */
-select.form-input:hover {
-    background: rgba(207, 149, 36, 0.15) !important;
-}
-
-select.form-input:focus {
-    outline: none !important;
-    box-shadow: 0 0 0 2px rgba(207, 149, 36, 0.3) !important;
-    background: rgba(207, 149, 36, 0.2) !important;
-}
-
-/* ESTILO ESPECÍFICO PARA EL SELECT DE MENSAJEROS */
-#uidMensajero {
-    background: rgba(207, 149, 36, 0.1) !important;
-    border: 1px solid var(--gold) !important;
-    color: var(--text-light) !important;
 }
 
 #uidMensajero option {
     background: #0A0A0A !important;
     color: #F5F5F5 !important;
-}
-
-#uidMensajero option:hover,
-#uidMensajero option:checked {
-    background: var(--gold) !important;
-    color: #000 !important;
+    padding: 10px !important;
+    margin: 5px !important;
 }
     </style>
 </head>
