@@ -895,130 +895,47 @@
     margin: 5px !important;
 }
 
-/* Agrega estos estilos al final de tu CSS */
+/* Estilos específicos para archivar e historial */
+#archivar-section,
+#historial-section {
+    background: var(--bg-darker);
+    min-height: calc(100vh - 120px);
+    padding: 20px;
+    margin: -20px; /* Compensa el padding del main-content */
+}
 
-/* Estilos específicos para la sección de archivar */
+/* Asegurar que el contenido de archivar ocupe todo el espacio */
 .archive-container {
-    background: rgba(20, 20, 20, 0.9);
+    background: rgba(20, 20, 20, 0.95);
     border: 1px solid var(--gold);
     border-radius: 16px;
-    padding: 25px;
-    margin-bottom: 20px;
+    padding: 30px;
+    margin: 0 auto;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(207, 149, 36, 0.15);
 }
 
-.archive-header {
-    text-align: center;
-    margin-bottom: 25px;
+/* Para la sección de historial */
+#historial-section .services-grid {
+    background: transparent;
+    padding: 0;
 }
 
-.archive-icon {
-    font-size: 48px;
+/* Asegurar que las tarjetas del historial tengan buen contraste */
+#historial-section .service-card {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid rgba(207, 149, 36, 0.4);
+}
+
+/* Header de las secciones específicas */
+#archivar-section .section-title,
+#historial-section .section-title {
     color: var(--gold);
-    margin-bottom: 15px;
-}
-
-.archive-stats {
-    display: grid;
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.archive-stat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background: rgba(207, 149, 36, 0.1);
-    border: 1px solid var(--gold);
-    border-radius: 10px;
-}
-
-.archive-stat-total {
-    background: rgba(207, 149, 36, 0.2);
-    font-weight: bold;
-}
-
-.archive-actions {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.archive-btn {
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 160px;
-    justify-content: center;
-}
-
-.archive-btn-primary {
-    background: var(--gold);
-    color: #000;
-}
-
-.archive-btn-primary:hover {
-    background: var(--gold-light);
-    transform: translateY(-2px);
-}
-
-.archive-btn-secondary {
-    background: rgba(59, 130, 246, 0.2);
-    color: #93C5FD;
-    border: 1px solid rgba(59, 130, 246, 0.5);
-}
-
-.archive-btn-secondary:hover {
-    background: rgba(59, 130, 246, 0.3);
-}
-
-/* Progress bar styles */
-.archive-progress {
-    background: rgba(20, 20, 20, 0.8);
-    border: 1px solid var(--gold);
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 20px;
-}
-
-.progress-bar-container {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    height: 8px;
-    overflow: hidden;
-    margin: 10px 0;
-}
-
-.progress-bar {
-    background: var(--gold);
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.3s ease;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .archive-actions {
-        flex-direction: column;
-    }
-    
-    .archive-btn {
-        min-width: auto;
-        width: 100%;
-    }
-    
-    .archive-stat {
-        flex-direction: column;
-        text-align: center;
-        gap: 5px;
-    }
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 10px;
 }
 
     </style>
@@ -1199,83 +1116,106 @@
         </div>
     </div>
 
-    <div id="archivar-section" class="hidden">
-    <h2 class="section-title">Archivar servicios antiguos</h2>
+  <div id="archivar-section" class="hidden">
+    <div class="text-center mb-8">
+        <h2 class="section-title">Archivar Servicios Antiguos</h2>
+        <p class="text-gray-300 max-w-2xl mx-auto">
+            Archiva automáticamente servicios en estado "entregado" o "cancelado" 
+            con más de 24 horas de antigüedad para mantener la base de datos organizada.
+        </p>
+    </div>
     
     <div class="archive-container">
         <div class="archive-header">
             <i class="fas fa-archive archive-icon"></i>
-            <p class="text-gray-300">Archiva automáticamente servicios completados con más de 24 horas</p>
+            <p class="text-gray-300 mb-6">Servicios completados listos para archivar</p>
         </div>
         
         <div class="archive-stats">
             <div class="archive-stat">
-                <span>Servicios entregados:</span>
+                <span><i class="fas fa-check-circle text-green-400 mr-2"></i>Entregados:</span>
                 <span id="count-entregados" class="text-gold font-bold">0</span>
             </div>
             <div class="archive-stat">
-                <span>Servicios cancelados:</span>
+                <span><i class="fas fa-times-circle text-red-400 mr-2"></i>Cancelados:</span>
                 <span id="count-cancelados" class="text-gold font-bold">0</span>
             </div>
             <div class="archive-stat archive-stat-total">
-                <span>Total a archivar:</span>
-                <span id="count-total" class="text-gold font-bold text-lg">0</span>
+                <span><i class="fas fa-boxes text-gold mr-2"></i>Total a archivar:</span>
+                <span id="count-total" class="text-gold font-bold text-xl">0</span>
             </div>
         </div>
         
         <div class="archive-actions">
             <button onclick="loadArchivableServices()" class="archive-btn archive-btn-secondary">
-                <i class="fas fa-sync"></i> Actualizar conteo
+                <i class="fas fa-sync"></i> Actualizar Conteo
             </button>
             <button onclick="confirmArchive()" class="archive-btn archive-btn-primary">
-                <i class="fas fa-archive"></i> Archivar ahora
+                <i class="fas fa-archive"></i> Archivar Ahora
             </button>
         </div>
         
         <div id="archive-progress" class="archive-progress hidden">
-            <div class="text-center mb-3">
+            <div class="text-center mb-4">
                 <i class="fas fa-spinner fa-spin text-gold mr-2"></i>
-                <span class="text-gold font-semibold">Archivando servicios...</span>
+                <span class="text-gold font-semibold">Procesando archivo...</span>
             </div>
             
             <div class="progress-bar-container">
                 <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
             </div>
             
-            <div class="flex justify-between text-sm text-gray-300">
-                <span id="progress-text">0/0</span>
+            <div class="flex justify-between text-sm text-gray-300 mt-2">
+                <span id="progress-text">0/0 servicios</span>
                 <span id="progress-percent">0%</span>
             </div>
             
-            <div class="text-center mt-3">
+            <div class="text-center mt-4">
                 <button onclick="cancelArchive()" class="text-red-400 hover:text-red-300 text-sm">
-                    <i class="fas fa-times"></i> Cancelar
+                    <i class="fas fa-times"></i> Cancelar Proceso
                 </button>
             </div>
         </div>
         
-        <div class="mt-4 text-center">
-            <p class="text-xs text-gray-500">
-                <i class="fas fa-info-circle"></i> 
-                Solo se archivan servicios en estado "entregado" o "cancelado" con más de 24 horas de antigüedad
+        <div class="mt-6 text-center">
+            <p class="text-xs text-gray-400">
+                <i class="fas fa-info-circle mr-1"></i> 
+                Los servicios archivados se moverán al historial y ya no aparecerán en la lista principal
             </p>
         </div>
     </div>
 </div>
 
 <div id="historial-section" class="hidden">
-    <h2 class="section-title">Historial de servicios archivados</h2>
+    <div class="text-center mb-8">
+        <h2 class="section-title">Historial de Servicios Archivados</h2>
+        <p class="text-gray-300 max-w-2xl mx-auto">
+            Consulta todos los servicios que han sido archivados. Puedes filtrar por estado y exportar los datos.
+        </p>
+    </div>
     
-    <div class="filters-container mb-4">
-        <button onclick="setHistorialFilter('all', this)" class="filter-btn active">Todos</button>
-        <button onclick="setHistorialFilter('entregado', this)" class="filter-btn">Entregados</button>
-        <button onclick="setHistorialFilter('cancelado', this)" class="filter-btn">Cancelados</button>
-        <button onclick="exportHistorialToCSV()" class="filter-btn bg-green-600 text-white">
-            <i class="fas fa-download"></i> Exportar CSV
+    <div class="filters-container mb-6">
+        <button onclick="setHistorialFilter('all', this)" class="filter-btn active">
+            <i class="fas fa-list mr-2"></i>Todos
+        </button>
+        <button onclick="setHistorialFilter('entregado', this)" class="filter-btn">
+            <i class="fas fa-check mr-2"></i>Entregados
+        </button>
+        <button onclick="setHistorialFilter('cancelado', this)" class="filter-btn">
+            <i class="fas fa-times mr-2"></i>Cancelados
+        </button>
+        <button onclick="exportHistorialToCSV()" class="filter-btn bg-green-600 text-white hover:bg-green-700">
+            <i class="fas fa-download mr-2"></i> Exportar CSV
         </button>
     </div>
     
     <div id="historial-list" class="services-grid"></div>
+    
+    <div id="historial-empty" class="hidden text-center py-12">
+        <i class="fas fa-inbox text-4xl text-gray-600 mb-4"></i>
+        <p class="text-gray-400 text-lg">No hay servicios archivados</p>
+        <p class="text-gray-500 text-sm">Los servicios aparecerán aquí después de ser archivados</p>
+    </div>
 </div>
 
     <!-- =================== MODALES =================== -->
@@ -2963,6 +2903,7 @@ async function loadHistorial() {
 
 function renderHistorial() {
     const historialList = document.getElementById('historial-list');
+    const historialEmpty = document.getElementById('historial-empty');
     
     let filteredServices = historialServices;
     if (currentHistorialFilter !== 'all') {
@@ -2972,10 +2913,14 @@ function renderHistorial() {
     }
 
     if (filteredServices.length === 0) {
-        historialList.innerHTML = '<div class="text-center text-gold">No hay servicios archivados</div>';
+        historialList.innerHTML = '';
+        historialList.classList.add('hidden');
+        historialEmpty.classList.remove('hidden');
         return;
     }
 
+    historialList.classList.remove('hidden');
+    historialEmpty.classList.add('hidden');
     historialList.innerHTML = '';
     
     filteredServices.forEach(service => {
@@ -2992,7 +2937,7 @@ function renderHistorial() {
             </div>
             
             <div class="service-detail">
-                <i class="fas fa-calendar"></i>
+                <i class="fas fa-calendar-plus"></i>
                 <div class="service-detail-content">
                     <strong>Creado:</strong> ${fechaCreacion}
                 </div>
@@ -3006,7 +2951,7 @@ function renderHistorial() {
             </div>
             
             <div class="service-detail">
-                <i class="fas fa-user"></i>
+                <i class="fas fa-user-shield"></i>
                 <div class="service-detail-content">
                     <strong>Por:</strong> ${service.archivadoPorEmail || 'Sistema'}
                 </div>
@@ -3015,7 +2960,9 @@ function renderHistorial() {
             ${service.entregar ? `
                 <div class="service-detail">
                     <i class="fas fa-map-marker-alt"></i>
-                    <div class="service-detail-content">${service.entregar}</div>
+                    <div class="service-detail-content">
+                        <strong>Entrega:</strong> ${service.entregar}
+                    </div>
                 </div>
             ` : ''}
             
@@ -3023,7 +2970,16 @@ function renderHistorial() {
                 <div class="service-detail">
                     <i class="fas fa-money-bill-wave"></i>
                     <div class="service-detail-content">
-                        Pago mensajero: $${service.pagoMensajero.toLocaleString()}
+                        <strong>Pago mensajero:</strong> $${service.pagoMensajero.toLocaleString()}
+                    </div>
+                </div>
+            ` : ''}
+            
+            ${service.observaciones ? `
+                <div class="service-detail">
+                    <i class="fas fa-sticky-note"></i>
+                    <div class="service-detail-content">
+                        <strong>Observaciones:</strong> ${service.observaciones}
                     </div>
                 </div>
             ` : ''}
