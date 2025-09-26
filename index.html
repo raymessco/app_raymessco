@@ -1181,9 +1181,35 @@
     <div id="evidence-modal" class="modal-backdrop hidden"> </div>
 
 
-    <div id="edit-profile-modal" class="modal-backdrop hidden">
-        <!-- Contenido del modal de editar perfil -->
+    <!-- Modal Editar Perfil - VERSIÓN COMPLETA -->
+<div id="edit-profile-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeEditProfile()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="modal-header">
+            <h2 class="modal-title">Editar perfil</h2>
+        </div>
+        
+        <form id="profile-form">
+            <div class="form-group">
+                <label for="profile-displayName" class="form-label">Nombre para mostrar</label>
+                <input type="text" id="profile-displayName" class="form-input" 
+                       placeholder="Tu nombre" required maxlength="50">
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i> Guardar cambios
+                </button>
+                <button type="button" onclick="closeEditProfile()" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 
     <div id="roleChoiceModal" class="modal-backdrop hidden">
         <!-- Contenido del modal de selección de rol -->
@@ -3005,12 +3031,36 @@ window.setFilter = setFilter;
     }
   }
       
-      function openEditProfile() {
-        const modal = document.getElementById('edit-profile-modal');
-        document.getElementById('profile-displayName').value = userNameEl.textContent;
-        modal.classList.remove('hidden');
-      }
-      window.openEditProfile = openEditProfile;
+  function openEditProfile() {
+    console.log("👤 Abriendo edición de perfil...");
+    
+    const modal = document.getElementById('edit-profile-modal');
+    const nameInput = document.getElementById('profile-displayName');
+    
+    if (!modal) {
+        console.error("❌ Modal no encontrado");
+        return;
+    }
+    
+    if (!nameInput) {
+        console.error("❌ Input de nombre no encontrado");
+        return;
+    }
+    
+    // ✅ CORREGIDO: Obtener el nombre de forma más robusta
+    const currentName = currentUser?.displayName || 
+                       document.getElementById('user-name')?.textContent || 
+                       currentUser?.email || 
+                       '';
+    
+    nameInput.value = currentName;
+    modal.classList.remove('hidden');
+    
+    console.log("✅ Modal abierto. Nombre actual:", currentName);
+}
+
+window.openEditProfile = openEditProfile;    
+
 
       function closeEditProfile() {
         document.getElementById('edit-profile-modal').classList.add('hidden');
