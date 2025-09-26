@@ -3341,6 +3341,33 @@ window.openEditProfile = openEditProfile;
     }
   }
 
+        // Agrega esto temporalmente para verificar
+function testPendingMensajeros() {
+    console.log("🧪 Probando consulta de solicitudes pendientes...");
+    
+    db.collection('users')
+        .where('role', '==', 'pending_mensajero')
+        .orderBy('createdAt', 'asc')
+        .get()
+        .then(snapshot => {
+            console.log("✅ ÍNDICE FUNCIONANDO CORRECTAMENTE");
+            console.log(`📋 Solicitudes encontradas: ${snapshot.size}`);
+            
+            snapshot.forEach(doc => {
+                console.log(`👤 ${doc.data().displayName} - ${doc.data().createdAt?.toDate?.()}`);
+            });
+        })
+        .catch(error => {
+            console.error("❌ Error inesperado:", error);
+        });
+}
+
+// Ejecutar prueba después de iniciar sesión como admin
+setTimeout(() => {
+    if (currentRole === 'admin') {
+        testPendingMensajeros();
+    }
+}, 3000);
 
 
   </script>
