@@ -1877,47 +1877,36 @@ diagnoseUI();
   }
 }
 
-
 async function loadMensajerosList() {
     try {
-        console.log("🔍 EJECUTANDO loadMensajerosList() - ¿Se llama esta función?");
-        
         const mensajeroSelect = document.getElementById('uidMensajero');
-        console.log("✅ Elemento select encontrado:", mensajeroSelect);
-        
-        if (!mensajeroSelect) {
-            console.error("❌ No se encontró el select #uidMensajero");
-            return;
-        }
+        if (!mensajeroSelect) return;
 
-        console.log("🔍 Buscando mensajeros en Firestore...");
         const mensajerosSnapshot = await db.collection('users')
             .where('role', 'in', ['mensajero', 'admin'])
             .get();
 
-        console.log(`📋 Mensajeros encontrados: ${mensajerosSnapshot.size}`);
-        
         mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
 
         if (mensajerosSnapshot.empty) {
-            console.log("⚠️ No hay mensajeros (pero la consulta funcionó)");
+            mensajeroSelect.innerHTML = '<option value="">No hay mensajeros disponibles</option>';
             return;
         }
 
         mensajerosSnapshot.forEach(doc => {
             const data = doc.data();
-            console.log(`👤 Agregando mensajero: ${data.displayName} (${data.role})`);
-            
             const option = document.createElement('option');
             option.value = doc.id;
             option.textContent = data.displayName || data.email || doc.id;
             mensajeroSelect.appendChild(option);
         });
 
-        console.log("✅ loadMensajerosList() completado correctamente");
-
     } catch (error) {
-        console.error('❌ Error en loadMensajerosList():', error);
+        console.error('Error cargando mensajeros:', error);
+        const mensajeroSelect = document.getElementById('uidMensajero');
+        if (mensajeroSelect) {
+            mensajeroSelect.innerHTML = '<option value="">Error al cargar</option>';
+        }
     }
 }
 
@@ -3226,35 +3215,6 @@ window.setFilter = setFilter;
     }
   }
 
-// Agrega esto DESPUÉS de tu función loadMensajerosList
-console.log("=== DIAGNÓSTICO EXTRA ===");
-
-// 1. Verificar que la función existe
-console.log("¿loadMensajerosList existe?", typeof loadMensajerosList);
-
-// 2. Verificar que currentRole es 'admin' cuando se abre el modal
-console.log("currentRole global:", currentRole);
-
-// 3. Probar la función manualmente
-function probarCargaMensajeros() {
-    console.log("🔧 Probando carga manual de mensajeros...");
-    if (currentRole === 'admin') {
-        loadMensajerosList();
-    }
-}
-
-// 4. Agregar botón de prueba temporal (quitar después)
-const testButton = document.createElement('button');
-testButton.textContent = '🔧 Probar Carga Mensajeros';
-testButton.style.position = 'fixed';
-testButton.style.top = '10px';
-testButton.style.right = '10px';
-testButton.style.zIndex = '10000';
-testButton.style.background = 'red';
-testButton.style.color = 'white';
-testButton.style.padding = '10px';
-testButton.onclick = probarCargaMensajeros;
-document.body.appendChild(testButton);
 
 
   </script>
