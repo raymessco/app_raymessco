@@ -1153,9 +1153,8 @@
     </div>
 
     <!-- Los demás modales (evidence, edit-profile, roleChoice) se mantienen igual -->
-    <div id="evidence-modal" class="modal-backdrop hidden">
-        <!-- Contenido del modal de evidencia -->
-    </div>
+    <div id="evidence-modal" class="modal-backdrop hidden"> </div>
+
 
     <div id="edit-profile-modal" class="modal-backdrop hidden">
         <!-- Contenido del modal de editar perfil -->
@@ -1853,12 +1852,15 @@ diagnoseUI();
     try {
         console.log("🔍 Cargando lista de mensajeros...");
         
-        // ✅ CORREGIDO: Obtener el elemento del DOM dentro de la función
+        // ✅ CORREGIDO: Obtener el elemento dentro de la función
         const mensajeroSelect = document.getElementById('uidMensajero');
         if (!mensajeroSelect) {
-            console.error("❌ No se encontró el select de mensajeros (#uidMensajero)");
+            console.error("❌ No se encontró el select #uidMensajero en el DOM");
             return;
         }
+
+        // Mostrar estado de carga
+        mensajeroSelect.innerHTML = '<option value="">Buscando mensajeros...</option>';
 
         const mensajerosSnapshot = await db.collection('users')
             .where('role', 'in', ['mensajero', 'admin'])
@@ -1866,11 +1868,8 @@ diagnoseUI();
 
         console.log(`📋 Mensajeros encontrados: ${mensajerosSnapshot.size}`);
         
-        // Limpiar y mostrar estado de carga
-        mensajeroSelect.innerHTML = '<option value="">Cargando mensajeros...</option>';
-        
         if (mensajerosSnapshot.empty) {
-            console.log("⚠️ No hay mensajeros registrados");
+            console.log("⚠️ No hay mensajeros registrados en la base de datos");
             mensajeroSelect.innerHTML = '<option value="">No hay mensajeros disponibles</option>';
             return;
         }
@@ -1880,11 +1879,11 @@ diagnoseUI();
         
         mensajerosSnapshot.forEach(doc => {
             const data = doc.data();
-            console.log(`👤 Mensajero: ${data.displayName || data.email} - Rol: ${data.role}`);
+            console.log(`👤 Encontrado: ${data.displayName || data.email} - Rol: ${data.role}`);
             
             const option = document.createElement('option');
             option.value = doc.id;
-            option.textContent = data.displayName || data.email || `Mensajero ${doc.id.substring(0, 6)}`;
+            option.textContent = data.displayName || data.email || `Usuario ${doc.id.substring(0, 6)}`;
             mensajeroSelect.appendChild(option);
         });
 
@@ -1894,7 +1893,7 @@ diagnoseUI();
         console.error('❌ Error cargando mensajeros:', error);
         const mensajeroSelect = document.getElementById('uidMensajero');
         if (mensajeroSelect) {
-            mensajeroSelect.innerHTML = '<option value="">Error cargando mensajeros</option>';
+            mensajeroSelect.innerHTML = '<option value="">Error al cargar mensajeros</option>';
         }
     }
 }
@@ -3204,6 +3203,27 @@ window.setFilter = setFilter;
     }
   }
 
+  // Función temporal de diagnóstico - agregar al final de tu script
+function verificarBaseDeDatos() {
+    console.log("🔍 VERIFICANDO BASE DE DATOS...");
+    
+    // Verificar si hay algún usuario en la colección
+    db.collection('users').get().then(snapshot => {
+        console.log(`📊 Total de usuarios en la BD: ${snapshot.size}`);
+        snapshot.forEach(doc => {
+            console.log(`👤 Usuario ${doc.id}:`, doc.data());
+        });
+    }).catch(error => {
+        console.error("❌ Error accediendo a la BD:", error);
+    });
+}
+
+// Ejecutar después de iniciar sesión como admin
+setTimeout(() => {
+    if (currentRole === 'admin') {
+        verificarBaseDeDatos();
+    }
+}, 2000);
 
 
   </script>
