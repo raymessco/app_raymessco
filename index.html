@@ -3285,49 +3285,70 @@ window.saveService = saveService;
   // === Función para archivar servicios antiguos ===
 
 async function archiveOldServices() {
+    if (currentRole !== 'admin') {
+        alert('Solo los administradores pueden archivar pedidos.');
+        return;
+    }
+
     console.log("⏳ Iniciando archivado de pedidos antiguos...");
-    const now = Date.now();
-    const cutoff = now - (24 * 60 * 60 * 1000);
+    
+    if (!confirm('¿Estás seguro de que deseas archivar pedidos completados con más de 24 horas? Esta acción no se puede deshacer.')) {
+        return;
+    }
 
     try {
-        const snapshot = await db.collection('services').get();
+        // Solo archivar servicios en estado final
+        const snapshot = await db.collection('services')
+            .where('estado', 'in', ['entregado', 'cancelado'])
+            .get();
+
         if (snapshot.empty) {
-            alert("No hay pedidos para archivar.");
+            alert("No hay pedidos entregados o cancelados para archivar.");
             return;
         }
 
-        const batch = db.batch();
+        const now = Date.now();
+        const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
         let count = 0;
 
-        snapshot.forEach(doc => {
+        // Usar transacciones individuales en lugar de batch para mejor control
+        for (const doc of snapshot.docs) {
             const data = doc.data();
-            if (data.fechaCreacion && data.fechaCreacion.toDate().getTime() < cutoff) {
-                const historyData = {
-                    empresa: data.empresa || "",
-                    cliente: data.cliente || "",
-                    direccionEntrega: data.entregar || "",
-                    estado: data.estado || "desconocido",
-                    fechaRegistro: data.fechaCreacion,
-                    fechaEntrega: data.fechaEntrega || null,
-                    fechaArchivado: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                const historyRef = db.collection('services_history').doc();
-                batch.set(historyRef, historyData);
-                batch.delete(db.collection('services').doc(doc.id));
-                count++;
+            const fechaCreacion = data.fechaCreacion?.toDate?.().getTime() || 0;
+            
+            // Solo archivar si tiene más de 24 horas
+            if (fechaCreacion < twentyFourHoursAgo) {
+                try {
+                    // Primero crear en historial
+                    await db.collection('services_history').doc(doc.id).set({
+                        ...data,
+                        idOriginal: doc.id,
+                        fechaArchivado: firebase.firestore.FieldValue.serverTimestamp(),
+                        archivadoPor: currentUser.uid,
+                        archivadoPorEmail: currentUser.email
+                    });
+                    
+                    // Luego eliminar de services
+                    await db.collection('services').doc(doc.id).delete();
+                    
+                    count++;
+                    console.log(`✅ Archivado: ${doc.id}`);
+                } catch (error) {
+                    console.error(`❌ Error archivando ${doc.id}:`, error);
+                }
             }
-        });
+        }
 
         if (count > 0) {
-            await batch.commit();
             alert(`✅ ${count} pedidos archivados correctamente.`);
+            // Recargar la vista
+            subscribeServicesByRole();
         } else {
-            alert("No se encontraron pedidos antiguos.");
+            alert("No se encontraron pedidos con más de 24 horas para archivar.");
         }
     } catch (error) {
-        console.error("❌ Error archivando pedidos:", error);
-        alert("Error al archivar pedidos.");
+        console.error("❌ Error en proceso de archivado:", error);
+        alert("Error al archivar pedidos: " + error.message);
     }
 }
 
