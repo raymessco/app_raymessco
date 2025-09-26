@@ -1850,35 +1850,53 @@ diagnoseUI();
 
 
   async function loadMensajerosList() {
-  // Verificar si el select existe en el DOM
-  if (!mensajeroSelect) {
-    console.warn("⚠️ No se encontró #field-mensajero en el DOM. loadMensajerosList cancelado.");
-    return;
-  }
+    try {
+        console.log("🔍 Cargando lista de mensajeros...");
+        
+        // ✅ CORREGIDO: Obtener el elemento del DOM dentro de la función
+        const mensajeroSelect = document.getElementById('uidMensajero');
+        if (!mensajeroSelect) {
+            console.error("❌ No se encontró el select de mensajeros (#uidMensajero)");
+            return;
+        }
 
-  try {
-    const mensajerosSnapshot = await db.collection('users')
-      .where('role', 'in', ['mensajero', 'admin'])
-      .get();
+        const mensajerosSnapshot = await db.collection('users')
+            .where('role', 'in', ['mensajero', 'admin'])
+            .get();
 
-    mensajerosList = [];
-    mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
+        console.log(`📋 Mensajeros encontrados: ${mensajerosSnapshot.size}`);
+        
+        // Limpiar y mostrar estado de carga
+        mensajeroSelect.innerHTML = '<option value="">Cargando mensajeros...</option>';
+        
+        if (mensajerosSnapshot.empty) {
+            console.log("⚠️ No hay mensajeros registrados");
+            mensajeroSelect.innerHTML = '<option value="">No hay mensajeros disponibles</option>';
+            return;
+        }
 
-    mensajerosSnapshot.forEach(doc => {
-      const data = doc.data();
-      mensajerosList.push({
-        id: doc.id,
-        displayName: data.displayName || data.email || doc.id
-      });
+        // Limpiar y cargar opciones
+        mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
+        
+        mensajerosSnapshot.forEach(doc => {
+            const data = doc.data();
+            console.log(`👤 Mensajero: ${data.displayName || data.email} - Rol: ${data.role}`);
+            
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.textContent = data.displayName || data.email || `Mensajero ${doc.id.substring(0, 6)}`;
+            mensajeroSelect.appendChild(option);
+        });
 
-      const option = document.createElement('option');
-      option.value = doc.id;
-      option.textContent = data.displayName || data.email || doc.id;
-      mensajeroSelect.appendChild(option);
-    });
-  } catch (error) {
-    console.error('❌ Error cargando mensajeros:', error);
-  }
+        console.log("✅ Lista de mensajeros cargada correctamente");
+
+    } catch (error) {
+        console.error('❌ Error cargando mensajeros:', error);
+        const mensajeroSelect = document.getElementById('uidMensajero');
+        if (mensajeroSelect) {
+            mensajeroSelect.innerHTML = '<option value="">Error cargando mensajeros</option>';
+        }
+    }
 }
 
 
