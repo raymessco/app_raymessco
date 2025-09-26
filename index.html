@@ -2798,6 +2798,9 @@ function closeSidebar() {
         sidebarBackdrop.style.display = 'none';
         console.log("✅ Backdrop ocultado");
     }
+    
+    // Asegurarse de que el body no tenga scroll bloqueado
+    document.body.style.overflow = 'auto';
 }
 
 window.closeSidebar = closeSidebar;
@@ -3076,26 +3079,40 @@ function exportHistorialToCSV() {
 
 function showSection(section) {
     console.log("🎯 Mostrando sección:", section);
+    currentSection = section;
 
-    // Ocultar todas las secciones
-    const allSections = document.querySelectorAll(
-        '#services-section, #financial-section, #pending-container, #pending-mensajeros-section, #costos-section, #cobros-section'
-    );
+    // Ocultar TODAS las secciones principales
+    const sections = [
+        'services-section',
+        'financial-section', 
+        'pending-mensajeros-section',
+        'costos-section',
+        'cobros-section',
+        'archivar-section',
+        'historial-section'
+    ];
 
-    allSections.forEach(div => {
-        if (div) div.classList.add('hidden');
+    sections.forEach(sectionId => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.classList.add('hidden');
+        }
     });
 
-    // Mostrar la sección target
-    const targetSection = document.getElementById(`${section}-section`) ||
-                         document.getElementById(`${section}-container`);
+    // Ocultar también el banner pendiente si está visible
+    const pendingBanner = document.getElementById('pending-banner');
+    if (pendingBanner) {
+        pendingBanner.classList.add('hidden');
+    }
 
+    // Mostrar la sección target
+    const targetSection = document.getElementById(`${section}-section`);
     if (targetSection) {
         targetSection.classList.remove('hidden');
         console.log("✅ Sección mostrada:", targetSection.id);
     } else {
         console.error("❌ No se encontró la sección:", section);
-        // Fallback: mostrar servicios por defecto
+        // Fallback: mostrar servicios
         const fallbackSection = document.getElementById('services-section');
         if (fallbackSection) {
             fallbackSection.classList.remove('hidden');
@@ -3103,24 +3120,21 @@ function showSection(section) {
         }
     }
 
-    // Manejar filtros
+    // Manejar filtros - solo mostrar en servicios
     const filtersEl = document.getElementById('filters');
     if (filtersEl) {
-        filtersEl.classList.toggle('hidden', section !== 'services');
-        console.log("🎛️ Filtros:", section === 'services' ? 'VISIBLES' : 'OCULTOS');
+        if (section === 'services') {
+            filtersEl.classList.remove('hidden');
+        } else {
+            filtersEl.classList.add('hidden');
+        }
     }
 
-    // ✅ NUEVO: CERRAR SIDEBAR SIEMPRE (en todos los dispositivos)
+    // ✅ CERRAR SIDEBAR SIEMPRE
     closeSidebar();
 
     // Lógica específica de cada sección
     switch (section) {
-      case 'archivar':
-            loadArchivableServices();
-            break;
-        case 'historial':
-            loadHistorial();
-            break;
         case 'services':
             console.log("➡️ Mostrando lógica de servicios");
             if (services && services.length > 0) {
@@ -3149,6 +3163,18 @@ function showSection(section) {
             console.log("➡️ Mostrando cobros");
             if (currentRole === 'admin') {
                 renderCobros();
+            }
+            break;
+        case 'archivar':
+            console.log("➡️ Mostrando archivar");
+            if (currentRole === 'admin') {
+                loadArchivableServices();
+            }
+            break;
+        case 'historial':
+            console.log("➡️ Mostrando historial");
+            if (currentRole === 'admin') {
+                loadHistorial();
             }
             break;
         default:
