@@ -990,12 +990,24 @@
                     <span class="menu-item-text">Solicitudes mensajero</span>
                 </div>
 
+<!-- Archivar servicios e historial -->
+<div id="menu-archivar" class="menu-item hidden" onclick="showSection('archivar')">
+    <i class="fas fa-archive"></i>
+    <span class="menu-item-text">Archivar servicios</span>
+</div>
+
+<div id="menu-historial" class="menu-item hidden" onclick="showSection('historial')">
+    <i class="fas fa-history"></i>
+    <span class="menu-item-text">Historial archivado</span>
+</div>
+
                 <!-- Finanzas mensajero -->
                 <div id="menu-finanzas-mensajero" class="menu-item hidden" onclick="showSection('financial')">
                     <i class="fas fa-chart-line"></i>
                     <span class="menu-item-text">Mis Finanzas</span>
                 </div>
 
+                
                 <!-- Editar perfil -->
                 <div class="menu-item" onclick="openEditProfile()">
                     <i class="fas fa-user-edit"></i>
@@ -1059,6 +1071,62 @@
             </div>
         </div>
     </div>
+
+    <div id="archivar-section" class="hidden">
+    <h2 class="section-title">Archivar servicios antiguos</h2>
+    
+    <div class="financial-card">
+        <div class="text-center mb-4">
+            <i class="fas fa-archive text-4xl text-gold mb-3"></i>
+            <p class="text-gray-300">Archiva automáticamente servicios completados con más de 24 horas</p>
+        </div>
+        
+        <div class="financial-item">
+            <span>Servicios entregados:</span>
+            <span id="count-entregados" class="text-gold">0</span>
+        </div>
+        <div class="financial-item">
+            <span>Servicios cancelados:</span>
+            <span id="count-cancelados" class="text-gold">0</span>
+        </div>
+        <div class="financial-item">
+            <span>Total a archivar:</span>
+            <span id="count-total" class="text-gold font-bold">0</span>
+        </div>
+        
+        <div class="mt-6 text-center">
+            <button onclick="loadArchivableServices()" class="btn-secondary action-btn mr-2">
+                <i class="fas fa-sync"></i> Actualizar conteo
+            </button>
+            <button onclick="confirmArchive()" class="btn-primary action-btn">
+                <i class="fas fa-archive"></i> Archivar ahora
+            </button>
+        </div>
+        
+        <div id="archive-progress" class="hidden mt-4 text-center">
+            <div class="text-gold mb-2">Archivando...</div>
+            <div class="bg-gray-700 rounded-full h-2">
+                <div id="progress-bar" class="bg-gold h-2 rounded-full" style="width: 0%"></div>
+            </div>
+            <div id="progress-text" class="text-sm text-gray-300 mt-1">0/0</div>
+        </div>
+    </div>
+</div>
+
+<div id="historial-section" class="hidden">
+    <h2 class="section-title">Historial de servicios archivados</h2>
+    
+    <div class="filters-container mb-4">
+        <button onclick="setHistorialFilter('all', this)" class="filter-btn active">Todos</button>
+        <button onclick="setHistorialFilter('entregado', this)" class="filter-btn">Entregados</button>
+        <button onclick="setHistorialFilter('cancelado', this)" class="filter-btn">Cancelados</button>
+        <button onclick="exportHistorialToCSV()" class="filter-btn bg-green-600 text-white">
+            <i class="fas fa-download"></i> Exportar CSV
+        </button>
+    </div>
+    
+    <div id="historial-list" class="services-grid"></div>
+</div>
 
     <!-- =================== MODALES =================== -->
 
@@ -1167,13 +1235,7 @@
                 </div>
             </form>
 
-            <!-- Botón visible solo para el administrador -->
-            <div id="admin-actions" class="mt-4 hidden text-right">
-                <button onclick="archiveOldServices()" 
-                        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                    📂 Archivar pedidos antiguos
-                </button>
-            </div>
+           
         </div>
     </div>
 
@@ -1632,16 +1694,20 @@ function updateUIByRole() {
 
   // Ocultar todos los elementos primero
   hide(menuCostos);
-  hide(menuCobros);
-  hide(menuPendientes);
-  hide(menuFinanzasMensajero);
-  hide(pendingBanner);
-  hide(adminActions);
+    hide(menuCobros);
+    hide(menuPendientes);
+    hide(menuFinanzasMensajero);
+    hide(pendingBanner);
+    hide(adminActions);
+    hide(menuRegistrar);
+    hide(adminFields);
+    hide(costoClienteField);
 
-  // 🔽 También ocultamos los nuevos por defecto
-  hide(menuRegistrar);
-  hide(adminFields);
-  hide(costoClienteField);
+     // 🔥 NUEVO: Ocultar los nuevos menús primero
+    const menuArchivar = document.getElementById("menu-archivar");
+    const menuHistorial = document.getElementById("menu-historial");
+    hide(menuArchivar);
+    hide(menuHistorial);
 
   // Mostrar filtros por defecto (para la sección de servicios)
   if (filters) {
@@ -1649,17 +1715,20 @@ function updateUIByRole() {
   }
 
   // Configurar según el rol
-  switch (currentRole) {
-    case "admin":
-      console.log("🔓 Configurando interfaz ADMIN");
-      show(menuCostos);
-      show(menuCobros);
-      show(menuPendientes);
-      show(adminActions);
-      show(menuRegistrar);       // 👈 admin puede registrar
-      show(adminFields);         // 👈 admin ve campos extra
-      show(costoClienteField);   // 👈 admin ve costo cliente
-      break;
+    switch (currentRole) {
+        case "admin":
+            console.log("🔓 Configurando interfaz ADMIN");
+            show(menuCostos);
+            show(menuCobros);
+            show(menuPendientes);
+            show(adminActions);
+            show(menuRegistrar);
+            show(adminFields);
+            show(costoClienteField);
+            // 🔥 NUEVO: Mostrar menús de archivar/historial para admin
+            show(menuArchivar);
+            show(menuHistorial);
+            break;
 
     case "mensajero":
       console.log("🚴 Configurando interfaz MENSAJERO");
@@ -2583,6 +2652,278 @@ function closeSidebar() {
 
 window.closeSidebar = closeSidebar;
 
+
+// 🔥 NUEVAS FUNCIONES PARA ARCHIVADO E HISTORIAL
+
+let historialServices = [];
+let currentHistorialFilter = 'all';
+
+async function loadArchivableServices() {
+    try {
+        const [entregadosSnapshot, canceladosSnapshot] = await Promise.all([
+            db.collection('services').where('estado', '==', 'entregado').get(),
+            db.collection('services').where('estado', '==', 'cancelado').get()
+        ]);
+
+        const now = Date.now();
+        const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
+
+        let countEntregados = 0;
+        let countCancelados = 0;
+
+        entregadosSnapshot.forEach(doc => {
+            const data = doc.data();
+            const fechaCreacion = data.fechaCreacion?.toDate?.().getTime() || 0;
+            if (fechaCreacion < twentyFourHoursAgo) countEntregados++;
+        });
+
+        canceladosSnapshot.forEach(doc => {
+            const data = doc.data();
+            const fechaCreacion = data.fechaCreacion?.toDate?.().getTime() || 0;
+            if (fechaCreacion < twentyFourHoursAgo) countCancelados++;
+        });
+
+        document.getElementById('count-entregados').textContent = countEntregados;
+        document.getElementById('count-cancelados').textContent = countCancelados;
+        document.getElementById('count-total').textContent = countEntregados + countCancelados;
+
+    } catch (error) {
+        console.error('Error cargando servicios archivables:', error);
+        alert('Error al cargar el conteo de servicios');
+    }
+}
+
+async function confirmArchive() {
+    const total = parseInt(document.getElementById('count-total').textContent);
+    if (total === 0) {
+        alert('No hay servicios para archivar');
+        return;
+    }
+
+    if (!confirm(`¿Archivar ${total} servicios completados con más de 24 horas?`)) {
+        return;
+    }
+
+    await archiveOldServices();
+}
+
+async function archiveOldServices() {
+    if (currentRole !== 'admin') {
+        alert('Solo los administradores pueden archivar pedidos.');
+        return;
+    }
+
+    const progressEl = document.getElementById('archive-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+
+    try {
+        const [entregadosSnapshot, canceladosSnapshot] = await Promise.all([
+            db.collection('services').where('estado', '==', 'entregado').get(),
+            db.collection('services').where('estado', '==', 'cancelado').get()
+        ]);
+
+        const allDocs = [...entregadosSnapshot.docs, ...canceladosSnapshot.docs];
+        const now = Date.now();
+        const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
+
+        const docsToArchive = allDocs.filter(doc => {
+            const data = doc.data();
+            const fechaCreacion = data.fechaCreacion?.toDate?.().getTime() || 0;
+            return fechaCreacion < twentyFourHoursAgo;
+        });
+
+        if (docsToArchive.length === 0) {
+            alert('No hay servicios para archivar');
+            return;
+        }
+
+        // Mostrar progreso
+        progressEl.classList.remove('hidden');
+        let archivedCount = 0;
+
+        for (const doc of docsToArchive) {
+            try {
+                const data = doc.data();
+                
+                // Crear en historial
+                await db.collection('services_history').doc(doc.id).set({
+                    ...data,
+                    idOriginal: doc.id,
+                    fechaArchivado: firebase.firestore.FieldValue.serverTimestamp(),
+                    archivadoPor: currentUser.uid,
+                    archivadoPorEmail: currentUser.email
+                });
+                
+                // Eliminar de services
+                await db.collection('services').doc(doc.id).delete();
+                
+                archivedCount++;
+                
+                // Actualizar progreso
+                const progress = (archivedCount / docsToArchive.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${archivedCount}/${docsToArchive.length}`;
+                
+            } catch (error) {
+                console.error(`Error archivando ${doc.id}:`, error);
+            }
+        }
+
+        progressEl.classList.add('hidden');
+        alert(`✅ ${archivedCount} servicios archivados correctamente`);
+        
+        // Actualizar vistas
+        loadArchivableServices();
+        if (currentSection === 'historial') {
+            loadHistorial();
+        }
+        
+    } catch (error) {
+        console.error('Error en archivado:', error);
+        progressEl.classList.add('hidden');
+        alert('Error al archivar servicios: ' + error.message);
+    }
+}
+
+async function loadHistorial() {
+    const historialList = document.getElementById('historial-list');
+    historialList.innerHTML = '<div class="text-center text-gold">Cargando historial...</div>';
+
+    try {
+        const snapshot = await db.collection('services_history')
+            .orderBy('fechaArchivado', 'desc')
+            .get();
+
+        historialServices = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        renderHistorial();
+
+    } catch (error) {
+        console.error('Error cargando historial:', error);
+        historialList.innerHTML = '<div class="text-center text-red-500">Error cargando historial</div>';
+    }
+}
+
+function renderHistorial() {
+    const historialList = document.getElementById('historial-list');
+    
+    let filteredServices = historialServices;
+    if (currentHistorialFilter !== 'all') {
+        filteredServices = historialServices.filter(service => 
+            service.estado === currentHistorialFilter
+        );
+    }
+
+    if (filteredServices.length === 0) {
+        historialList.innerHTML = '<div class="text-center text-gold">No hay servicios archivados</div>';
+        return;
+    }
+
+    historialList.innerHTML = '';
+    
+    filteredServices.forEach(service => {
+        const card = document.createElement('div');
+        card.className = 'service-card';
+        
+        const fechaArchivado = service.fechaArchivado?.toDate?.().toLocaleString('es-CO') || 'Fecha desconocida';
+        const fechaCreacion = service.fechaCreacion?.toDate?.().toLocaleString('es-CO') || 'Fecha desconocida';
+        
+        card.innerHTML = `
+            <div class="service-header">
+                <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
+                <div class="service-status status-${service.estado}">${service.estado}</div>
+            </div>
+            
+            <div class="service-detail">
+                <i class="fas fa-calendar"></i>
+                <div class="service-detail-content">
+                    <strong>Creado:</strong> ${fechaCreacion}
+                </div>
+            </div>
+            
+            <div class="service-detail">
+                <i class="fas fa-archive"></i>
+                <div class="service-detail-content">
+                    <strong>Archivado:</strong> ${fechaArchivado}
+                </div>
+            </div>
+            
+            <div class="service-detail">
+                <i class="fas fa-user"></i>
+                <div class="service-detail-content">
+                    <strong>Por:</strong> ${service.archivadoPorEmail || 'Sistema'}
+                </div>
+            </div>
+            
+            ${service.entregar ? `
+                <div class="service-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div class="service-detail-content">${service.entregar}</div>
+                </div>
+            ` : ''}
+            
+            ${service.pagoMensajero ? `
+                <div class="service-detail">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <div class="service-detail-content">
+                        Pago mensajero: $${service.pagoMensajero.toLocaleString()}
+                    </div>
+                </div>
+            ` : ''}
+        `;
+        
+        historialList.appendChild(card);
+    });
+}
+
+function setHistorialFilter(filter, element) {
+    currentHistorialFilter = filter;
+    
+    document.querySelectorAll('#historial-section .filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    element.classList.add('active');
+    renderHistorial();
+}
+
+function exportHistorialToCSV() {
+    if (historialServices.length === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+
+    const headers = ['Empresa', 'Estado', 'Dirección', 'Pago Mensajero', 'Fecha Creación', 'Fecha Archivado'];
+    const csvData = historialServices.map(service => [
+        service.empresa || service.cliente || '',
+        service.estado || '',
+        service.entregar || '',
+        service.pagoMensajero || 0,
+        service.fechaCreacion?.toDate?.().toLocaleString('es-CO') || '',
+        service.fechaArchivado?.toDate?.().toLocaleString('es-CO') || ''
+    ]);
+
+    const csvContent = [headers, ...csvData]
+        .map(row => row.map(field => `"${field}"`).join(','))
+        .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `historial_servicios_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 function showSection(section) {
     console.log("🎯 Mostrando sección:", section);
 
@@ -2624,6 +2965,12 @@ function showSection(section) {
 
     // Lógica específica de cada sección
     switch (section) {
+      case 'archivar':
+            loadArchivableServices();
+            break;
+        case 'historial':
+            loadHistorial();
+            break;
         case 'services':
             console.log("➡️ Mostrando lógica de servicios");
             if (services && services.length > 0) {
