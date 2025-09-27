@@ -1064,6 +1064,52 @@
     }
 }
 
+/* Estilos específicos para la sección de historial */
+#historial-section {
+    background: var(--bg-darker);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+#historial-section .services-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    background: transparent;
+}
+
+#historial-section .service-card {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid rgba(207, 149, 36, 0.4);
+    transition: all 0.3s ease;
+}
+
+#historial-section .service-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(207, 149, 36, 0.2);
+}
+
+/* Responsive para historial */
+@media (min-width: 768px) {
+    #historial-section .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    #historial-section .services-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Estilos para el mensaje de vacío */
+#historial-empty {
+    background: rgba(20, 20, 20, 0.5);
+    border: 2px dashed rgba(207, 149, 36, 0.3);
+    border-radius: 16px;
+    padding: 40px 20px;
+}
+
     </style>
 </head>
 <body>
@@ -1315,6 +1361,7 @@
         </p>
     </div>
     
+    <!-- Filtros corregidos -->
     <div class="filters-container mb-6">
         <button onclick="setHistorialFilter('all', this)" class="filter-btn active">
             <i class="fas fa-list mr-2"></i>Todos
@@ -1325,13 +1372,15 @@
         <button onclick="setHistorialFilter('cancelado', this)" class="filter-btn">
             <i class="fas fa-times mr-2"></i>Cancelados
         </button>
-        <button onclick="exportHistorialToCSV()" class="filter-btn bg-green-600 text-white hover:bg-green-700">
+        <button onclick="exportHistorialToCSV()" class="filter-btn" style="background: #16a34a; color: white;">
             <i class="fas fa-download mr-2"></i> Exportar CSV
         </button>
     </div>
     
+    <!-- Contenedor para los servicios del historial -->
     <div id="historial-list" class="services-grid"></div>
     
+    <!-- Mensaje cuando no hay datos -->
     <div id="historial-empty" class="hidden text-center py-12">
         <i class="fas fa-inbox text-4xl text-gray-600 mb-4"></i>
         <p class="text-gray-400 text-lg">No hay servicios archivados</p>
@@ -2985,47 +3034,81 @@ async function archiveOldServices() {
 }
 
 async function loadHistorial() {
+    console.log("📂 Cargando historial de servicios archivados...");
+    
     const historialList = document.getElementById('historial-list');
-    historialList.innerHTML = '<div class="text-center text-gold">Cargando historial...</div>';
+    const historialEmpty = document.getElementById('historial-empty');
+    
+    if (!historialList) {
+        console.error("❌ No se encontró el elemento #historial-list");
+        return;
+    }
 
+    historialList.innerHTML = '<div class="text-center text-gold">Cargando historial...</div>';
+    
     try {
         const snapshot = await db.collection('services_history')
             .orderBy('fechaArchivado', 'desc')
             .get();
 
+        console.log(`📊 Encontrados ${snapshot.size} servicios en el historial`);
+        
         historialServices = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
 
-        renderHistorial();
+        if (historialServices.length === 0) {
+            console.log("📭 No hay servicios en el historial");
+            historialList.innerHTML = '';
+            historialList.classList.add('hidden');
+            if (historialEmpty) historialEmpty.classList.remove('hidden');
+        } else {
+            console.log("✅ Servicios cargados en historial:", historialServices.length);
+            if (historialEmpty) historialEmpty.classList.add('hidden');
+            historialList.classList.remove('hidden');
+            renderHistorial();
+        }
 
     } catch (error) {
-        console.error('Error cargando historial:', error);
+        console.error('❌ Error cargando historial:', error);
         historialList.innerHTML = '<div class="text-center text-red-500">Error cargando historial</div>';
+        if (historialEmpty) historialEmpty.classList.add('hidden');
     }
 }
 
 function renderHistorial() {
+    console.log("🎨 Renderizando historial...");
+    
     const historialList = document.getElementById('historial-list');
     const historialEmpty = document.getElementById('historial-empty');
     
+    if (!historialList) {
+        console.error("❌ No se encontró #historial-list");
+        return;
+    }
+    
     let filteredServices = historialServices;
+    
+    // Aplicar filtro si no es 'all'
     if (currentHistorialFilter !== 'all') {
         filteredServices = historialServices.filter(service => 
             service.estado === currentHistorialFilter
         );
     }
 
+    console.log(`🔍 Filtro: ${currentHistorialFilter}, Mostrando: ${filteredServices.length} servicios`);
+
     if (filteredServices.length === 0) {
         historialList.innerHTML = '';
         historialList.classList.add('hidden');
-        historialEmpty.classList.remove('hidden');
+        if (historialEmpty) historialEmpty.classList.remove('hidden');
         return;
     }
 
     historialList.classList.remove('hidden');
-    historialEmpty.classList.add('hidden');
+    if (historialEmpty) historialEmpty.classList.add('hidden');
+    
     historialList.innerHTML = '';
     
     filteredServices.forEach(service => {
@@ -3039,6 +3122,20 @@ function renderHistorial() {
             <div class="service-header">
                 <div class="service-client">${service.empresa || service.cliente || 'Sin nombre'}</div>
                 <div class="service-status status-${service.estado}">${service.estado}</div>
+            </div>
+            
+            <div class="service-detail">
+                <i class="fas fa-user"></i>
+                <div class="service-detail-content">
+                    <strong>Contacto:</strong> ${service.contacto || 'No especificado'}
+                </div>
+            </div>
+            
+            <div class="service-detail">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="service-detail-content">
+                    <strong>Entrega:</strong> ${service.entregar || 'No especificado'}
+                </div>
             </div>
             
             <div class="service-detail">
@@ -3058,24 +3155,15 @@ function renderHistorial() {
             <div class="service-detail">
                 <i class="fas fa-user-shield"></i>
                 <div class="service-detail-content">
-                    <strong>Por:</strong> ${service.archivadoPorEmail || 'Sistema'}
+                    <strong>Archivado por:</strong> ${service.archivadoPorEmail || 'Sistema'}
                 </div>
             </div>
-            
-            ${service.entregar ? `
-                <div class="service-detail">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <div class="service-detail-content">
-                        <strong>Entrega:</strong> ${service.entregar}
-                    </div>
-                </div>
-            ` : ''}
             
             ${service.pagoMensajero ? `
                 <div class="service-detail">
                     <i class="fas fa-money-bill-wave"></i>
                     <div class="service-detail-content">
-                        <strong>Pago mensajero:</strong> $${service.pagoMensajero.toLocaleString()}
+                        <strong>Pago mensajero:</strong> $${Number(service.pagoMensajero).toLocaleString()}
                     </div>
                 </div>
             ` : ''}
@@ -3092,18 +3180,29 @@ function renderHistorial() {
         
         historialList.appendChild(card);
     });
+    
+    console.log("✅ Historial renderizado correctamente");
 }
 
 function setHistorialFilter(filter, element) {
+    console.log(`🎯 Aplicando filtro de historial: ${filter}`);
+    
     currentHistorialFilter = filter;
     
+    // Remover clase active de todos los botones
     document.querySelectorAll('#historial-section .filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     
-    element.classList.add('active');
+    // Agregar clase active al botón clickeado
+    if (element && element.classList) {
+        element.classList.add('active');
+    }
+    
+    // Re-renderizar el historial
     renderHistorial();
 }
+window.setHistorialFilter = setHistorialFilter;
 
 function exportHistorialToCSV() {
     if (historialServices.length === 0) {
@@ -3936,6 +4035,31 @@ async function archiveOldServices() {
     }
 }
 
+// Función temporal para crear datos de prueba (eliminar después de probar)
+async function crearServicioPruebaHistorial() {
+    try {
+        await db.collection('services_history').doc('test-' + Date.now()).set({
+            empresa: "Empresa de Prueba",
+            cliente: "Cliente Demo",
+            contacto: "Contacto Test",
+            entregar: "Dirección de prueba 123",
+            estado: "entregado",
+            pagoMensajero: 15000,
+            observaciones: "Este es un servicio de prueba",
+            fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
+            fechaArchivado: firebase.firestore.FieldValue.serverTimestamp(),
+            archivadoPor: currentUser.uid,
+            archivadoPorEmail: currentUser.email
+        });
+        console.log("✅ Servicio de prueba creado en historial");
+        loadHistorial(); // Recargar el historial
+    } catch (error) {
+        console.error("❌ Error creando servicio de prueba:", error);
+    }
+}
+
+// Llamar esta función una vez si no hay datos:
+// crearServicioPruebaHistorial();
 
 
   </script>
