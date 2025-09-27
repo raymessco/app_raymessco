@@ -895,32 +895,29 @@
     margin: 5px !important;
 }
 
-/* CORRECCIÓN PARA LAS SECCIONES DE ARCHIVAR E HISTORIAL */
+/* ========== CORRECCIÓN COMPLETA PARA ARCHIVAR E HISTORIAL ========== */
+
 #archivar-section,
 #historial-section {
-    background: var(--bg-darker) !important;
-    min-height: calc(100vh - 120px);
+    background: var(--bg-darker);
+    min-height: 100vh;
     padding: 20px;
-    margin: 0 !important; /* ELIMINAR margen negativo que causa el espacio */
+    margin: 0;
     display: block;
-    position: relative;
-    z-index: 1;
 }
 
-/* CONTENEDOR PRINCIPAL MEJORADO */
-.archive-container,
-.historial-container {
+/* Contenedores principales */
+.archive-container {
     background: rgba(20, 20, 20, 0.95);
     border: 1px solid var(--gold);
     border-radius: 16px;
     padding: 30px;
     margin: 0 auto;
-    max-width: 800px;
+    max-width: 600px;
     box-shadow: 0 10px 30px rgba(207, 149, 36, 0.15);
-    position: relative;
 }
 
-/* HEADER DE SECCIONES MEJORADO */
+/* Header de secciones */
 #archivar-section .section-title,
 #historial-section .section-title {
     color: var(--gold);
@@ -929,24 +926,12 @@
     font-size: 28px;
     border-bottom: 2px solid var(--gold);
     padding-bottom: 15px;
-    width: 100%;
 }
 
-/* ESTILOS ESPECÍFICOS PARA ARCHIVAR */
-.archive-header {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.archive-icon {
-    font-size: 48px;
-    color: var(--gold);
-    margin-bottom: 15px;
-}
-
+/* Estadísticas de archivo */
 .archive-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 15px;
     margin-bottom: 25px;
 }
@@ -956,14 +941,18 @@
     border: 1px solid var(--gold);
     border-radius: 12px;
     padding: 15px;
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .archive-stat-total {
     background: rgba(207, 149, 36, 0.2);
     font-size: 1.1em;
+    font-weight: bold;
 }
 
+/* Botones de archivo */
 .archive-actions {
     display: flex;
     gap: 15px;
@@ -1003,7 +992,7 @@
     background: rgba(59, 130, 246, 0.3);
 }
 
-/* BARRA DE PROGRESO MEJORADA */
+/* Barra de progreso */
 .archive-progress {
     background: rgba(20, 20, 20, 0.9);
     border: 1px solid var(--gold);
@@ -1027,58 +1016,51 @@
     transition: width 0.3s ease;
 }
 
-/* ESTILOS PARA HISTORIAL */
-.historial-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 25px;
-}
-
-.historial-grid {
+/* Estilos para historial */
+#historial-section .services-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: 1fr;
     gap: 20px;
+    background: transparent;
+    padding: 0;
 }
 
-.historial-card {
-    background: rgba(30, 30, 30, 0.9);
-    border: 1px solid rgba(207, 149, 36, 0.3);
-    border-radius: 12px;
-    padding: 20px;
-    transition: all 0.3s ease;
+#historial-section .service-card {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid rgba(207, 149, 36, 0.4);
 }
 
-.historial-card:hover {
-    border-color: var(--gold);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(207, 149, 36, 0.2);
-}
-
-/* RESPONSIVE */
+/* Responsive */
 @media (max-width: 768px) {
     #archivar-section,
     #historial-section {
         padding: 15px;
     }
     
-    .archive-container,
-    .historial-container {
+    .archive-container {
         padding: 20px;
         margin: 0 10px;
-    }
-    
-    .archive-stats {
-        grid-template-columns: 1fr;
     }
     
     .archive-actions {
         flex-direction: column;
     }
     
-    .historial-grid {
-        grid-template-columns: 1fr;
+    .archive-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (min-width: 768px) {
+    #historial-section .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    #historial-section .services-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
@@ -2603,31 +2585,10 @@ function renderServices(data) {
 }
 
 
-// Inicializar el esqueleto al cargar la aplicación
-      document.addEventListener('DOMContentLoaded', function() {
-        // Mostrar esqueleto en la sección de servicios desde el principio
-        const servicesSection = document.getElementById('services-section');
-        if (servicesSection && servicesSection.classList.contains('hidden')) {
-          // Si la sección está oculta, preparar el esqueleto para cuando se muestre
-          const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-              if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                if (!servicesSection.classList.contains('hidden')) {
-                  showServicesSkeleton();
-                  observer.disconnect();
-                }
-              }
-            });
-          });
-          
-          observer.observe(servicesSection, { attributes: true });
-        } else {
-          showServicesSkeleton();
-        }
-        
-        // Inicializar la app como antes
-        initApp();
-      });
+// CORRECCIÓN: Inicialización simple sin skeleton
+document.addEventListener('DOMContentLoaded', function() {
+    initApp();
+});
 
   // Abre el modal y muestra la foto
   function openEvidenceView(imageUrl) {
@@ -2744,7 +2705,12 @@ function renderServices(data) {
   }
   window.attachPhoneAutoFormat = attachPhoneAutoFormat;
 
-
+function cancelArchive() {
+    // Esta función cancelaría el proceso de archivado si estuviera en curso
+    document.getElementById('archive-progress').classList.add('hidden');
+    alert('Proceso de archivado cancelado');
+}
+window.cancelArchive = cancelArchive;
 
 
       async function changeEstado(serviceId, newEstado) {
