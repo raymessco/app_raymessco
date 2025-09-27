@@ -895,26 +895,7 @@
     margin: 5px !important;
 }
 
-/* ========== CORRECCIÓN COMPLETA PARA ARCHIVAR E HISTORIAL ========== */
 
-#archivar-section {
-    background: var(--bg-darker);
-    padding: 40px 20px; /* Aumenta el espaciado para mejor apariencia */
-    margin: 0;
-    display: flex; /* 1. Habilita Flexbox para centrar */
-    flex-direction: column;
-    align-items: center; /* 2. Centra horizontalmente */
-    justify-content: center; /* 3. Centra verticalmente */
-    min-height: calc(100vh - 120px); /* 4. Ajusta la altura para descontar header/padding */
-}
-
-#historial-section {
-    background: var(--bg-darker);
-    padding: 20px; /* Se mantiene el padding */
-    margin: 0;
-    display: block;
-    /* 5. Se elimina min-height: 100vh para quitar el espacio negro */
-}
 
     </style>
 </head>
@@ -1038,134 +1019,133 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Banner pendiente -->
-            <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
-                <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
-            </div>
-
-            <!-- Filtros -->
-            <div id="filters" class="filters-container">
-                <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
-                <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
-                <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
-                <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
-                <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
-            </div>
-
-            <!-- Secciones de contenido -->
-            <div id="services-section" class="services-grid"></div>
-
-            <div id="financial-section" class="hidden">
-                <h2 class="section-title">Resumen financiero</h2>
-                <div class="financial-card">
-                    <div class="financial-item">
-                        <span>Total ganado:</span>
-                        <span id="total-earned" class="text-gold">$0</span>
-                    </div>
-                    <div class="financial-item">
-                        <span>Total pendiente de pago:</span>
-                        <span id="total-pending" class="text-gold">$0</span>
-                    </div>
-                    <div class="financial-item">
-                        <span>Total pagado:</span>
-                        <span id="total-paid" class="text-gold">$0</span>
-                    </div>
-                </div>
-                <h3 class="section-title">Detalle de servicios por día</h3>
-                <div id="financial-list"></div>
-            </div>
-
-            <div id="pending-mensajeros-section" class="hidden">
-                <h2 class="section-title">Solicitudes de Mensajeros</h2>
-                <div id="pending-mensajeros-list"></div>
-            </div>
-
-            <div id="costos-section" class="hidden">
-                <h2 class="section-title">Costos por empresa</h2>
-                <div id="costos-empresas"></div>
-            </div>
-
-            <div id="cobros-section" class="hidden">
-                <h2 class="section-title">Cobros contra entrega</h2>
-                <div id="cobros-body"></div>
-            </div>
-        </div>
+    <div id="pending-banner" class="hidden" style="background: rgba(161, 98, 7, 0.2); color: #FDE68A; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+        <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
     </div>
 
-  <div id="archivar-section" class="hidden">
-    <div class="archive-container">
-        <div class="text-center mb-8">
-            <h2 class="section-title">Archivar Servicios Antiguos</h2>
-            <p class="text-gray-300">
-                Archiva automáticamente servicios en estado "entregado" o "cancelado" 
-                con más de 24 horas de antigüedad para mantener la base de datos organizada.
-            </p>
-        </div>
-        
-        <div class="archive-stats">
-            <div class="archive-stat">
-                <span><i class="fas fa-check-circle text-green-400 mr-2"></i>Entregados:</span>
-                <span id="count-entregados" class="text-gold font-bold">0</span>
+    <div id="filters" class="filters-container">
+        <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
+        <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
+        <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
+        <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
+        <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
+    </div>
+
+    <div id="services-section" class="services-grid"></div>
+
+    <div id="financial-section" class="hidden">
+        <h2 class="section-title">Resumen financiero</h2>
+        <div class="financial-card">
+            <div class="financial-item">
+                <span>Total ganado:</span>
+                <span id="total-earned" class="text-gold">$0</span>
             </div>
-            <div class="archive-stat">
-                <span><i class="fas fa-times-circle text-red-400 mr-2"></i>Cancelados:</span>
-                <span id="count-cancelados" class="text-gold font-bold">0</span>
+            <div class="financial-item">
+                <span>Total pendiente de pago:</span>
+                <span id="total-pending" class="text-gold">$0</span>
             </div>
-            <div class="archive-stat archive-stat-total">
-                <span><i class="fas fa-boxes text-gold mr-2"></i>Total a archivar:</span>
-                <span id="count-total" class="text-gold font-bold text-xl">0</span>
+            <div class="financial-item">
+                <span>Total pagado:</span>
+                <span id="total-paid" class="text-gold">$0</span>
             </div>
         </div>
-        
-        <div class="archive-actions">
-            <button onclick="loadArchivableServices()" class="archive-btn archive-btn-secondary">
-                <i class="fas fa-sync"></i> Actualizar Conteo
-            </button>
-            <button onclick="confirmArchive()" class="archive-btn archive-btn-primary">
-                <i class="fas fa-archive"></i> Archivar Ahora
-            </button>
-        </div>
-        
-        <div id="archive-progress" class="archive-progress hidden">
-            <div class="text-center mb-4">
-                <i class="fas fa-spinner fa-spin text-gold mr-2"></i>
-                <span class="text-gold font-semibold">Procesando archivo...</span>
+        <h3 class="section-title">Detalle de servicios por día</h3>
+        <div id="financial-list"></div>
+    </div>
+
+    <div id="pending-mensajeros-section" class="hidden">
+        <h2 class="section-title">Solicitudes de Mensajeros</h2>
+        <div id="pending-mensajeros-list"></div>
+    </div>
+
+    <div id="costos-section" class="hidden">
+        <h2 class="section-title">Costos por empresa</h2>
+        <div id="costos-empresas"></div>
+    </div>
+
+    <div id="cobros-section" class="hidden">
+        <h2 class="section-title">Cobros contra entrega</h2>
+        <div id="cobros-body"></div>
+    </div>
+
+    <div id="archivar-section" class="hidden">
+        <div class="archive-container">
+            <div class="text-center mb-8">
+                <h2 class="section-title">Archivar Servicios Antiguos</h2>
+                <p class="text-gray-300">
+                    Archiva automáticamente servicios en estado "entregado" o "cancelado" 
+                    con más de 24 horas de antigüedad para mantener la base de datos organizada.
+                </p>
             </div>
             
-            <div class="progress-bar-container">
-                <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+            <div class="archive-stats">
+                <div class="archive-stat">
+                    <span><i class="fas fa-check-circle text-green-400 mr-2"></i>Entregados:</span>
+                    <span id="count-entregados" class="text-gold font-bold">0</span>
+                </div>
+                <div class="archive-stat">
+                    <span><i class="fas fa-times-circle text-red-400 mr-2"></i>Cancelados:</span>
+                    <span id="count-cancelados" class="text-gold font-bold">0</span>
+                </div>
+                <div class="archive-stat archive-stat-total">
+                    <span><i class="fas fa-boxes text-gold mr-2"></i>Total a archivar:</span>
+                    <span id="count-total" class="text-gold font-bold text-xl">0</span>
+                </div>
             </div>
             
-            <div class="flex justify-between text-sm text-gray-300 mt-2">
-                <span id="progress-text">0/0 servicios</span>
-                <span id="progress-percent">0%</span>
-            </div>
-            
-            <div class="text-center mt-4">
-                <button onclick="cancelArchive()" class="text-red-400 hover:text-red-300 text-sm">
-                    <i class="fas fa-times"></i> Cancelar Proceso
+            <div class="archive-actions">
+                <button onclick="loadArchivableServices()" class="archive-btn archive-btn-secondary">
+                    <i class="fas fa-sync"></i> Actualizar Conteo
+                </button>
+                <button onclick="confirmArchive()" class="archive-btn archive-btn-primary">
+                    <i class="fas fa-archive"></i> Archivar Ahora
                 </button>
             </div>
+            
+            <div id="archive-progress" class="archive-progress hidden">
+                <div class="text-center mb-4">
+                    <i class="fas fa-spinner fa-spin text-gold mr-2"></i>
+                    <span class="text-gold font-semibold">Procesando archivo...</span>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                
+                <div class="flex justify-between text-sm text-gray-300 mt-2">
+                    <span id="progress-text">0/0 servicios</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button onclick="cancelArchive()" class="text-red-400 hover:text-red-300 text-sm">
+                        <i class="fas fa-times"></i> Cancelar Proceso
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <p class="text-xs text-gray-400">
+                    <i class="fas fa-info-circle mr-1"></i> 
+                    Los servicios archivados se moverán al historial y ya no aparecerán en la lista principal
+                </p>
+            </div>
         </div>
-        
-        <div class="mt-6 text-center">
-            <p class="text-xs text-gray-400">
-                <i class="fas fa-info-circle mr-1"></i> 
-                Los servicios archivados se moverán al historial y ya no aparecerán en la lista principal
+    </div>
+
+    <div id="historial-section" class="hidden">
+        <div class="text-center mb-8">
+            <h2 class="section-title">Historial de Servicios Archivados</h2>
+            <p class="text-gray-300 max-w-2xl mx-auto">
+                Consulta todos los servicios que han sido archivados. Puedes filtrar por estado y exportar los datos.
             </p>
         </div>
     </div>
-</div>
 
-<div id="historial-section" class="hidden">
-    <div class="text-center mb-8">
-        <h2 class="section-title">Historial de Servicios Archivados</h2>
-        <p class="text-gray-300 max-w-2xl mx-auto">
-            Consulta todos los servicios que han sido archivados. Puedes filtrar por estado y exportar los datos.
-        </p>
-    </div>
+</div> </div> 
+
+
     
     <!-- Filtros corregidos -->
     <div class="filters-container mb-6">
