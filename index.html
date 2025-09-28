@@ -1024,15 +1024,18 @@
         <i class="fas fa-clock"></i> Tu cuenta está en revisión para ser mensajero. Podrás usar funciones de mensajería una vez el administrador apruebe tu solicitud.
     </div>
 
-    <div id="filters" class="filters-container">
-        <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
-        <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
-        <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
-        <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
-        <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
-    </div>
+    <!-- Filtros SOLO para Servicios -->
+<div id="filters" class="filters-container mb-6">
+    <button onclick="setFilter('all', this)" class="filter-btn active">Todos</button>
+    <button onclick="setFilter('pendiente', this)" class="filter-btn">Pendientes</button>
+    <button onclick="setFilter('en_ruta', this)" class="filter-btn">En ruta</button>
+    <button onclick="setFilter('entregado', this)" class="filter-btn">Entregados</button>
+    <button onclick="setFilter('cancelado', this)" class="filter-btn">Cancelados</button>
+</div>
 
-    <div id="services-section" class="services-grid"></div>
+<!-- Contenedor de servicios -->
+<div id="services-section" class="services-grid"></div>
+
 
     <div id="financial-section" class="hidden">
         <h2 class="section-title">Resumen financiero</h2>
@@ -1134,31 +1137,25 @@
         </div>
     </div>
 
-   <!-- 🔹 Historial -->
-<div id="historial-section" class="hidden">
-  <div class="text-center mb-8">
-      <h2 class="section-title">Historial de Servicios Archivados</h2>
-      <p class="text-gray-300 max-w-2xl mx-auto">
-          Consulta todos los servicios que han sido archivados. Puedes filtrar por estado y exportar los datos.
-      </p>
-  </div>
-  
-  <div class="filters-container mb-6">
-      <button onclick="setHistorialFilter('all', this)" class="filter-btn active">
-          <i class="fas fa-list mr-2"></i>Todos
-      </button>
-      <button onclick="setHistorialFilter('entregado', this)" class="filter-btn">
-          <i class="fas fa-check mr-2"></i>Entregados
-      </button>
-      <button onclick="setHistorialFilter('cancelado', this)" class="filter-btn">
-          <i class="fas fa-times mr-2"></i>Cancelados
-      </button>
-      <button onclick="exportHistorialToCSV()" class="filter-btn" style="background: #16a34a; color: white;">
-          <i class="fas fa-download mr-2"></i> Exportar CSV
-      </button>
-  </div>
-  
-  <div id="historial-list" class="services-grid"></div>
+   <!-- Filtros SOLO para Historial -->
+<div id="historial-filters" class="filters-container mb-6 hidden">
+    <button onclick="setHistorialFilter('all', this)" class="filter-btn active">
+        <i class="fas fa-list mr-2"></i>Todos
+    </button>
+    <button onclick="setHistorialFilter('entregado', this)" class="filter-btn">
+        <i class="fas fa-check mr-2"></i>Entregados
+    </button>
+    <button onclick="setHistorialFilter('cancelado', this)" class="filter-btn">
+        <i class="fas fa-times mr-2"></i>Cancelados
+    </button>
+    <button onclick="exportHistorialToCSV()" class="filter-btn" style="background: #16a34a; color: white;">
+        <i class="fas fa-download mr-2"></i> Exportar CSV
+    </button>
+</div>
+
+<!-- Contenedor de historial -->
+<div id="historial-list" class="services-grid"></div>
+
   
   <div id="historial-empty" class="hidden text-center py-12">
       <i class="fas fa-inbox text-4xl text-gray-600 mb-4"></i>
@@ -3052,7 +3049,7 @@ function showSection(section) {
     // Ocultar TODAS las secciones principales
     const sections = [
         'services-section',
-        'financial-section', 
+        'financial-section',
         'pending-mensajeros-section',
         'costos-section',
         'cobros-section',
@@ -3088,13 +3085,23 @@ function showSection(section) {
         }
     }
 
-    // Manejar filtros - solo mostrar en servicios
-    const filtersEl = document.getElementById('filters');
+    // Manejar filtros según la sección
+    const filtersEl = document.getElementById('filters'); // filtros de servicios
+    const historialFiltersEl = document.getElementById('historial-filters'); // filtros de historial
+
     if (filtersEl) {
         if (section === 'services') {
             filtersEl.classList.remove('hidden');
         } else {
             filtersEl.classList.add('hidden');
+        }
+    }
+
+    if (historialFiltersEl) {
+        if (section === 'historial') {
+            historialFiltersEl.classList.remove('hidden');
+        } else {
+            historialFiltersEl.classList.add('hidden');
         }
     }
 
@@ -3151,8 +3158,6 @@ function showSection(section) {
 }
 
 window.showSection = showSection;
-
-
 
 
  function setFilter(filter, element) {
