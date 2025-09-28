@@ -1137,37 +1137,16 @@
         </div>
     </div>
 
-   <!-- Filtros SOLO para Historial -->
-<div id="historial-filters" class="filters-container mb-6 hidden">
-    <button onclick="setHistorialFilter('all', this)" class="filter-btn active">
-        <i class="fas fa-list mr-2"></i>Todos
-    </button>
-    <button onclick="setHistorialFilter('entregado', this)" class="filter-btn">
-        <i class="fas fa-check mr-2"></i>Entregados
-    </button>
-    <button onclick="setHistorialFilter('cancelado', this)" class="filter-btn">
-        <i class="fas fa-times mr-2"></i>Cancelados
-    </button>
-    <button onclick="exportHistorialToCSV()" class="filter-btn" style="background: #16a34a; color: white;">
-        <i class="fas fa-download mr-2"></i> Exportar CSV
-    </button>
-</div>
+<div id="historial-section" class="hidden">
+    <div class="text-center mb-8">
+        <h2 class="section-title">Historial de Servicios Archivados</h2>
+        <p class="text-gray-300 max-w-2xl mx-auto">
+            Consulta todos los servicios que han sido archivados. Puedes filtrar por estado y exportar los datos.
+        </p>
+    </div>
 
-<!-- Contenedor de historial -->
-<div id="historial-list" class="services-grid"></div>
-
-  
-  <div id="historial-empty" class="hidden text-center py-12">
-      <i class="fas fa-inbox text-4xl text-gray-600 mb-4"></i>
-      <p class="text-gray-400 text-lg">No hay servicios archivados</p>
-      <p class="text-gray-500 text-sm">Los servicios aparecerán aquí después de ser archivados</p>
-  </div>
-</div>
-
-
-    
-    <!-- Filtros corregidos -->
-    <div class="filters-container mb-6">
+    <!-- ✅ Filtros SOLO para Historial -->
+    <div id="historial-filters" class="filters-container mb-6 hidden">
         <button onclick="setHistorialFilter('all', this)" class="filter-btn active">
             <i class="fas fa-list mr-2"></i>Todos
         </button>
@@ -1181,11 +1160,11 @@
             <i class="fas fa-download mr-2"></i> Exportar CSV
         </button>
     </div>
-    
-    <!-- Contenedor para los servicios del historial -->
+
+    <!-- Contenedor de historial -->
     <div id="historial-list" class="services-grid"></div>
-    
-    <!-- Mensaje cuando no hay datos -->
+
+    <!-- Mensaje vacío -->
     <div id="historial-empty" class="hidden text-center py-12">
         <i class="fas fa-inbox text-4xl text-gray-600 mb-4"></i>
         <p class="text-gray-400 text-lg">No hay servicios archivados</p>
