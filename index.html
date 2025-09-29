@@ -1180,7 +1180,7 @@
             <button class="modal-close" onclick="closeModal()">✖</button>
             <h2 class="modal-title" id="modal-title">Nuevo Servicio</h2>
 
-            <form id="service-form"></form>
+            <form id="service-form">
                 <!-- Empresa -->
                 <div class="form-group">
                     <label for="empresaCliente" class="form-label">Empresa</label>
@@ -1277,11 +1277,11 @@
                         <i class="fas fa-times"></i> Cancelar
                     </button>
                 </div>
-            </form>
-
-           
+            
+          </form>
         </div>
     </div>
+   
 
     <!-- Los demás modales (evidence, edit-profile, roleChoice) se mantienen igual -->
     <div id="evidence-modal" class="modal-backdrop hidden"> </div>
@@ -1415,9 +1415,9 @@
   }
 
   // Formularios
-  const serviceForm = document.getElementById('service-form');
+ const serviceForm = document.getElementById("service-form");
 if (serviceForm) {
-  serviceForm.addEventListener('submit', handleServiceSubmit);
+    serviceForm.addEventListener("submit", handleServiceSubmit);
 }
 
   const profileForm = document.getElementById('profile-form');
@@ -1950,6 +1950,7 @@ diagnoseUI();
 
  async function handleServiceSubmit(e) {
     e.preventDefault();
+console.log("🚀 handleServiceSubmit disparado");
 
     // Debug rápido: ver cuántas veces se llama
     console.log("handleServiceSubmit invoked", new Date().toISOString());
