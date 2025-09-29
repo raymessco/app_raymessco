@@ -1283,79 +1283,32 @@
     </div>
    
 
-   <!--  MODAL DE EVIDENCIA  -->
+    <!-- EVIDENCE MODAL -->
 <div id="evidence-modal" class="modal-backdrop hidden">
-    <div class="modal-content" style="max-width: 500px;">
-        <button class="modal-close" onclick="closeEvidenceModal()">
-            <i class="fas fa-times"></i>
-        </button>
-        
-        <div class="modal-header">
-            <h2 class="modal-title">Tomar Evidencia de Entrega</h2>
-            <p class="text-gray-300 text-sm">Toma una foto como comprobante de entrega</p>
-        </div>
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeEvidenceModal()">✖</button>
+    <h2 class="modal-title">Tomar evidencia</h2>
 
-        <!-- Vista de cámara -->
-        <div id="camera-view" class="text-center">
-            <video id="video" autoplay playsinline 
-                   style="width: 100%; max-width: 400px; height: 300px; background: #000; border-radius: 8px;">
-            </video>
-            
-            <div class="mt-4 flex justify-center gap-4">
-                <button id="capture-btn" class="btn-primary">
-                    <i class="fas fa-camera"></i> Tomar Foto
-                </button>
-                <button onclick="closeEvidenceModal()" class="btn-cancel">
-                    Cancelar
-                </button>
-            </div>
-        </div>
+    <div id="camera-wrapper">
+      <!-- vista previa en vivo -->
+      <video id="videoElement" autoplay playsinline muted style="width:100%;max-height:60vh;background:#000;border-radius:8px;"></video>
 
-        <!-- Vista de previsualización -->
-        <div id="preview-view" class="text-center hidden">
-            <img id="capturedImage" src="" 
-                 style="width: 100%; max-width: 400px; height: 300px; object-fit: cover; border-radius: 8px;">
-            
-            <div class="mt-4 flex justify-center gap-2">
-                <button id="retake-btn" class="btn-secondary">
-                    <i class="fas fa-redo"></i> Volver a Tomar
-                </button>
-                <button id="confirm-delivery" class="btn-primary">
-                    <i class="fas fa-check"></i> Confirmar Entrega
-                </button>
-            </div>
-        </div>
+      <!-- canvas oculto para capturar imagen -->
+      <canvas id="canvasElement" class="hidden" style="display:none;"></canvas>
 
-        <!-- Estado de carga -->
-        <div id="uploading-status" class="hidden text-center mt-4">
-            <i class="fas fa-spinner fa-spin text-gold"></i>
-            <span class="text-gold ml-2">Subiendo evidencia...</span>
-        </div>
+      <!-- imagen capturada -->
+      <div id="captured-image-container" class="hidden text-center py-4">
+        <img id="capturedImage" alt="Evidencia" style="max-width:100%;border-radius:8px;" />
+      </div>
     </div>
-</div>
 
-<!-- Modal para ver evidencia existente -->
-<div id="evidence-view-modal" class="modal-backdrop hidden">
-    <div class="modal-content" style="max-width: 600px;">
-        <button class="modal-close" onclick="closeEvidenceView()">
-            <i class="fas fa-times"></i>
-        </button>
-        
-        <div class="modal-header">
-            <h2 class="modal-title">Evidencia de Entrega</h2>
-        </div>
-        
-        <div class="text-center">
-            <img id="evidence-view-img" src="" 
-                 style="max-width: 100%; max-height: 70vh; border-radius: 8px;">
-        </div>
-        
-        <div class="text-center mt-4">
-            <button onclick="closeEvidenceView()" class="btn-cancel">
-                Cerrar
-            </button>
-        </div>
+    <!-- controles -->
+    <div class="form-actions" style="margin-top:16px;">
+      <button type="button" id="capture-btn" class="btn-submit">Tomar foto</button>
+      <button type="button" id="retake-btn" class="btn-cancel hidden">Volver a tomar</button>
+      <button type="button" id="confirm-delivery" class="btn-submit" disabled>Confirmar entrega</button>
     </div>
+  </div>
 </div>
 
 
@@ -1438,8 +1391,6 @@
       let deferredPrompt = null;
       let _servicesUnsubscribe = null;
       let isSubmittingService = false;
-      let mediaStream = null;
-      let currentSection = 'services';
 
       // Referencias a elementos UI
       const loginView = document.getElementById('login-view');
@@ -1460,7 +1411,7 @@
       const adminFields = document.getElementById('admin-fields');
       const cobrarFieldContainer = document.getElementById('cobrar-field-container');
       const installButton = document.getElementById('install-button');
-      const mensajeroSelect = document.getElementById('uidMensajero');
+      const mensajeroSelect = document.getElementById('field-mensajero');
 
       // Inicializar la aplicación
      function initApp() {
@@ -1619,7 +1570,22 @@ function attachEvidenceHandlers() {
   evidenceHandlersAttached = true;
 }
 
-
+// --- Abrir / Cerrar modal ---
+function openEvidenceModal(serviceId) {
+  currentServiceIdForEvidence = serviceId;
+  document.getElementById('evidence-modal').classList.remove('hidden');
+  attachEvidenceHandlers();
+  startCamera();
+}
+function closeEvidenceModal() {
+  document.getElementById('evidence-modal').classList.add('hidden');
+  stopCamera();
+  document.getElementById('captured-image-container').classList.add('hidden');
+  document.getElementById('videoElement').classList.remove('hidden');
+  document.getElementById('capture-btn').classList.remove('hidden');
+  document.getElementById('retake-btn').classList.add('hidden');
+  document.getElementById('confirm-delivery').disabled = true;
+}}
 
 // Confirmar entrega
 const confirmDelivery = document.getElementById('confirm-delivery');
@@ -1645,7 +1611,7 @@ if (confirmDelivery) {
     }
   });
 }
-console.log("✅ App inicializada correctamente");
+
  // ✅ cierre correcto de initApp()
 
 
@@ -2206,12 +2172,8 @@ async function handleServiceSubmit(e) {
 async function loadMensajerosList() {
     try {
         const mensajeroSelect = document.getElementById('uidMensajero');
-        if (!mensajeroSelect) {
-            console.error("❌ Selector de mensajeros no encontrado");
-            return;
-        }
+        if (!mensajeroSelect) return;
 
-        console.log("🔍 Cargando lista de mensajeros...");
         const mensajerosSnapshot = await db.collection('users')
             .where('role', 'in', ['mensajero', 'admin'])
             .get();
@@ -2219,7 +2181,6 @@ async function loadMensajerosList() {
         mensajeroSelect.innerHTML = '<option value="">Seleccionar mensajero</option>';
 
         if (mensajerosSnapshot.empty) {
-            console.log("ℹ️ No hay mensajeros registrados");
             mensajeroSelect.innerHTML = '<option value="">No hay mensajeros disponibles</option>';
             return;
         }
@@ -2228,17 +2189,15 @@ async function loadMensajerosList() {
             const data = doc.data();
             const option = document.createElement('option');
             option.value = doc.id;
-            option.textContent = data.displayName || data.email || `Usuario ${doc.id.substring(0, 8)}`;
+            option.textContent = data.displayName || data.email || doc.id;
             mensajeroSelect.appendChild(option);
         });
 
-        console.log(`✅ ${mensajerosSnapshot.size} mensajeros cargados`);
-
     } catch (error) {
-        console.error('❌ Error cargando mensajeros:', error);
+        console.error('Error cargando mensajeros:', error);
         const mensajeroSelect = document.getElementById('uidMensajero');
         if (mensajeroSelect) {
-            mensajeroSelect.innerHTML = '<option value="">Error al cargar mensajeros</option>';
+            mensajeroSelect.innerHTML = '<option value="">Error al cargar</option>';
         }
     }
 }
@@ -2754,232 +2713,59 @@ window.cancelArchive = cancelArchive;
       }
       window.deleteService = deleteService;
 
-     function openEvidenceModal(serviceId) {
-    console.log("📸 Abriendo cámara para servicio:", serviceId);
-    
-    // Validaciones de seguridad
-    if (currentRole !== 'mensajero') {
-        alert('Solo los mensajeros pueden tomar evidencias de entrega.');
-        return;
-    }
-    
-    // Verificar que el servicio existe y le pertenece
-    const service = services.find(s => s.id === serviceId);
-    if (!service) {
-        alert('Servicio no encontrado.');
-        return;
-    }
-    
-    if (service.uidMensajero !== currentUser.uid) {
-        alert('No tienes permiso para tomar evidencia de este servicio.');
-        return;
-    }
-    
-    if (service.estado !== 'en_ruta') {
-        alert('Solo puedes tomar evidencia de servicios en ruta.');
-        return;
-    }
-    
-    currentServiceIdForEvidence = serviceId;
-    
-    const modal = document.getElementById('evidence-modal');
-    if (!modal) {
-        alert('Error: Modal de evidencia no encontrado.');
-        return;
-    }
-    
-    const cameraView = document.getElementById('camera-view');
-    const previewView = document.getElementById('preview-view');
-    const uploadingStatus = document.getElementById('uploading-status');
-    
-    // Resetear vistas
-    cameraView.classList.remove('hidden');
-    previewView.classList.add('hidden');
-    uploadingStatus.classList.add('hidden');
-    
-    modal.classList.remove('hidden');
-    startCamera();
-}
-
-function startCamera() {
-    const video = document.getElementById('video');
-    if (!video) {
-        alert('Error: Elemento de video no encontrado.');
-        return;
-    }
-    
-    // Parar cámara anterior si existe
-    if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-    }
-    
-    navigator.mediaDevices.getUserMedia({ 
-        video: { 
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-        },
-        audio: false 
-    })
-    .then(stream => {
-        mediaStream = stream;
-        video.srcObject = stream;
-        isCameraOn = true;
-        console.log('✅ Cámara iniciada correctamente');
-    })
-    .catch(error => {
-        console.error('Error al acceder a la cámara:', error);
-        alert('No se pudo acceder a la cámara. Asegúrate de permitir el acceso a la cámara en tu navegador.');
-    });
-}
-
-function captureEvidence() {
-    const video = document.getElementById('video');
-    if (!video || !mediaStream) {
-        alert('Cámara no disponible.');
-        return;
-    }
-    
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    
-    // Mostrar preview
-    document.getElementById('capturedImage').src = imageDataUrl;
-    document.getElementById('camera-view').classList.add('hidden');
-    document.getElementById('preview-view').classList.remove('hidden');
-    
-    // Parar cámara para ahorrar batería
-    stopCamera();
-}
-
-function retakeEvidence() {
-    // Volver a la vista de cámara
-    document.getElementById('preview-view').classList.add('hidden');
-    document.getElementById('camera-view').classList.remove('hidden');
-    
-    // Reiniciar cámara
-    startCamera();
-}
-
-function stopCamera() {
-    if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-        mediaStream = null;
-    }
-    isCameraOn = false;
-}
-
-async function confirmEvidence() {
-    const imageSrc = document.getElementById('capturedImage').src;
-    const uploadingStatus = document.getElementById('uploading-status');
-    const previewView = document.getElementById('preview-view');
-    
-    if (!imageSrc || imageSrc === '') {
-        alert('No hay imagen capturada.');
-        return;
-    }
-    
-    // Mostrar estado de carga
-    previewView.classList.add('hidden');
-    uploadingStatus.classList.remove('hidden');
-    
-    try {
-        await db.collection('services').doc(currentServiceIdForEvidence).update({
-            estado: 'entregado',
-            evidenciaEntrega: imageSrc,
-            fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        console.log('✅ Entrega confirmada con evidencia');
-        alert('¡Entrega confirmada con éxito!');
-        closeEvidenceModal();
-        
-        // Recargar servicios
-        subscribeServicesByRole();
-        
-    } catch (error) {
-        console.error('❌ Error confirmando entrega:', error);
-        alert('Error al confirmar la entrega: ' + error.message);
-        
-        // Volver a preview
-        uploadingStatus.classList.add('hidden');
-        previewView.classList.remove('hidden');
-    }
-}
-
-function closeEvidenceModal() {
-    const modal = document.getElementById('evidence-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-    stopCamera();
-    currentServiceIdForEvidence = null;
-}
-function openEvidenceModal(serviceId) {
-    console.log("📸 Abriendo modal de evidencia para:", serviceId);
-    currentServiceIdForEvidence = serviceId;
-    document.getElementById('evidence-modal').classList.remove('hidden');
-    startCamera();
-}
-
-function closeEvidenceModal() {
-    document.getElementById('evidence-modal').classList.add('hidden');
-    stopCamera();
-}
-
-function openEvidenceView(imageUrl) {
-    document.getElementById('evidence-view-img').src = imageUrl;
-    document.getElementById('evidence-view-modal').classList.remove('hidden');
-}
-
-function closeEvidenceView() {
-    document.getElementById('evidence-view-modal').classList.add('hidden');
-}
-function resetEvidenceModal() {
-    const capturedImage = document.getElementById('capturedImage');
-    const cameraView = document.getElementById('camera-view');
-    const previewView = document.getElementById('preview-view');
-    const uploadingStatus = document.getElementById('uploading-status');
-    
-    if (capturedImage) capturedImage.src = '';
-    if (cameraView) cameraView.classList.remove('hidden');
-    if (previewView) previewView.classList.add('hidden');
-    if (uploadingStatus) uploadingStatus.classList.add('hidden');
-}
-
-// ✅ Asegurar que los event listeners estén correctamente asignados
-document.addEventListener("DOMContentLoaded", function() {
-    // Asignar eventos a los botones de evidencia
-    const captureBtn = document.getElementById("capture-btn");
-    const retakeBtn = document.getElementById("retake-btn");
-    const confirmBtn = document.getElementById("confirm-delivery");
-    
-    if (captureBtn) {
-        captureBtn.addEventListener("click", captureEvidence);
-    } else {
-        console.error('❌ Botón capture-btn no encontrado');
-    }
-    
-    if (retakeBtn) {
-        retakeBtn.addEventListener("click", retakeEvidence);
-    } else {
-        console.error('❌ Botón retake-btn no encontrado');
-    }
-    
-    if (confirmBtn) {
-        confirmBtn.addEventListener("click", confirmEvidence);
-    } else {
-        console.error('❌ Botón confirm-delivery no encontrado');
-    }
-});
-
+      function openEvidenceModal(serviceId) {
+        currentServiceIdForEvidence = serviceId;
+        document.getElementById('evidence-modal').classList.remove('hidden');
+        startCamera();
       }
+      window.openEvidenceModal = openEvidenceModal;
+
+      function closeEvidenceModal() {
+        document.getElementById('evidence-modal').classList.add('hidden');
+        stopCamera();
+        resetEvidenceModal();
+      }
+      window.closeEvidenceModal = closeEvidenceModal;
+
+     async function startCamera() {
+  const videoElement = document.getElementById('videoElement');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false
+    });
+
+    videoElement.srcObject = stream;
+    await videoElement.play();
+    console.log("📷 Cámara activada correctamente");
+  } catch (error) {
+    console.error("❌ No se pudo acceder a la cámara:", error);
+    alert("No se pudo acceder a la cámara. Revisa permisos en tu navegador.");
+  }
+}
+window.startCamera = startCamera;
+
+
+      function stopCamera() {
+        const videoElement = document.getElementById('videoElement');
+        if (videoElement.srcObject) {
+          videoElement.srcObject.getTracks().forEach(track => track.stop());
+          videoElement.srcObject = null;
+        }
+      }
+
+      function resetEvidenceModal() {
+        document.getElementById('captured-image-container').classList.add('hidden');
+        document.getElementById('videoElement').classList.remove('hidden');
+        document.getElementById('capture-btn').classList.remove('hidden');
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(input => input.checked = false);
+        selectedPaymentMethod = null;
+        document.getElementById('confirm-delivery').disabled = true;
+      }
+
+
+      
 
 
 
