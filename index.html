@@ -1285,7 +1285,11 @@
 
     <!-- Los demás modales (evidence, edit-profile, roleChoice) se mantienen igual -->
     <div id="evidence-modal" class="modal-backdrop hidden"> </div>
-
+<!-- Fallback: input para abrir cámara nativa o galería -->
+<input id="evidence-file" type="file" accept="image/*" capture="environment" class="hidden">
+<label for="evidence-file" id="fallback-btn" class="btn-submit mt-3">
+  📷 Usar cámara del dispositivo
+</label>
 
     <!-- Modal Editar Perfil - VERSIÓN COMPLETA -->
 <div id="edit-profile-modal" class="modal-backdrop hidden">
@@ -1451,36 +1455,57 @@ if (googleBtn) {
   });
 }
 
-  // Capturar evidencia
-  const captureBtn = document.getElementById('capture-btn');
-  if (captureBtn) {
-    captureBtn.addEventListener('click', () => {
-      const video = document.getElementById('videoElement');
-      const canvas = document.getElementById('canvasElement');
-      const context = canvas.getContext('2d');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  // 📸 Capturar evidencia con cámara (getUserMedia)
+const captureBtn = document.getElementById('capture-btn');
+if (captureBtn) {
+  captureBtn.addEventListener('click', () => {
+    const video = document.getElementById('videoElement');
+    const canvas = document.getElementById('canvasElement');
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
-      document.getElementById('captured-image-container').classList.remove('hidden');
-      document.getElementById('videoElement').classList.add('hidden');
-      document.getElementById('capture-btn').classList.add('hidden');
-      document.getElementById('confirm-delivery').disabled = false;
-    });
-  }
+    document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
+    document.getElementById('captured-image-container').classList.remove('hidden');
+    document.getElementById('videoElement').classList.add('hidden');
+    document.getElementById('capture-btn').classList.add('hidden');
+    document.getElementById('confirm-delivery').disabled = false;
+  });
+}
 
-  const retakeBtn = document.getElementById('retake-btn');
-  if (retakeBtn) {
-    retakeBtn.addEventListener('click', () => {
-      document.getElementById('captured-image-container').classList.add('hidden');
-      document.getElementById('videoElement').classList.remove('hidden');
-      document.getElementById('capture-btn').classList.remove('hidden');
-      document.getElementById('confirm-delivery').disabled = true;
-    });
-  }
+const retakeBtn = document.getElementById('retake-btn');
+if (retakeBtn) {
+  retakeBtn.addEventListener('click', () => {
+    document.getElementById('captured-image-container').classList.add('hidden');
+    document.getElementById('videoElement').classList.remove('hidden');
+    document.getElementById('capture-btn').classList.remove('hidden');
+    document.getElementById('confirm-delivery').disabled = true;
+  });
+}
 
-  const confirmDelivery = document.getElementById('confirm-delivery');
+// ✅ Fallback: input file para abrir cámara/galería nativa
+const evidenceFile = document.getElementById('evidence-file');
+if (evidenceFile) {
+  evidenceFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const imgUrl = URL.createObjectURL(file);
+    const imgPreview = document.getElementById('capturedImage');
+    imgPreview.src = imgUrl;
+
+    document.getElementById('captured-image-container').classList.remove('hidden');
+    document.getElementById('videoElement').classList.add('hidden');
+    document.getElementById('capture-btn').classList.add('hidden');
+    document.getElementById('confirm-delivery').disabled = false;
+
+    console.log("✅ Foto cargada con fallback:", file.name);
+  });
+}}
+
+// Confirmar entrega
+const confirmDelivery = document.getElementById('confirm-delivery');
 if (confirmDelivery) {
   confirmDelivery.addEventListener('click', async () => {
     if (!selectedPaymentMethod) {
@@ -1503,7 +1528,7 @@ if (confirmDelivery) {
     }
   });
 }
-}
+
  // ✅ cierre correcto de initApp()
 
 
