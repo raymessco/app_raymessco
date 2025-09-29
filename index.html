@@ -2619,35 +2619,25 @@ window.cancelArchive = cancelArchive;
       }
       window.closeEvidenceModal = closeEvidenceModal;
 
-      async function startCamera() {
-    const videoElement = document.getElementById('videoElement');
+     async function startCamera() {
+  const videoElement = document.getElementById('videoElement');
 
-    try {
-      // Intentar con la cámara trasera
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: "environment" } },
-        audio: false
-      });
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false
+    });
 
-      videoElement.srcObject = stream;
-      videoElement.play();
-      console.log("📷 Cámara trasera activada");
-    } catch (error) {
-      console.warn("⚠️ No se pudo usar la cámara trasera, intentando cámara por defecto:", error);
-
-      // Si falla, usar la cámara predeterminada
-      try {
-        const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        videoElement.srcObject = fallbackStream;
-        videoElement.play();
-        console.log("📷 Cámara predeterminada activada");
-      } catch (fallbackError) {
-        console.error("❌ No se pudo acceder a ninguna cámara:", fallbackError);
-        alert("No se pudo acceder a la cámara. Revisa los permisos en tu navegador.");
-      }
-    }
+    videoElement.srcObject = stream;
+    await videoElement.play();
+    console.log("📷 Cámara activada correctamente");
+  } catch (error) {
+    console.error("❌ No se pudo acceder a la cámara:", error);
+    alert("No se pudo acceder a la cámara. Revisa permisos en tu navegador.");
   }
-  window.startCamera = startCamera;
+}
+window.startCamera = startCamera;
+
 
       function stopCamera() {
         const videoElement = document.getElementById('videoElement');
