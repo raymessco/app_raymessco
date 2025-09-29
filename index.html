@@ -1946,7 +1946,7 @@ diagnoseUI();
   }
 
 
-   async function handleServiceSubmit(e) {
+ async function handleServiceSubmit(e) {
     e.preventDefault(); // 🚫 evita envío automático del formulario
 
     // Validar permisos
@@ -1955,106 +1955,92 @@ diagnoseUI();
         return;
     }
 
-    try {
-        // 👉 Llamar a tu función de guardado
-        await saveService();
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    const docId = form.dataset.editId || null;
 
-        console.log("✅ Servicio creado correctamente");
-        // Opcional: cerrar modal o resetear formulario
-        document.getElementById("service-form").reset();
-        closeModal(); // si usas modal
+    const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
+
+    // Payload base común
+    const payload = {
+        empresa: data.empresaCliente || "",
+        cliente: currentUser.displayName || currentUser.email || "Sin nombre",
+        contacto: data.contacto || "",
+        recoger: data.recoger || "",
+        entregar: data.entregar || "",
+        barrioMunicipio: data.barrioMunicipio || "",
+        telefono: telefonoNormalizado || "",
+        volumen: data.volumen || "",
+        observaciones: data.observaciones || "",
+        cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+        pagoMensajero: parseFloat(data.pagoMensajero || 0) || 0,
+        uidCliente: currentUser.uid,
+        emailCliente: currentUser.email || "",
+        estado: "pendiente",
+        fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    // Configuración según rol
+    if (currentRole === 'admin') {
+        payload.uidMensajero = data.uidMensajero || "";
+        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+        payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
+    } else if (currentRole === 'cliente') {
+        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+        payload.costo = parseFloat(data.costoCliente || 0) || 0;
+    }
+
+    console.log("FieldValue timestamp:", firebase.firestore.FieldValue.serverTimestamp);
+    console.log("fechaCreacion:", payload.fechaCreacion);
+    console.log("Payload inicial:", JSON.stringify(payload, null, 2));
+
+    try {
+        if (docId) {
+            console.log("📝 Actualizando servicio");
+
+            const updateData = { ...payload };
+            delete updateData.fechaCreacion;
+
+            const simpleUpdateData = {};
+            Object.keys(updateData).forEach(key => {
+                if (updateData[key] !== undefined && updateData[key] !== null) {
+                    simpleUpdateData[key] = updateData[key];
+                }
+            });
+
+            await db.collection('services').doc(docId).update(simpleUpdateData);
+
+            const updatedDoc = await db.collection('services').doc(docId).get();
+            const updatedDataResult = { id: updatedDoc.id, ...updatedDoc.data() };
+
+            services = services.map(s => (s.id === updatedDataResult.id ? updatedDataResult : s));
+            renderServices(services);
+
+            console.log("✅ Servicio actualizado correctamente:", updatedDataResult.id);
+
+        } else {
+            console.log("➕ Creando nuevo servicio");
+            payload.estado = "pendiente";
+            payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
+
+            const docRef = await db.collection('services').add(payload);
+            const newDoc = await docRef.get();
+            const newData = { id: newDoc.id, ...newDoc.data() };
+
+            services.unshift(newData);
+
+            console.log("✅ Servicio creado correctamente:", newData.id);
+        }
+
+        closeModal();
+        form.reset();
+
     } catch (error) {
-        console.error("❌ Error al guardar servicio:", error);
-        alert("Hubo un problema al guardar el servicio. Intenta de nuevo.");
+        console.error("❌ Error guardando servicio:", error);
+        alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
     }
 }
-
-
-  const form = e.target;
-  const formData = new FormData(form);
-  const data = Object.fromEntries(formData.entries());
-  const docId = form.dataset.editId || null;
-
-  const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
-
-  // Payload base común
-  const payload = {
-    empresa: data.empresaCliente || "",
-  cliente: currentUser.displayName || currentUser.email || "Sin nombre",
-  contacto: data.contacto || "",
-  recoger: data.recoger || "",
-  entregar: data.entregar || "",
-  barrioMunicipio: data.barrioMunicipio || "",
-  telefono: telefonoNormalizado || "",
-  volumen: data.volumen || "",
-  observaciones: data.observaciones || "",   // 👈 ya capturado
-  cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-  pagoMensajero: parseFloat(data.pagoMensajero || 0) || 0, // 👈 nuevo campo
-  uidCliente: currentUser.uid,
-  emailCliente: currentUser.email || "",
-  estado: "pendiente",
-  fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
-};
-
-  // Configuración según rol
-  if (currentRole === 'admin') {
-    payload.uidMensajero = data.uidMensajero || "";
-    payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
-    payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
-  } else if (currentRole === 'cliente') {
-    payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0; // ✅ cliente también lo guarda
-    payload.costo = parseFloat(data.costoCliente || 0) || 0;
-  }
-
-  console.log("FieldValue timestamp:", firebase.firestore.FieldValue.serverTimestamp);
-  console.log("fechaCreacion:", payload.fechaCreacion);
-  console.log("Payload inicial:", JSON.stringify(payload, null, 2));
-
-  try {
-    if (docId) {
-      console.log("📝 Actualizando servicio");
-
-      const updateData = { ...payload };
-      delete updateData.fechaCreacion;
-
-      const simpleUpdateData = {};
-      Object.keys(updateData).forEach(key => {
-        if (updateData[key] !== undefined && updateData[key] !== null) {
-          simpleUpdateData[key] = updateData[key];
-        }
-      });
-
-      await db.collection('services').doc(docId).update(simpleUpdateData);
-
-      const updatedDoc = await db.collection('services').doc(docId).get();
-      const updatedDataResult = { id: updatedDoc.id, ...updatedDoc.data() };
-
-      services = services.map(s => (s.id === updatedDataResult.id ? updatedDataResult : s));
-      renderServices(services);
-
-      console.log("✅ Servicio actualizado correctamente:", updatedDataResult.id);
-
-    } else {
-      console.log("➕ Creando nuevo servicio");
-      payload.estado = "pendiente";
-      payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
-
-      const docRef = await db.collection('services').add(payload);
-      const newDoc = await docRef.get();
-      const newData = { id: newDoc.id, ...newDoc.data() };
-
-      services.unshift(newData);
-
-      console.log("✅ Servicio creado correctamente:", newData.id);
-    }
-
-    closeModal();
-    form.reset();
-
-  } catch (error) {
-    console.error("❌ Error guardando servicio:", error);
-    alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
-  }
 
 
 async function loadMensajerosList() {
