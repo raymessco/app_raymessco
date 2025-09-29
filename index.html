@@ -3851,23 +3851,26 @@ async function crearServicioPruebaHistorial() {
 }
 
 
-// Guardar cambios en perfil
-const editProfileForm = document.getElementById("edit-profile-form");
-if (editProfileForm) {
-    editProfileForm.addEventListener("submit", async (e) => {
-        e.preventDefault(); // 🚫 evita que se envíe solo
-        await saveProfileChanges(); // tu función de guardado de perfil
-    });
-}
+<script>
+    // Guardar cambios en perfil (PRUEBA)
+    const editProfileForm = document.getElementById("edit-profile-form");
+    if (editProfileForm) {
+        editProfileForm.addEventListener("submit", async (e) => {
+            e.preventDefault(); // 🚫 evita que se envíe solo
+            console.log("✅ Guardar perfil ejecutado UNA sola vez");
+            // Aquí iría: await saveProfileChanges();
+        });
+    }
 
-// Guardar servicio
-const serviceForm = document.getElementById("service-form");
-if (serviceForm) {
-    serviceForm.addEventListener("submit", async (e) => {
-        e.preventDefault(); // 🚫 evita envío doble
-        await saveService(); // tu función de guardado de servicios
-    });
-}
+    // Guardar servicio (PRUEBA)
+    const serviceForm = document.getElementById("service-form");
+    if (serviceForm) {
+        serviceForm.addEventListener("submit", async (e) => {
+            e.preventDefault(); // 🚫 evita envío doble
+            console.log("✅ Guardar servicio ejecutado UNA sola vez");
+            // Aquí iría: await saveService();
+        });
+    }
   </script>
 
   </body>
