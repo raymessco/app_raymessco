@@ -3470,61 +3470,89 @@ window.setFilter = setFilter;
 
   // También necesitamos implementar renderCobros() para la sección de cobros:
   async function renderCobros() {
-    const cobrosBody = document.getElementById('cobros-body');
-    cobrosBody.innerHTML = '<div class="text-center text-gold">Cargando cobros contra entrega...</div>';
+  const cobrosBody = document.getElementById('cobros-body');
+  cobrosBody.innerHTML = '<div class="text-center text-gold">Cargando cobros contra entrega...</div>';
 
-    try {
-      // Obtener servicios que tienen cobro contra entrega
-      const snapshot = await db.collection('services')
-        .where('cobrarProducto', '>', 0)
-        .get();
-      
-      if (snapshot.empty) {
-        cobrosBody.innerHTML = '<div class="text-center text-gold">No hay cobros contra entrega</div>';
-        return;
-      }
+  try {
+    // Obtener servicios con cobro contra entrega
+    const snapshot = await db.collection('services')
+      .where('cobrarProducto', '>', 0)
+      .orderBy('empresa') // opcional, para ordenarlos por empresa
+      .get();
 
-      let html = `
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr class="bg-gold/20">
-                <th class="p-3 text-left border border-gold">Empresa/Cliente</th>
-                <th class="p-3 text-left border border-gold">Contacto</th>
-                <th class="p-3 text-right border border-gold">Valor a Cobrar</th>
-                <th class="p-3 text-left border border-gold">Estado</th>
-                <th class="p-3 text-left border border-gold">Mensajero</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-      
-      snapshot.docs.forEach(doc => {
-        const service = doc.data();
-        const empresa = service.empresa || service.cliente || 'Sin nombre';
-        
-        html += `
+    if (snapshot.empty) {
+      cobrosBody.innerHTML = '<div class="text-center text-gold">No hay cobros contra entrega</div>';
+      return;
+    }
+
+    // Agrupar por empresa
+    const grouped = {};
+    snapshot.docs.forEach(doc => {
+      const service = doc.data();
+      const empresa = service.empresa || service.cliente || "Sin nombre";
+      if (!grouped[empresa]) grouped[empresa] = [];
+      grouped[empresa].push({ id: doc.id, ...service });
+    });
+
+    // Render
+    let html = "";
+    Object.keys(grouped).forEach(empresa => {
+      const servicios = grouped[empresa];
+      const total = servicios.reduce((sum, s) => sum + (s.cobrarProducto || 0), 0);
+
+      let rows = "";
+      servicios.forEach(service => {
+        rows += `
           <tr class="border-b border-gold/30">
-            <td class="p-3 border border-gold/30">${empresa}</td>
             <td class="p-3 border border-gold/30">${service.contacto || 'N/A'}</td>
-            <td class="p-3 text-right border border-gold/30">$${service.cobrarProducto.toLocaleString()}</td>
+            <td class="p-3 text-right border border-gold/30">$${(service.cobrarProducto || 0).toLocaleString()}</td>
             <td class="p-3 border border-gold/30">
-              <span class="service-status status-${service.estado.replace('_', '')}">
-                ${service.estado.replace('_', ' ')}
+              <span class="service-status status-${service.estado.replace('_','')}">
+                ${service.estado.replace('_',' ')}
               </span>
             </td>
             <td class="p-3 border border-gold/30">${service.uidMensajero ? 'Asignado' : 'Sin asignar'}</td>
           </tr>
         `;
       });
-      
-      html += '</tbody></table></div>';
-      cobrosBody.innerHTML = html;
-    } catch (error) {
-      console.error('Error cargando cobros contra entrega:', error);
-      cobrosBody.innerHTML = '<div class="text-center text-red-500">Error cargando cobros contra entrega</div>';
-    }
+
+      html += `
+        <div class="empresa-block mb-6 border border-gold rounded-lg">
+          <h3 class="bg-gold/20 text-gold font-bold p-3">${empresa}</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-gold/20">
+                  <th class="p-3 text-left border border-gold">Contacto</th>
+                  <th class="p-3 text-right border border-gold">Valor a Cobrar</th>
+                  <th class="p-3 text-left border border-gold">Estado</th>
+                  <th class="p-3 text-left border border-gold">Mensajero</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+              <tfoot>
+                <tr class="bg-black/50 font-bold text-gold">
+                  <td class="p-3 text-right border border-gold" colspan="4">
+                    TOTAL: $${total.toLocaleString()}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      `;
+    });
+
+    cobrosBody.innerHTML = html;
+
+  } catch (error) {
+    console.error('Error cargando cobros contra entrega:', error);
+    cobrosBody.innerHTML = '<div class="text-center text-red-500">Error cargando cobros contra entrega</div>';
   }
+}
+
       
   function openEditProfile() {
     console.log("👤 Abriendo edición de perfil...");
