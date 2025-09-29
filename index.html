@@ -1947,12 +1947,28 @@ diagnoseUI();
 
 
    async function handleServiceSubmit(e) {
-  e.preventDefault();
+    e.preventDefault(); // 🚫 evita envío automático del formulario
 
-  if (!(currentRole === 'admin' || currentRole === 'cliente')) {
-    alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
-    return;
-  }
+    // Validar permisos
+    if (!(currentRole === 'admin' || currentRole === 'cliente')) {
+        alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+        return;
+    }
+
+    try {
+        // 👉 Llamar a tu función de guardado
+        await saveService();
+
+        console.log("✅ Servicio creado correctamente");
+        // Opcional: cerrar modal o resetear formulario
+        document.getElementById("service-form").reset();
+        closeModal(); // si usas modal
+    } catch (error) {
+        console.error("❌ Error al guardar servicio:", error);
+        alert("Hubo un problema al guardar el servicio. Intenta de nuevo.");
+    }
+}
+
 
   const form = e.target;
   const formData = new FormData(form);
@@ -2039,7 +2055,7 @@ diagnoseUI();
     console.error("❌ Error guardando servicio:", error);
     alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
   }
-}
+
 
 async function loadMensajerosList() {
     try {
@@ -3851,26 +3867,16 @@ async function crearServicioPruebaHistorial() {
 }
 
 
-<script>
-    // Guardar cambios en perfil (PRUEBA)
-    const editProfileForm = document.getElementById("edit-profile-form");
-    if (editProfileForm) {
-        editProfileForm.addEventListener("submit", async (e) => {
-            e.preventDefault(); // 🚫 evita que se envíe solo
-            console.log("✅ Guardar perfil ejecutado UNA sola vez");
-            // Aquí iría: await saveProfileChanges();
-        });
-    }
+// Guardar cambios en perfil
+const editProfileForm = document.getElementById("edit-profile-form");
+if (editProfileForm) {
+    editProfileForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // 🚫 evita que se envíe solo
+        await saveProfileChanges(); // tu función de guardado de perfil
+    });
+}
 
-    // Guardar servicio (PRUEBA)
-    const serviceForm = document.getElementById("service-form");
-    if (serviceForm) {
-        serviceForm.addEventListener("submit", async (e) => {
-            e.preventDefault(); // 🚫 evita envío doble
-            console.log("✅ Guardar servicio ejecutado UNA sola vez");
-            // Aquí iría: await saveService();
-        });
-    }
+
   </script>
 
   </body>
