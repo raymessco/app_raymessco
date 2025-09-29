@@ -3850,10 +3850,24 @@ async function crearServicioPruebaHistorial() {
     }
 }
 
-// Llamar esta función una vez si no hay datos:
-// crearServicioPruebaHistorial();
 
+// Guardar cambios en perfil
+const editProfileForm = document.getElementById("edit-profile-form");
+if (editProfileForm) {
+    editProfileForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // 🚫 evita que se envíe solo
+        await saveProfileChanges(); // tu función de guardado de perfil
+    });
+}
 
+// Guardar servicio
+const serviceForm = document.getElementById("service-form");
+if (serviceForm) {
+    serviceForm.addEventListener("submit", async (e) => {
+        e.preventDefault(); // 🚫 evita envío doble
+        await saveService(); // tu función de guardado de servicios
+    });
+}
   </script>
 
   </body>
