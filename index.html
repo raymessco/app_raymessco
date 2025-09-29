@@ -1283,13 +1283,34 @@
     </div>
    
 
-    <!-- Los demás modales (evidence, edit-profile, roleChoice) se mantienen igual -->
-    <div id="evidence-modal" class="modal-backdrop hidden"> </div>
-<!-- Fallback: input para abrir cámara nativa o galería -->
-<input id="evidence-file" type="file" accept="image/*" capture="environment" class="hidden">
-<label for="evidence-file" id="fallback-btn" class="btn-submit mt-3">
-  📷 Usar cámara del dispositivo
-</label>
+    <!-- EVIDENCE MODAL -->
+<div id="evidence-modal" class="modal-backdrop hidden">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeEvidenceModal()">✖</button>
+    <h2 class="modal-title">Tomar evidencia</h2>
+
+    <div id="camera-wrapper">
+      <!-- vista previa en vivo -->
+      <video id="videoElement" autoplay playsinline muted style="width:100%;max-height:60vh;background:#000;border-radius:8px;"></video>
+
+      <!-- canvas oculto para capturar imagen -->
+      <canvas id="canvasElement" class="hidden" style="display:none;"></canvas>
+
+      <!-- imagen capturada -->
+      <div id="captured-image-container" class="hidden text-center py-4">
+        <img id="capturedImage" alt="Evidencia" style="max-width:100%;border-radius:8px;" />
+      </div>
+    </div>
+
+    <!-- controles -->
+    <div class="form-actions" style="margin-top:16px;">
+      <button type="button" id="capture-btn" class="btn-submit">Tomar foto</button>
+      <button type="button" id="retake-btn" class="btn-cancel hidden">Volver a tomar</button>
+      <button type="button" id="confirm-delivery" class="btn-submit" disabled>Confirmar entrega</button>
+    </div>
+  </div>
+</div>
+
 
     <!-- Modal Editar Perfil - VERSIÓN COMPLETA -->
 <div id="edit-profile-modal" class="modal-backdrop hidden">
@@ -1363,6 +1384,8 @@
       let currentFilter = 'all';
       let _userProfileUnsub = null;
       let currentServiceIdForEvidence = null;
+      let evidenceHandlersAttached = false;
+      let isCameraOn = false;
       let selectedPaymentMethod = null;
       let mensajerosList = [];
       let deferredPrompt = null;
@@ -1455,53 +1478,113 @@ if (googleBtn) {
   });
 }
 
-  // 📸 Capturar evidencia con cámara (getUserMedia)
-const captureBtn = document.getElementById('capture-btn');
-if (captureBtn) {
-  captureBtn.addEventListener('click', () => {
-    const video = document.getElementById('videoElement');
-    const canvas = document.getElementById('canvasElement');
-    const context = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+// --- Cámara ---
+async function startCamera() {
+  const videoElement = document.getElementById('videoElement');
+  if (!videoElement) return;
 
-    document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg');
-    document.getElementById('captured-image-container').classList.remove('hidden');
-    document.getElementById('videoElement').classList.add('hidden');
-    document.getElementById('capture-btn').classList.add('hidden');
-    document.getElementById('confirm-delivery').disabled = false;
-  });
+  const constraints = { video: { facingMode: { ideal: "environment" } }, audio: false };
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    videoElement.srcObject = stream;
+    videoElement.muted = true;
+    videoElement.setAttribute('playsinline', '');
+    await videoElement.play();
+    isCameraOn = true;
+    console.log('📷 Cámara activada (ideal environment)');
+  } catch (err) {
+    console.warn('⚠️ Fallback a cámara genérica:', err);
+    try {
+      const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoElement.srcObject = fallbackStream;
+      videoElement.muted = true;
+      videoElement.setAttribute('playsinline', '');
+      await videoElement.play();
+      isCameraOn = true;
+      console.log('📷 Cámara activada (fallback)');
+    } catch (fallbackErr) {
+      console.error('❌ No se pudo acceder a la cámara:', fallbackErr);
+      alert('No se pudo acceder a la cámara. Revisa permisos y que la página esté en HTTPS.');
+    }
+  }
+}
+function stopCamera() {
+  const videoElement = document.getElementById('videoElement');
+  if (videoElement && videoElement.srcObject) {
+    videoElement.srcObject.getTracks().forEach(t => t.stop());
+    videoElement.srcObject = null;
+  }
+  isCameraOn = false;
 }
 
-const retakeBtn = document.getElementById('retake-btn');
-if (retakeBtn) {
-  retakeBtn.addEventListener('click', () => {
-    document.getElementById('captured-image-container').classList.add('hidden');
-    document.getElementById('videoElement').classList.remove('hidden');
-    document.getElementById('capture-btn').classList.remove('hidden');
-    document.getElementById('confirm-delivery').disabled = true;
-  });
+// --- Capturar / Retomar / Confirmar ---
+function captureEvidence() {
+  const video = document.getElementById('videoElement');
+  const canvas = document.getElementById('canvasElement');
+  if (!video || !canvas) return;
+
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg', 0.9);
+  document.getElementById('captured-image-container').classList.remove('hidden');
+  document.getElementById('videoElement').classList.add('hidden');
+  document.getElementById('capture-btn').classList.add('hidden');
+  document.getElementById('retake-btn').classList.remove('hidden');
+  document.getElementById('confirm-delivery').disabled = false;
+
+  stopCamera();
+}
+function retakeEvidence() {
+  document.getElementById('captured-image-container').classList.add('hidden');
+  document.getElementById('videoElement').classList.remove('hidden');
+  document.getElementById('capture-btn').classList.remove('hidden');
+  document.getElementById('retake-btn').classList.add('hidden');
+  document.getElementById('confirm-delivery').disabled = true;
+  startCamera();
+}
+async function confirmEvidence() {
+  try {
+    await db.collection('services').doc(currentServiceIdForEvidence).update({
+      estado: 'entregado',
+      evidenciaEntrega: document.getElementById('capturedImage').src,
+      fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert('Entrega confirmada con éxito');
+    closeEvidenceModal();
+  } catch (error) {
+    console.error('Error confirmando entrega:', error);
+    alert('Error al confirmar la entrega');
+  }
 }
 
-// ✅ Fallback: input file para abrir cámara/galería nativa
-const evidenceFile = document.getElementById('evidence-file');
-if (evidenceFile) {
-  evidenceFile.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+// --- Adjuntar handlers ---
+function attachEvidenceHandlers() {
+  if (evidenceHandlersAttached) return;
+  document.getElementById('capture-btn').addEventListener('click', captureEvidence);
+  document.getElementById('retake-btn').addEventListener('click', retakeEvidence);
+  document.getElementById('confirm-delivery').addEventListener('click', confirmEvidence);
+  evidenceHandlersAttached = true;
+}
 
-    const imgUrl = URL.createObjectURL(file);
-    const imgPreview = document.getElementById('capturedImage');
-    imgPreview.src = imgUrl;
-
-    document.getElementById('captured-image-container').classList.remove('hidden');
-    document.getElementById('videoElement').classList.add('hidden');
-    document.getElementById('capture-btn').classList.add('hidden');
-    document.getElementById('confirm-delivery').disabled = false;
-
-    console.log("✅ Foto cargada con fallback:", file.name);
-  });
+// --- Abrir / Cerrar modal ---
+function openEvidenceModal(serviceId) {
+  currentServiceIdForEvidence = serviceId;
+  document.getElementById('evidence-modal').classList.remove('hidden');
+  attachEvidenceHandlers();
+  startCamera();
+}
+function closeEvidenceModal() {
+  document.getElementById('evidence-modal').classList.add('hidden');
+  stopCamera();
+  document.getElementById('captured-image-container').classList.add('hidden');
+  document.getElementById('videoElement').classList.remove('hidden');
+  document.getElementById('capture-btn').classList.remove('hidden');
+  document.getElementById('retake-btn').classList.add('hidden');
+  document.getElementById('confirm-delivery').disabled = true;
 }}
 
 // Confirmar entrega
