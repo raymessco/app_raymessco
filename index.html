@@ -1284,7 +1284,32 @@
    
 
     <!-- EVIDENCE MODAL -->
+<div id="evidence-modal" class="modal-backdrop hidden">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeEvidenceModal()">✖</button>
+    <h2 class="modal-title">Tomar evidencia</h2>
 
+    <div id="camera-wrapper">
+      <!-- vista previa en vivo -->
+      <video id="videoElement" autoplay playsinline muted style="width:100%;max-height:60vh;background:#000;border-radius:8px;"></video>
+
+      <!-- canvas oculto para capturar imagen -->
+      <canvas id="canvasElement" class="hidden" style="display:none;"></canvas>
+
+      <!-- imagen capturada -->
+      <div id="captured-image-container" class="hidden text-center py-4">
+        <img id="capturedImage" alt="Evidencia" style="max-width:100%;border-radius:8px;" />
+      </div>
+    </div>
+
+    <!-- controles -->
+    <div class="form-actions" style="margin-top:16px;">
+      <button type="button" id="capture-btn" class="btn-submit">Tomar foto</button>
+      <button type="button" id="retake-btn" class="btn-cancel hidden">Volver a tomar</button>
+      <button type="button" id="confirm-delivery" class="btn-submit" disabled>Confirmar entrega</button>
+    </div>
+  </div>
+</div>
 
 
     <!-- Modal Editar Perfil - VERSIÓN COMPLETA -->
@@ -1453,7 +1478,74 @@ if (googleBtn) {
   });
 }
 
+// --- Cámara ---
+async function startCamera() {
+  const videoElement = document.getElementById('videoElement');
+  if (!videoElement) return;
 
+  const constraints = { video: { facingMode: { ideal: "environment" } }, audio: false };
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    videoElement.srcObject = stream;
+    videoElement.muted = true;
+    videoElement.setAttribute('playsinline', '');
+    await videoElement.play();
+    isCameraOn = true;
+    console.log('📷 Cámara activada (ideal environment)');
+  } catch (err) {
+    console.warn('⚠️ Fallback a cámara genérica:', err);
+    try {
+      const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      videoElement.srcObject = fallbackStream;
+      videoElement.muted = true;
+      videoElement.setAttribute('playsinline', '');
+      await videoElement.play();
+      isCameraOn = true;
+      console.log('📷 Cámara activada (fallback)');
+    } catch (fallbackErr) {
+      console.error('❌ No se pudo acceder a la cámara:', fallbackErr);
+      alert('No se pudo acceder a la cámara. Revisa permisos y que la página esté en HTTPS.');
+    }
+  }
+}
+function stopCamera() {
+  const videoElement = document.getElementById('videoElement');
+  if (videoElement && videoElement.srcObject) {
+    videoElement.srcObject.getTracks().forEach(t => t.stop());
+    videoElement.srcObject = null;
+  }
+  isCameraOn = false;
+}
+
+// --- Capturar / Retomar / Confirmar ---
+function captureEvidence() {
+  const video = document.getElementById('videoElement');
+  const canvas = document.getElementById('canvasElement');
+  if (!video || !canvas) return;
+
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  document.getElementById('capturedImage').src = canvas.toDataURL('image/jpeg', 0.9);
+  document.getElementById('captured-image-container').classList.remove('hidden');
+  document.getElementById('videoElement').classList.add('hidden');
+  document.getElementById('capture-btn').classList.add('hidden');
+  document.getElementById('retake-btn').classList.remove('hidden');
+  document.getElementById('confirm-delivery').disabled = false;
+
+  stopCamera();
+}
+function retakeEvidence() {
+  document.getElementById('captured-image-container').classList.add('hidden');
+  document.getElementById('videoElement').classList.remove('hidden');
+  document.getElementById('capture-btn').classList.remove('hidden');
+  document.getElementById('retake-btn').classList.add('hidden');
+  document.getElementById('confirm-delivery').disabled = true;
+  startCamera();
+}
 async function confirmEvidence() {
   try {
     await db.collection('services').doc(currentServiceIdForEvidence).update({
@@ -1469,6 +1561,58 @@ async function confirmEvidence() {
   }
 }
 
+// --- Adjuntar handlers ---
+function attachEvidenceHandlers() {
+  if (evidenceHandlersAttached) return;
+  document.getElementById('capture-btn').addEventListener('click', captureEvidence);
+  document.getElementById('retake-btn').addEventListener('click', retakeEvidence);
+  document.getElementById('confirm-delivery').addEventListener('click', confirmEvidence);
+  evidenceHandlersAttached = true;
+}
+
+// --- Abrir / Cerrar modal ---
+function openEvidenceModal(serviceId) {
+  currentServiceIdForEvidence = serviceId;
+  document.getElementById('evidence-modal').classList.remove('hidden');
+  attachEvidenceHandlers();
+  startCamera();
+}
+function closeEvidenceModal() {
+  document.getElementById('evidence-modal').classList.add('hidden');
+  stopCamera();
+  document.getElementById('captured-image-container').classList.add('hidden');
+  document.getElementById('videoElement').classList.remove('hidden');
+  document.getElementById('capture-btn').classList.remove('hidden');
+  document.getElementById('retake-btn').classList.add('hidden');
+  document.getElementById('confirm-delivery').disabled = true;
+}}
+
+// Confirmar entrega
+const confirmDelivery = document.getElementById('confirm-delivery');
+if (confirmDelivery) {
+  confirmDelivery.addEventListener('click', async () => {
+    if (!selectedPaymentMethod) {
+      alert('Por favor selecciona un método de pago');
+      return;
+    }
+
+    try {
+      await db.collection('services').doc(currentServiceIdForEvidence).update({
+        estado: 'entregado',
+        evidenciaEntrega: document.getElementById('capturedImage').src,
+        metodoPago: selectedPaymentMethod,
+        fechaEntrega: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert('Entrega confirmada con éxito');
+      closeEvidenceModal();
+    } catch (error) {
+      console.error('Error confirmando entrega:', error);
+      alert('Error al confirmar la entrega');
+    }
+  });
+}
+
+ // ✅ cierre correcto de initApp()
 
 
 
@@ -2569,7 +2713,12 @@ window.cancelArchive = cancelArchive;
       }
       window.deleteService = deleteService;
 
-   
+      function openEvidenceModal(serviceId) {
+        currentServiceIdForEvidence = serviceId;
+        document.getElementById('evidence-modal').classList.remove('hidden');
+        startCamera();
+      }
+      window.openEvidenceModal = openEvidenceModal;
 
       function closeEvidenceModal() {
         document.getElementById('evidence-modal').classList.add('hidden');
@@ -2578,14 +2727,57 @@ window.cancelArchive = cancelArchive;
       }
       window.closeEvidenceModal = closeEvidenceModal;
 
-     
+     async function startCamera() {
+  const videoElement = document.getElementById('videoElement');
 
-   
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" } },
+      audio: false
+    });
+
+    videoElement.srcObject = stream;
+    await videoElement.play();
+    console.log("📷 Cámara activada correctamente");
+  } catch (error) {
+    console.error("❌ No se pudo acceder a la cámara:", error);
+    alert("No se pudo acceder a la cámara. Revisa permisos en tu navegador.");
+  }
+}
+window.startCamera = startCamera;
+
+
+      function stopCamera() {
+        const videoElement = document.getElementById('videoElement');
+        if (videoElement.srcObject) {
+          videoElement.srcObject.getTracks().forEach(track => track.stop());
+          videoElement.srcObject = null;
+        }
+      }
+
+      function resetEvidenceModal() {
+        document.getElementById('captured-image-container').classList.add('hidden');
+        document.getElementById('videoElement').classList.remove('hidden');
+        document.getElementById('capture-btn').classList.remove('hidden');
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(input => input.checked = false);
+        selectedPaymentMethod = null;
+        document.getElementById('confirm-delivery').disabled = true;
+      }
+
+
       
 
 
 
-      
+      function selectPaymentMethod(method) {
+        selectedPaymentMethod = method;
+        document.getElementById('confirm-delivery').disabled = false;
+        document.querySelectorAll('.payment-option').forEach(option => {
+          option.style.background = 'rgba(20, 20, 20, 0.8)';
+        });
+        event.currentTarget.style.background = 'rgba(207, 149, 36, 0.2)';
+      }
+      window.selectPaymentMethod = selectPaymentMethod;
 
      
 function closeSidebar() {
@@ -3515,18 +3707,7 @@ window.openEditProfile = openEditProfile;
       // Inicializar la aplicación cuando el DOM esté listo
       document.addEventListener('DOMContentLoaded', initApp);
       
-  // --- Asignar eventos a botones de evidencia ---
-document.addEventListener("DOMContentLoaded", () => {
-  const captureBtn = document.getElementById("capture-btn");
-  const retakeBtn = document.getElementById("retake-btn");
-  const confirmBtn = document.getElementById("confirm-delivery");
-
-  if (captureBtn) captureBtn.addEventListener("click", captureEvidence);
-  if (retakeBtn) retakeBtn.addEventListener("click", retakeEvidence);
-  if (confirmBtn) confirmBtn.addEventListener("click", confirmEvidence);
-});
-}
-
+  
   function changeEstado(serviceId, nuevoEstado) {
     if (!currentUser) return alert("Debes iniciar sesión");
 
