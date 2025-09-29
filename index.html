@@ -3476,9 +3476,9 @@ window.setFilter = setFilter;
   try {
     // Obtener servicios con cobro contra entrega
     const snapshot = await db.collection('services')
-      .where('cobrarProducto', '>', 0)
-      .orderBy('empresa') // opcional, para ordenarlos por empresa
-      .get();
+  .where('cobrarProducto', '>', 0)
+  .get();
+
 
     if (snapshot.empty) {
       cobrosBody.innerHTML = '<div class="text-center text-gold">No hay cobros contra entrega</div>';
