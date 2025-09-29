@@ -1180,7 +1180,7 @@
             <button class="modal-close" onclick="closeModal()">✖</button>
             <h2 class="modal-title" id="modal-title">Nuevo Servicio</h2>
 
-            <form id="service-form" onsubmit="handleServiceSubmit(event)">
+            <form id="service-form"></form>
                 <!-- Empresa -->
                 <div class="form-group">
                     <label for="empresaCliente" class="form-label">Empresa</label>
@@ -1331,8 +1331,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
-        // Tu código JavaScript completo aquí...
-        // [Todo el código JavaScript que tenías anteriormente]
+       
+       
+
         
         // Solo como ejemplo del inicio - el resto del código va completo
         const firebaseConfig = {
@@ -1362,6 +1363,7 @@
       let mensajerosList = [];
       let deferredPrompt = null;
       let _servicesUnsubscribe = null;
+      let isSubmittingService = false;
 
       // Referencias a elementos UI
       const loginView = document.getElementById('login-view');
@@ -1947,57 +1949,70 @@ diagnoseUI();
 
 
  async function handleServiceSubmit(e) {
-    e.preventDefault(); // 🚫 evita envío automático del formulario
+    e.preventDefault();
 
-    // Validar permisos
-    if (!(currentRole === 'admin' || currentRole === 'cliente')) {
-        alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+    // Debug rápido: ver cuántas veces se llama
+    console.log("handleServiceSubmit invoked", new Date().toISOString());
+
+    // Protección contra envíos concurrentes
+    if (isSubmittingService) {
+        console.warn("Envio duplicado prevenido - ya hay un envío en curso.");
         return;
     }
+    isSubmittingService = true;
 
+    // Deshabilitar botón submit para evitar doble-click
     const form = e.target;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-    const docId = form.dataset.editId || null;
-
-    const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
-
-    // Payload base común
-    const payload = {
-        empresa: data.empresaCliente || "",
-        cliente: currentUser.displayName || currentUser.email || "Sin nombre",
-        contacto: data.contacto || "",
-        recoger: data.recoger || "",
-        entregar: data.entregar || "",
-        barrioMunicipio: data.barrioMunicipio || "",
-        telefono: telefonoNormalizado || "",
-        volumen: data.volumen || "",
-        observaciones: data.observaciones || "",
-        cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
-        pagoMensajero: parseFloat(data.pagoMensajero || 0) || 0,
-        uidCliente: currentUser.uid,
-        emailCliente: currentUser.email || "",
-        estado: "pendiente",
-        fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    // Configuración según rol
-    if (currentRole === 'admin') {
-        payload.uidMensajero = data.uidMensajero || "";
-        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
-        payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
-    } else if (currentRole === 'cliente') {
-        payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
-        payload.costo = parseFloat(data.costoCliente || 0) || 0;
-    }
-
-    console.log("FieldValue timestamp:", firebase.firestore.FieldValue.serverTimestamp);
-    console.log("fechaCreacion:", payload.fechaCreacion);
-    console.log("Payload inicial:", JSON.stringify(payload, null, 2));
+    const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+    if (submitBtn) submitBtn.disabled = true;
 
     try {
+        // Validar permisos
+        if (!(currentRole === 'admin' || currentRole === 'cliente')) {
+            alert('No tienes permisos para crear pedidos hasta que tu cuenta sea aprobada.');
+            return;
+        }
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        const docId = form.dataset.editId || null;
+
+        const telefonoNormalizado = normalizeColombiaPhone(data.telefono);
+
+        // Payload base común
+        const payload = {
+            empresa: data.empresaCliente || "",
+            cliente: currentUser?.displayName || currentUser?.email || "Sin nombre",
+            contacto: data.contacto || "",
+            recoger: data.recoger || "",
+            entregar: data.entregar || "",
+            barrioMunicipio: data.barrioMunicipio || "",
+            telefono: telefonoNormalizado || "",
+            volumen: data.volumen || "",
+            observaciones: data.observaciones || "",
+            cobrarProducto: parseFloat(data.cobrarProducto || 0) || 0,
+            pagoMensajero: parseFloat(data.pagoMensajero || 0) || 0,
+            uidCliente: currentUser?.uid || "",
+            emailCliente: currentUser?.email || "",
+            estado: "pendiente",
+            fechaCreacion: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Configuración según rol
+        if (currentRole === 'admin') {
+            payload.uidMensajero = data.uidMensajero || "";
+            payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+            payload.costo = parseFloat(data.pagoMensajero || 0) || 0;
+        } else if (currentRole === 'cliente') {
+            payload.pagoMensajero = parseFloat(data.pagoMensajero || 0) || 0;
+            payload.costo = parseFloat(data.costoCliente || 0) || 0;
+        }
+
+        console.log("Payload inicial:", JSON.stringify(payload, null, 2));
+
         if (docId) {
-            console.log("📝 Actualizando servicio");
+            // Actualizar existente
+            console.log("📝 Actualizando servicio:", docId);
 
             const updateData = { ...payload };
             delete updateData.fechaCreacion;
@@ -2020,7 +2035,12 @@ diagnoseUI();
             console.log("✅ Servicio actualizado correctamente:", updatedDataResult.id);
 
         } else {
+            // Nuevo documento
             console.log("➕ Creando nuevo servicio");
+
+            // Opción: agregar un token de cliente para facilitar dedupe opcional
+            // payload.clientSubmitId = `${currentUser?.uid || 'anon'}_${Date.now()}`;
+
             payload.estado = "pendiente";
             payload.fechaCreacion = firebase.firestore.FieldValue.serverTimestamp();
 
@@ -2028,7 +2048,9 @@ diagnoseUI();
             const newDoc = await docRef.get();
             const newData = { id: newDoc.id, ...newDoc.data() };
 
+            // Actualizar UI localmente
             services.unshift(newData);
+            renderServices(services);
 
             console.log("✅ Servicio creado correctamente:", newData.id);
         }
@@ -2039,8 +2061,13 @@ diagnoseUI();
     } catch (error) {
         console.error("❌ Error guardando servicio:", error);
         alert("Error guardando servicio. Verifica que tengas los permisos necesarios.");
+    } finally {
+        // Rehabilitar envío
+        isSubmittingService = false;
+        if (submitBtn) submitBtn.disabled = false;
     }
 }
+
 
 
 async function loadMensajerosList() {
