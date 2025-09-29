@@ -2044,8 +2044,7 @@ async function handleServiceSubmit(e) {
             const newDoc = await docRef.get();
             const newData = { id: newDoc.id, ...newDoc.data() };
 
-            services.unshift(newData); // insertar al inicio
-            renderServices(services);
+           
 
             console.log("✅ Servicio creado:", newData.id);
         }
